@@ -1,0 +1,1 @@
+import { z } from 'zod'; import { SAFE_TEXT_REGEX, SAFE_TEXT_ERROR } from './shared'; export const fieldDefinitionSchema = z.object({ label: z.string().min(1).max(100).regex(SAFE_TEXT_REGEX, SAFE_TEXT_ERROR), placeholder: z.string().max(200).regex(SAFE_TEXT_REGEX, SAFE_TEXT_ERROR).optional(), type: z.enum(['text', 'email', 'number', 'textarea']) });

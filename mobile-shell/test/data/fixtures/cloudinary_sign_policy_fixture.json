@@ -1,0 +1,13 @@
+{
+  "request": {
+    "fieldType": "image",
+    "formId": "form-123",
+    "draftId": "draft-456"
+  },
+  "expected": {
+    "folder": "submissions/form-123/draft-456",
+    "uploadPreset": "scct_mobile_submissions",
+    "resourceType": "image",
+    "eager": "c_limit,w_2560,h_2560"
+  }
+}

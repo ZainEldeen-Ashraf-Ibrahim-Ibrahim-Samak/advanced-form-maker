@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "submission-payload.schema.json",
+  "title": "SubmissionPayload",
+  "type": "object",
+  "required": ["formId", "formVersion", "values", "media", "clientSubmittedAt"],
+  "properties": {
+    "formId": { "type": "string" },
+    "formVersion": { "type": "string" },
+    "values": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "string" },
+          { "type": "number" },
+          { "type": "boolean" },
+          { "type": "null" }
+        ]
+      }
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fieldId", "publicId", "url"],
+        "properties": {
+          "fieldId": { "type": "string" },
+          "publicId": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "mimeType": { "type": "string" },
+          "sizeBytes": { "type": "integer" }
+        }
+      }
+    },
+    "clientSubmittedAt": { "type": "string", "format": "date-time" },
+    "clientDraftId": { "type": "string" },
+    "localeAtSubmit": { "type": "string", "enum": ["ar", "en"] }
+  }
+}

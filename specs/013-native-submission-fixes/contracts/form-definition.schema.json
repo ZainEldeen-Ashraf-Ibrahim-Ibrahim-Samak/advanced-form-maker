@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "form-definition.schema.json",
+  "title": "FormDefinition",
+  "type": "object",
+  "required": ["id", "version", "fields"],
+  "properties": {
+    "id": { "type": "string" },
+    "version": { "type": "string" },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "required", "messageKeys"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["text", "number", "select", "date", "phone", "nationalId", "media"]
+          },
+          "required": { "type": "boolean" },
+          "regex": { "type": "string" },
+          "formatterId": {
+            "type": "string",
+            "enum": ["phone", "nationalId", "date", "numeric", "none"]
+          },
+          "messageKeys": {
+            "type": "object",
+            "required": ["label", "errorRequired", "errorRegex"],
+            "properties": {
+              "label": { "type": "string" },
+              "placeholder": { "type": "string" },
+              "errorRequired": { "type": "string" },
+              "errorRegex": { "type": "string" },
+              "errorFormat": { "type": "string" }
+            }
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["value", "labelKey"],
+              "properties": {
+                "value": { "type": "string" },
+                "labelKey": { "type": "string" }
+              }
+            }
+          },
+          "mediaLimits": {
+            "type": "object",
+            "properties": {
+              "maxImageBytes": { "type": "integer", "minimum": 1 },
+              "maxVideoBytes": { "type": "integer", "minimum": 1 },
+              "acceptedMimeTypes": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1 @@
+import { z } from 'zod'; import { SAFE_TEXT_REGEX, SAFE_TEXT_ERROR } from './shared'; export const formTemplateSchema = z.object({ name: z.string().min(1).max(100).regex(SAFE_TEXT_REGEX, SAFE_TEXT_ERROR), description: z.string().max(500).regex(SAFE_TEXT_REGEX, SAFE_TEXT_ERROR).optional() });

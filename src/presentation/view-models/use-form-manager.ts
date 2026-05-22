@@ -1,0 +1,88 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import type { FormTemplate } from "@/domain/entities/form-template";
+
+interface UseFormManagerReturn {
+  forms: FormTemplate[];
+  isLoading: boolean;
+  error: string | null;
+  createForm: (name: string, description?: string) => Promise<void>;
+  updateForm: (id: string, data: { name?: string; description?: string; isActive?: boolean }) => Promise<void>;
+  deleteForm: (id: string) => Promise<{ success: boolean; error?: string }>;
+  refresh: () => Promise<void>;
+}
+
+export function useFormManager(): UseFormManagerReturn {
+  const [forms, setForms] = useState<FormTemplate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchForms = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/forms");
+      const data = await res.json();
+      if (data.success) {
+        setForms(data.data);
+      } else {
+        setError(data.error || "Failed to fetch forms");
+      }
+    } catch {
+      setError("Network error");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchForms();
+  }, [fetchForms]);
+
+  const createForm = async (name: string, description?: string) => {
+    setError(null);
+    const res = await fetch("/api/admin/forms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, description }),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    await fetchForms();
+  };
+
+  const updateForm = async (
+    id: string,
+    input: { name?: string; description?: string; isActive?: boolean }
+  ) => {
+    setError(null);
+    const res = await fetch(`/api/admin/forms/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    await fetchForms();
+  };
+
+  const deleteForm = async (id: string): Promise<{ success: boolean; error?: string }> => {
+    const res = await fetch(`/api/admin/forms/${id}`, { method: "DELETE" });
+    const data = await res.json();
+    if (data.success) {
+      await fetchForms();
+    }
+    return data;
+  };
+
+  return {
+    forms,
+    isLoading,
+    error,
+    createForm,
+    updateForm,
+    deleteForm,
+    refresh: fetchForms,
+  };
+}

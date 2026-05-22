@@ -1,0 +1,438 @@
+{
+  "version": 1,
+  "description": "Shared validation parity fixture for web and Flutter validators.",
+  "cases": [
+    {
+      "id": "phone-001",
+      "field": "phone",
+      "input": "0501234567",
+      "expectedValid": true,
+      "expectedFormatted": "0501234567",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "phone-002",
+      "field": "phone",
+      "input": " 0501234567 ",
+      "expectedValid": true,
+      "expectedFormatted": "0501234567",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "phone-003",
+      "field": "phone",
+      "input": "+966501234567",
+      "expectedValid": true,
+      "expectedFormatted": "+966501234567",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "phone-004",
+      "field": "phone",
+      "input": "501234567",
+      "expectedValid": true,
+      "expectedFormatted": "501234567",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "phone-005",
+      "field": "phone",
+      "input": "05012",
+      "expectedValid": false,
+      "expectedFormatted": "05012",
+      "expectedMessageKey": "validation.regex"
+    },
+    {
+      "id": "phone-006",
+      "field": "phone",
+      "input": "abc0501234567",
+      "expectedValid": false,
+      "expectedFormatted": "abc0501234567",
+      "expectedMessageKey": "validation.format"
+    },
+    {
+      "id": "phone-007",
+      "field": "phone",
+      "input": "",
+      "expectedValid": false,
+      "expectedFormatted": "",
+      "expectedMessageKey": "validation.required"
+    },
+    {
+      "id": "phone-008",
+      "field": "phone",
+      "input": "0000000000",
+      "expectedValid": true,
+      "expectedFormatted": "0000000000",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "phone-009",
+      "field": "phone",
+      "input": "050-123-4567",
+      "expectedValid": false,
+      "expectedFormatted": "050-123-4567",
+      "expectedMessageKey": "validation.format"
+    },
+    {
+      "id": "phone-010",
+      "field": "phone",
+      "input": "05012345678",
+      "expectedValid": false,
+      "expectedFormatted": "05012345678",
+      "expectedMessageKey": "validation.regex"
+    },
+    {
+      "id": "nid-001",
+      "field": "nationalId",
+      "input": "1234567890",
+      "expectedValid": true,
+      "expectedFormatted": "1234567890",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "nid-002",
+      "field": "nationalId",
+      "input": " 1234567890 ",
+      "expectedValid": true,
+      "expectedFormatted": "1234567890",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "nid-003",
+      "field": "nationalId",
+      "input": "0123456789",
+      "expectedValid": true,
+      "expectedFormatted": "0123456789",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "nid-004",
+      "field": "nationalId",
+      "input": "123456789",
+      "expectedValid": false,
+      "expectedFormatted": "123456789",
+      "expectedMessageKey": "validation.regex"
+    },
+    {
+      "id": "nid-005",
+      "field": "nationalId",
+      "input": "12345678901",
+      "expectedValid": false,
+      "expectedFormatted": "12345678901",
+      "expectedMessageKey": "validation.regex"
+    },
+    {
+      "id": "nid-006",
+      "field": "nationalId",
+      "input": "ABCDEFGHIJ",
+      "expectedValid": false,
+      "expectedFormatted": "ABCDEFGHIJ",
+      "expectedMessageKey": "validation.format"
+    },
+    {
+      "id": "nid-007",
+      "field": "nationalId",
+      "input": "",
+      "expectedValid": false,
+      "expectedFormatted": "",
+      "expectedMessageKey": "validation.required"
+    },
+    {
+      "id": "nid-008",
+      "field": "nationalId",
+      "input": "1234 567890",
+      "expectedValid": false,
+      "expectedFormatted": "1234 567890",
+      "expectedMessageKey": "validation.format"
+    },
+    {
+      "id": "nid-009",
+      "field": "nationalId",
+      "input": "0000000000",
+      "expectedValid": true,
+      "expectedFormatted": "0000000000",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "nid-010",
+      "field": "nationalId",
+      "input": "12345-67890",
+      "expectedValid": false,
+      "expectedFormatted": "12345-67890",
+      "expectedMessageKey": "validation.format"
+    },
+    {
+      "id": "date-001",
+      "field": "date",
+      "input": "2026-01-31",
+      "expectedValid": true,
+      "expectedFormatted": "2026-01-31",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "date-002",
+      "field": "date",
+      "input": " 2026-01-31 ",
+      "expectedValid": true,
+      "expectedFormatted": "2026-01-31",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "date-003",
+      "field": "date",
+      "input": "2024-02-29",
+      "expectedValid": true,
+      "expectedFormatted": "2024-02-29",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "date-004",
+      "field": "date",
+      "input": "2025-02-29",
+      "expectedValid": false,
+      "expectedFormatted": "2025-02-29",
+      "expectedMessageKey": "validation.format"
+    },
+    {
+      "id": "date-005",
+      "field": "date",
+      "input": "2026/01/31",
+      "expectedValid": false,
+      "expectedFormatted": "2026/01/31",
+      "expectedMessageKey": "validation.regex"
+    },
+    {
+      "id": "date-006",
+      "field": "date",
+      "input": "31-01-2026",
+      "expectedValid": false,
+      "expectedFormatted": "31-01-2026",
+      "expectedMessageKey": "validation.regex"
+    },
+    {
+      "id": "date-007",
+      "field": "date",
+      "input": "",
+      "expectedValid": false,
+      "expectedFormatted": "",
+      "expectedMessageKey": "validation.required"
+    },
+    {
+      "id": "date-008",
+      "field": "date",
+      "input": "2026-13-01",
+      "expectedValid": false,
+      "expectedFormatted": "2026-13-01",
+      "expectedMessageKey": "validation.format"
+    },
+    {
+      "id": "date-009",
+      "field": "date",
+      "input": "2026-00-10",
+      "expectedValid": false,
+      "expectedFormatted": "2026-00-10",
+      "expectedMessageKey": "validation.format"
+    },
+    {
+      "id": "date-010",
+      "field": "date",
+      "input": "2026-11-00",
+      "expectedValid": false,
+      "expectedFormatted": "2026-11-00",
+      "expectedMessageKey": "validation.format"
+    },
+    {
+      "id": "numeric-001",
+      "field": "numeric",
+      "input": "123",
+      "expectedValid": true,
+      "expectedFormatted": "123",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "numeric-002",
+      "field": "numeric",
+      "input": " 123 ",
+      "expectedValid": true,
+      "expectedFormatted": "123",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "numeric-003",
+      "field": "numeric",
+      "input": "12.50",
+      "expectedValid": true,
+      "expectedFormatted": "12.50",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "numeric-004",
+      "field": "numeric",
+      "input": "-12",
+      "expectedValid": true,
+      "expectedFormatted": "-12",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "numeric-005",
+      "field": "numeric",
+      "input": "12,000",
+      "expectedValid": false,
+      "expectedFormatted": "12,000",
+      "expectedMessageKey": "validation.format"
+    },
+    {
+      "id": "numeric-006",
+      "field": "numeric",
+      "input": "12a",
+      "expectedValid": false,
+      "expectedFormatted": "12a",
+      "expectedMessageKey": "validation.format"
+    },
+    {
+      "id": "numeric-007",
+      "field": "numeric",
+      "input": "",
+      "expectedValid": false,
+      "expectedFormatted": "",
+      "expectedMessageKey": "validation.required"
+    },
+    {
+      "id": "numeric-008",
+      "field": "numeric",
+      "input": "0",
+      "expectedValid": true,
+      "expectedFormatted": "0",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "regex-required-001",
+      "field": "regex-required",
+      "input": "ABC-123",
+      "expectedValid": true,
+      "expectedFormatted": "ABC-123",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "regex-required-002",
+      "field": "regex-required",
+      "input": "abc-123",
+      "expectedValid": false,
+      "expectedFormatted": "abc-123",
+      "expectedMessageKey": "validation.regex"
+    },
+    {
+      "id": "regex-required-003",
+      "field": "regex-required",
+      "input": "AB-123",
+      "expectedValid": false,
+      "expectedFormatted": "AB-123",
+      "expectedMessageKey": "validation.regex"
+    },
+    {
+      "id": "regex-required-004",
+      "field": "regex-required",
+      "input": "ABC-12",
+      "expectedValid": false,
+      "expectedFormatted": "ABC-12",
+      "expectedMessageKey": "validation.regex"
+    },
+    {
+      "id": "regex-required-005",
+      "field": "regex-required",
+      "input": " ABC-123 ",
+      "expectedValid": true,
+      "expectedFormatted": "ABC-123",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "regex-required-006",
+      "field": "regex-required",
+      "input": "",
+      "expectedValid": false,
+      "expectedFormatted": "",
+      "expectedMessageKey": "validation.required"
+    },
+    {
+      "id": "regex-required-007",
+      "field": "regex-required",
+      "input": "AAA-999",
+      "expectedValid": true,
+      "expectedFormatted": "AAA-999",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "regex-required-008",
+      "field": "regex-required",
+      "input": "AAA_999",
+      "expectedValid": false,
+      "expectedFormatted": "AAA_999",
+      "expectedMessageKey": "validation.regex"
+    },
+    {
+      "id": "trimmed-text-001",
+      "field": "trimmed-text",
+      "input": "hello",
+      "expectedValid": true,
+      "expectedFormatted": "hello",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "trimmed-text-002",
+      "field": "trimmed-text",
+      "input": " hello ",
+      "expectedValid": true,
+      "expectedFormatted": "hello",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "trimmed-text-003",
+      "field": "trimmed-text",
+      "input": "   ",
+      "expectedValid": false,
+      "expectedFormatted": "",
+      "expectedMessageKey": "validation.required"
+    },
+    {
+      "id": "trimmed-text-004",
+      "field": "trimmed-text",
+      "input": "line one",
+      "expectedValid": true,
+      "expectedFormatted": "line one",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "trimmed-text-005",
+      "field": "trimmed-text",
+      "input": "line one    ",
+      "expectedValid": true,
+      "expectedFormatted": "line one",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "trimmed-text-006",
+      "field": "trimmed-text",
+      "input": "A",
+      "expectedValid": true,
+      "expectedFormatted": "A",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "trimmed-text-007",
+      "field": "trimmed-text",
+      "input": "  A  ",
+      "expectedValid": true,
+      "expectedFormatted": "A",
+      "expectedMessageKey": null
+    },
+    {
+      "id": "trimmed-text-008",
+      "field": "trimmed-text",
+      "input": "",
+      "expectedValid": false,
+      "expectedFormatted": "",
+      "expectedMessageKey": "validation.required"
+    }
+  ]
+}
