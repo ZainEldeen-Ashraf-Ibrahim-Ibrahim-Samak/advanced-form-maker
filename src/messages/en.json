@@ -69,7 +69,8 @@
     "exportedSuccess": "Exported successfully",
     "loggedInAs": "Logged in as:",
     "whatsapp": "WhatsApp",
-    "call": "Call"
+    "call": "Call",
+    "exportFailed": "Export failed"
   },
   "auth": {
     "login": "Login",
@@ -115,7 +116,17 @@
     "failedToLoadBandwidth": "Failed to load bandwidth metrics",
     "quotaUsed": "{percent}% of your current quota",
     "used": "Used: {amount}",
-    "limit": "Limit: {amount}"
+    "limit": "Limit: {amount}",
+    "manageCardsTitle": "Manage Dashboard Cards",
+    "manageCardsDesc": "Drag to reorder cards or toggle visibility.",
+    "cardVisible": "Visible",
+    "cardHidden": "Hidden",
+    "saveOrder": "Save Layout",
+    "layoutSaved": "Dashboard layout saved successfully",
+    "showAll": "Show All",
+    "hideAll": "Hide All",
+    "manage": "Manage →",
+    "submissionCount": "{count} {count, plural, =1 {submission} other {submissions}}"
   },
   "forms": {
     "title": "Form Templates",
@@ -132,7 +143,13 @@
     "deleteConfirm": "Are you sure you want to delete this form?",
     "deleteWarning": "This action cannot be undone.",
     "cannotDelete": "Cannot delete a form with existing submissions",
-    "backToForms": "Back to Forms"
+    "backToForms": "Back to Forms",
+    "manageForm": "Manage Form",
+    "manageFormDesc": "Manage form fields and review submission trends.",
+    "locked": "Locked",
+    "lockForm": "Lock Form",
+    "lockFormDesc": "Prevent new submissions while keeping the form visible.",
+    "editForm": "Edit Form"
   },
   "fields": {
     "title": "Field Builder",
@@ -369,7 +386,8 @@
     "notADocument": "No clear document detected in the image.",
     "fieldsFilled": "{count} fields filled",
     "fieldsNotFilled": "{count} fields remaining",
-    "enableAiAutoFill": "Enable AI Auto-Fill"
+    "enableAiAutoFill": "Enable AI Auto-Fill",
+    "aiAutoFillDesc": "Automatically fill contact info and custom fields using uploaded document photos."
   },
   "user": {
     "submission": {
@@ -395,7 +413,8 @@
     "networkError": "Network error. Please check your connection.",
     "serverError": "Server error. Please try again later.",
     "server_error": "Server error. Please try again later.",
-    "not_found": "Page not found"
+    "not_found": "Page not found",
+    "formLocked": "This form is currently unavailable."
   },
   "cache": {
     "title": "Cache Management",
@@ -496,7 +515,8 @@
     "updateSuccess": "Team member updated successfully",
     "updateError": "Failed to update team member",
     "roleUpdateSuccess": "Role updated successfully",
-    "roleUpdateError": "Failed to update role"
+    "roleUpdateError": "Failed to update role",
+    "phone": "Phone"
   },
   "adminSettings": {
     "loading": "Loading core system settings...",
@@ -532,7 +552,19 @@
     "downloadBackup": "Download Database Backup",
     "uploadRestore": "Upload & Restore Data",
     "restoring": "Restoring data now...",
-    "dataRetentionTitle": "Data Retention Policies"
+    "dataRetentionTitle": "Data Retention Policies",
+    "brandingTitle": "Site Branding & Identity",
+    "siteNameLabel": "Site Display Name",
+    "siteLogoLabel": "Site Logo (Cloudinary URL)",
+    "logoPreview": "Logo Preview",
+    "uploadLogoButton": "Upload Custom Logo",
+    "brandingSaveSuccess": "Branding identity updated successfully",
+    "brandingSaveError": "Failed to update branding identity",
+    "logoUploadError": "Failed to upload logo image",
+    "restoreConfirm": "WARNING: This will completely replace the current database with the backup data. This action is destructive and cannot be undone. Are you sure?",
+    "restoringToast": "Restoring system from backup...",
+    "restoreFailed": "Failed to restore backup",
+    "restoreSuccess": "System restored successfully! Reloading..."
   },
   "settings": {
     "title": "Settings",
@@ -562,5 +594,28 @@
     "ogDescription": "Manage your data collection and review process efficiently with bilingual support.",
     "twitterTitle": "{siteName} — Data Collection System",
     "twitterDescription": "Professional data collection for business needs."
+  },
+  "formAnalysis": {
+    "title": "AI Form Submission Analysis",
+    "subtitle": "Trigger Gemini AI models to analyze trends, sentiments, and patterns across all submissions of this form.",
+    "runButton": "Run AI Analysis",
+    "runningStatus": "AI is analyzing submissions...",
+    "idleStatus": "Ready for analysis.",
+    "doneStatus": "Analysis completed.",
+    "failedStatus": "Analysis failed.",
+    "toggleEnableLabel": "Allow AI Analysis on this form",
+    "summaryTitle": "Executive Summary",
+    "patternsTitle": "Identified Patterns",
+    "findingsTitle": "Notable Findings",
+    "sentimentTitle": "Sentiment & Tone Overview",
+    "lastAnalyzedAt": "Last analyzed at {date} ({count} submissions)",
+    "noSubmissions": "There are no submissions for this form yet to analyze.",
+    "disabledError": "AI Analysis is disabled for this form template.",
+    "failedMessage": "Error details: {message}",
+    "disabledSubtitle": "Toggle the analysis configuration above to run and view AI generated summaries.",
+    "noPatterns": "No core patterns identified yet.",
+    "noFindings": "No notable individual findings detected yet.",
+    "noAnalysisDone": "No Analysis Done",
+    "noAnalysisDoneDesc": "Click the \"{runButton}\" button above to stream and compile submission feedback into structured business insights."
   }
 }

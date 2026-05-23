@@ -1,5 +1,6 @@
 import { MongoSettingsRepository } from "@/data/repositories/mongo-settings-repository";
 import { ISettingsConfiguration } from "@/data/models/settings.model";
+import { z } from "zod";
 
 export class ManageSettingsUseCase {
   private repo = new MongoSettingsRepository();
@@ -10,5 +11,14 @@ export class ManageSettingsUseCase {
 
   async updateSettings(updaterId: string, updates: Partial<ISettingsConfiguration>) {
     return await this.repo.upsertSettings(updaterId, updates);
+  }
+
+  async updateBranding(updaterId: string, input: { siteName?: string; siteLogoUrl?: string }) {
+    const parsed = z.object({
+      siteName: z.string().min(1).max(100).optional(),
+      siteLogoUrl: z.union([z.string().url(), z.literal("")]).optional(),
+    }).parse(input);
+
+    return await this.repo.updateBranding(updaterId, parsed);
   }
 }

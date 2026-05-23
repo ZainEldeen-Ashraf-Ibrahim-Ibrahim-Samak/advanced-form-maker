@@ -157,6 +157,7 @@ export const updateFormTemplateSchema = z.object({
   contactRecords: z.array(contactRecordSchema).min(1).optional(),
   contactFormFields: z.array(contactFormFieldSchema).min(1).optional(),
   aiAutoFillEnabled: z.boolean().optional(),
+  isLocked: z.boolean().optional(),
 });
 
 // ── Submission Schemas ─────────────────────────────────────────────

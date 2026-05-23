@@ -1,12 +1,13 @@
 import { MediaGallery } from "@/presentation/components/admin/media-gallery";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { SITE_ADMIN_NAME } from "@/components/shared/site-name";
+import { getSiteBranding } from "@/components/shared/site-name";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("media");
+  const branding = await getSiteBranding();
   return {
-    title: `${t("title")} — ${SITE_ADMIN_NAME}`,
+    title: `${t("title")} — ${branding.siteName} Admin`,
     description: t("subtitle"),
   };
 }

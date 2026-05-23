@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
-import { SITE_ADMIN_NAME } from "@/components/shared/site-name";
+import { getSiteBranding } from "@/components/shared/site-name";
 import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: `Field Builder — ${SITE_ADMIN_NAME}`,
-  description: "Define fields for your data collection form",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const branding = await getSiteBranding();
+  return {
+    title: `Field Builder — ${branding.siteName} Admin`,
+    description: "Define fields for your data collection form",
+  };
+}
 
 interface FieldsPageProps {
   params: Promise<{ id: string }>;

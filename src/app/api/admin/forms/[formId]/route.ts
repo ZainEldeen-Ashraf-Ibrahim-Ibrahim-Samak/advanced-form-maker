@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { MongoFormTemplateRepository } from "@/data/repositories/mongo-form-template-repository";
+import { MongoDashboardCardRepository } from "@/data/repositories/mongo-dashboard-card-repository";
 import { ManageFormsUseCase } from "@/domain/use-cases/admin/manage-forms";
 import { updateFormTemplateSchema } from "@/lib/validations";
 import { errorResponse, successResponse, unauthorizedResponse } from "@/lib/api-response";
@@ -8,7 +9,8 @@ import { NotificationPublisher } from "@/lib/events/publisher";
 import { parseSecureJson } from "@/lib/api-security";
 
 const repo = new MongoFormTemplateRepository();
-const useCase = new ManageFormsUseCase(repo);
+const cardRepo = new MongoDashboardCardRepository();
+const useCase = new ManageFormsUseCase(repo, cardRepo);
 
 export const dynamic = "force-dynamic";
 

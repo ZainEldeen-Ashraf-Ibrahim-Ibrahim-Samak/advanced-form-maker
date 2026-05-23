@@ -5,6 +5,8 @@ import { MongoFieldDefinitionRepository } from "@/data/repositories/mongo-field-
 import { ViewSubmissionUseCase } from "@/domain/use-cases/client/view-submission";
 import { errorResponse, successResponse } from "@/lib/api-response";
 import { logger } from "@/lib/dev-logger";
+import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 const submissionRepo = new MongoSubmissionRepository();
 const fieldValueRepo = new MongoFieldValueRepository();
@@ -168,8 +170,13 @@ export async function POST(
       normalizeVersion(request.headers.get("if-match-form-version")) ||
       normalizeVersion(body.expectedFormVersion);
 
+    const current = await viewUseCase.execute(token);
+    if (current?.formTemplate?.isLocked) {
+      const t = await getTranslations("errors");
+      return NextResponse.json({ error: t("formLocked") }, { status: 423 });
+    }
+
     if (expectedFormVersion) {
-      const current = await viewUseCase.execute(token);
       const currentFormVersion = normalizeVersion(current?.formVersion);
       if (expectedFormVersion && !areVersionsMatch(currentFormVersion, expectedFormVersion)) {
         return conflictResponse("STALE_FORM_VERSION");
@@ -251,8 +258,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ to
       normalizeVersion(request.headers.get("if-match-submission-updated-at")) ||
       normalizeVersion(body.expectedSubmissionUpdatedAt);
 
+    const current = await viewUseCase.execute(token);
+    if (current?.formTemplate?.isLocked) {
+      const t = await getTranslations("errors");
+      return NextResponse.json({ error: t("formLocked") }, { status: 423 });
+    }
+
     if (expectedFormVersion || expectedSubmissionUpdatedAt) {
-      const current = await viewUseCase.execute(token);
       const currentFormVersion = normalizeVersion(current?.formVersion);
       const currentSubmissionUpdatedAt = normalizeVersion(
         current?.submission?.updatedAt

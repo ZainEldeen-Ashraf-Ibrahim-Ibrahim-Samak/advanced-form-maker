@@ -5,6 +5,10 @@ import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/dev-logger";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import fs from "fs";
+import path from "path";
 
 // Import all models to ensure they are registered in the current context
 import "@/data/models/backup-log.model";
@@ -178,6 +182,8 @@ export async function GET(req: Request) {
       });
     }
 
+    const format = searchParams.get("format") || "xlsx";
+
     // Clean sheet name to fit 31-char limit and exclude invalid characters (like :, ?, *, /, \)
     const cleanSheetName = exportTitle
       .replace(/[:\?\*\/\\\[\]]/g, "")
@@ -188,19 +194,58 @@ export async function GET(req: Request) {
     const workbook = xlsx.utils.book_new();
     xlsx.utils.book_append_sheet(workbook, worksheet, cleanSheetName);
 
-    const buffer = xlsx.write(workbook, { type: "buffer", bookType: "xlsx" });
+    let bodyContent: Buffer | string;
+    let contentType: string;
 
-    // Clean filename for the Content-Disposition header
-    const safeFilename = exportTitle
-      .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-zA-Z0-9\u0600-\u06FF-_]/g, "");
+    if (format === "xlsx") {
+      bodyContent = xlsx.write(workbook, { type: "buffer", bookType: "xlsx" });
+      contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    } else if (format === "csv") {
+      bodyContent = xlsx.write(workbook, { type: "buffer", bookType: "csv" });
+      contentType = "text/csv";
+    } else if (format === "json") {
+      bodyContent = JSON.stringify(flattenedData, null, 2);
+      contentType = "application/json";
+    } else if (format === "pdf") {
+      const doc = new jsPDF();
+      let fontName = "helvetica";
+      const fontPath = path.join(process.cwd(), "public", "fonts", "Amiri-Regular.ttf");
+      if (fs.existsSync(fontPath)) {
+        const fontBuffer = fs.readFileSync(fontPath);
+        const base64Font = fontBuffer.toString("base64");
+        doc.addFileToVFS("Amiri-Regular.ttf", base64Font);
+        doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
+        fontName = "Amiri";
+      }
 
-    return new NextResponse(buffer, {
+      doc.setProperties({ title: exportTitle });
+      doc.setFont(fontName);
+      doc.text(exportTitle, 14, 15);
+
+      const headers = Object.keys(flattenedData[0] || {});
+      const pdfBody = flattenedData.map((row) => headers.map((h) => String(row[h] || "")));
+
+      autoTable(doc, {
+        head: [headers],
+        body: pdfBody,
+        startY: 20,
+        styles: { font: fontName, fontStyle: "normal", fontSize: 10 },
+      });
+
+      bodyContent = Buffer.from(doc.output("arraybuffer"));
+      contentType = "application/pdf";
+    } else {
+      return NextResponse.json({ error: `Unsupported format: ${format}` }, { status: 400 });
+    }
+
+    const filename = `${exportTitle} data.${format}`;
+    const encodedFilename = encodeURIComponent(filename);
+
+    return new NextResponse(bodyContent as any, {
       status: 200,
       headers: {
-        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition": `attachment; filename="${encodeURIComponent(safeFilename)}-data.xlsx"`,
+        "Content-Type": contentType,
+        "Content-Disposition": `attachment; filename="${encodedFilename}"; filename*=UTF-8''${encodedFilename}`,
       },
     });
   } catch (error) {

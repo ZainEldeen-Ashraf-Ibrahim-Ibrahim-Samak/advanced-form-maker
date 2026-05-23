@@ -5,7 +5,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { ThemeProvider } from "@/presentation/providers/theme-provider";
 import { AuthProvider } from "@/presentation/providers/auth-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { SITE_NAME } from "@/components/shared/site-name";
+import { getSiteBranding } from "@/components/shared/site-name";
 import "@/app/globals.css";
 
 const geistSans = Geist({
@@ -25,15 +25,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "metadata" });
+  const branding = await getSiteBranding();
 
   return {
     metadataBase: new URL("https://scct-damages.vercel.app/"),
-    title: t("title", { siteName: SITE_NAME }),
+    title: t("title", { siteName: branding.siteName }),
     description: t("description"),
     keywords: ["SCCT", "Damages", "Data Collection", "Bilingual", "Dashboard"],
     authors: [{ name: "SCCT Team" }],
     creator: "SCCT Team",
     publisher: "SCCT Team",
+    icons: {
+      icon: branding.siteLogoUrl || "/favicon.ico",
+    },
     robots: {
       index: true,
       follow: true,
@@ -46,10 +50,10 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: t("ogTitle", { siteName: SITE_NAME }),
+      title: t("ogTitle", { siteName: branding.siteName }),
       description: t("ogDescription"),
       url: "https://scct-damages.vercel.app/",
-      siteName: SITE_NAME,
+      siteName: branding.siteName,
       locale: locale === "ar" ? "ar_EG" : "en_US",
       type: "website",
     },

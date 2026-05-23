@@ -2,6 +2,7 @@ import FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import JSZip from "jszip";
 
 // Helper to convert array buffer to base64
 function arrayBufferToBase64(buffer: ArrayBuffer) {
@@ -28,7 +29,7 @@ export function exportToCSV<T>(data: T[], filename: string, columns: { header: s
 
   const csv = [headers, ...rows].join("\n");
   const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
-  FileSaver.saveAs(blob, `${filename}.csv`);
+  FileSaver.saveAs(blob, `${filename} data.csv`);
 }
 
 export function exportToExcel<T>(data: T[], filename: string, columns: { header: string; key: keyof T | ((row: T) => string) }[]) {
@@ -54,13 +55,14 @@ export function exportToExcel<T>(data: T[], filename: string, columns: { header:
 
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-  XLSX.writeFile(workbook, `${filename}.xlsx`);
+  XLSX.writeFile(workbook, `${filename} data.xlsx`);
 }
 
 export async function exportToPDF<T>(data: T[], filename: string, title: string, columns: { header: string; key: keyof T | ((row: T) => string) }[]) {
   if (data.length === 0) return;
 
   const doc = new jsPDF();
+  doc.setProperties({ title });
   let fontName = "helvetica";
   
   // Try loading Arabic font to support RTL text and Unicode characters
@@ -91,5 +93,45 @@ export async function exportToPDF<T>(data: T[], filename: string, title: string,
     styles: { font: fontName, fontStyle: "normal", fontSize: 10 },
   });
 
-  doc.save(`${filename}.pdf`);
+  doc.save(`${title} data.pdf`);
+}
+
+export async function exportBulkZip(formIds: string[], format: string) {
+  if (formIds.length === 0) return;
+
+  const zip = new JSZip();
+  
+  await Promise.all(
+    formIds.map(async (formId) => {
+      try {
+        const res = await fetch(`/api/admin/system/export?collection=submissions&formId=${formId}&format=${format}`);
+        if (!res.ok) {
+          console.error(`Failed to export form ${formId}: ${res.statusText}`);
+          return;
+        }
+
+        const contentDisposition = res.headers.get("Content-Disposition");
+        let filename = `${formId}-data.${format}`;
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename\*?=(?:UTF-8'')?([^;]+)/i);
+          if (match && match[1]) {
+            filename = decodeURIComponent(match[1].replace(/['"]/g, ""));
+          } else {
+            const legacyMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
+            if (legacyMatch && legacyMatch[1]) {
+              filename = decodeURIComponent(legacyMatch[1]);
+            }
+          }
+        }
+
+        const blob = await res.blob();
+        zip.file(filename, blob);
+      } catch (e) {
+        console.error(`Error fetching export for form ${formId}`, e);
+      }
+    })
+  );
+
+  const content = await zip.generateAsync({ type: "blob" });
+  FileSaver.saveAs(content, "all-forms-data.zip");
 }

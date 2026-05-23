@@ -50,4 +50,34 @@ export class MongoSettingsRepository {
       throw error;
     }
   }
+
+  async updateBranding(
+    updaterId: string,
+    brandingUpdates: { siteName?: string; siteLogoUrl?: string }
+  ): Promise<ISettingsConfiguration> {
+    try {
+      await connectToDatabase();
+      const settings = await this.getSettings();
+      if (!settings) {
+        const newSettings = new SettingsConfigurationModel({
+          branding: {
+            siteName: brandingUpdates.siteName ?? "SCCT DAMAGES",
+            siteLogoUrl: brandingUpdates.siteLogoUrl ?? "",
+          },
+          updatedBy: updaterId,
+        });
+        return await newSettings.save();
+      }
+
+      settings.branding = {
+        siteName: brandingUpdates.siteName !== undefined ? brandingUpdates.siteName : (settings.branding?.siteName ?? "SCCT DAMAGES"),
+        siteLogoUrl: brandingUpdates.siteLogoUrl !== undefined ? brandingUpdates.siteLogoUrl : (settings.branding?.siteLogoUrl ?? ""),
+      };
+      settings.updatedBy = updaterId;
+      return await settings.save();
+    } catch (error) {
+      logger.error("Failed to update branding settings", { updaterId, brandingUpdates, error });
+      throw error;
+    }
+  }
 }

@@ -15,6 +15,10 @@ export interface SettingsState {
   draft_retention_days: number | null;
   cloudinary_storage_threshold: number | null;
   storage_cleanup_target: "drafts" | "unused_media" | null;
+  branding?: {
+    siteName: string;
+    siteLogoUrl: string;
+  };
 }
 
 export function useAdminSettings() {
@@ -22,6 +26,7 @@ export function useAdminSettings() {
   const [settings, setSettings] = useState<SettingsState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingBranding, setIsSavingBranding] = useState(false);
   const [isBackingUp, setIsBackingUp] = useState(false);
 
   const fetchSettings = async () => {
@@ -37,6 +42,7 @@ export function useAdminSettings() {
           draft_retention_days: data.data.draft_retention_days ?? null,
           cloudinary_storage_threshold: data.data.cloudinary_storage_threshold ?? null,
           storage_cleanup_target: data.data.storage_cleanup_target ?? null,
+          branding: data.data.branding || { siteName: "SCCT DAMAGES", siteLogoUrl: "" },
         });
       }
     } catch (e: unknown) {
@@ -72,6 +78,39 @@ export function useAdminSettings() {
     }
   };
 
+  const saveBranding = async (input: { siteName?: string; siteLogoUrl?: string }) => {
+    setIsSavingBranding(true);
+    try {
+      const res = await fetch("/api/admin/settings/branding", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json();
+        throw new Error(errJson.error || t("brandingSaveError"));
+      }
+      
+      const data = await res.json();
+      if (data.success && settings) {
+        setSettings({
+          ...settings,
+          branding: {
+            siteName: data.data.siteName,
+            siteLogoUrl: data.data.siteLogoUrl,
+          },
+        });
+        toast.success(t("brandingSaveSuccess") || "Branding settings saved successfully");
+      }
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : t("brandingSaveError");
+      toast.error(message);
+    } finally {
+      setIsSavingBranding(false);
+    }
+  };
+
   const triggerBackup = async () => {
     setIsBackingUp(true);
     const toastId = toast.loading(t("backupLoading"));
@@ -95,8 +134,10 @@ export function useAdminSettings() {
     settings,
     isLoading,
     isSaving,
+    isSavingBranding,
     isBackingUp,
     saveSettings,
+    saveBranding,
     triggerBackup
   };
 }

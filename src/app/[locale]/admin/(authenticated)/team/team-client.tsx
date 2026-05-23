@@ -247,7 +247,7 @@ export function TeamClient({
                   <EmailRegix email={newMember.email} showTypoSuggestions={true} />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">{t("phone")}</Label>
                   <Input
                     id="phone"
                     type="tel"
@@ -362,7 +362,7 @@ export function TeamClient({
                 <EmailRegix email={editingMember.email} showTypoSuggestions={true} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="edit-phone">Phone</Label>
+                <Label htmlFor="edit-phone">{t("phone")}</Label>
                 <Input
                   id="edit-phone"
                   type="tel"

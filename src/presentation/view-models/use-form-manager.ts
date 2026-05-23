@@ -8,8 +8,9 @@ interface UseFormManagerReturn {
   isLoading: boolean;
   error: string | null;
   createForm: (name: string, description?: string) => Promise<void>;
-  updateForm: (id: string, data: { name?: string; description?: string; isActive?: boolean; aiAutoFillEnabled?: boolean }) => Promise<void>;
+  updateForm: (id: string, data: { name?: string; description?: string; isActive?: boolean; aiAutoFillEnabled?: boolean; isLocked?: boolean }) => Promise<void>;
   deleteForm: (id: string) => Promise<{ success: boolean; error?: string }>;
+  toggleLock: (formId: string, currentState: boolean) => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -54,7 +55,7 @@ export function useFormManager(): UseFormManagerReturn {
 
   const updateForm = async (
     id: string,
-    input: { name?: string; description?: string; isActive?: boolean; aiAutoFillEnabled?: boolean }
+    input: { name?: string; description?: string; isActive?: boolean; aiAutoFillEnabled?: boolean; isLocked?: boolean }
   ) => {
     setError(null);
     const res = await fetch(`/api/admin/forms/${id}`, {
@@ -76,6 +77,23 @@ export function useFormManager(): UseFormManagerReturn {
     return data;
   };
 
+  const toggleLock = async (formId: string, currentState: boolean) => {
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/forms/${formId}/lock`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isLocked: !currentState }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      await fetchForms();
+    } catch (e: any) {
+      setError(e.message || "Failed to toggle form lock");
+      throw e;
+    }
+  };
+
   return {
     forms,
     isLoading,
@@ -83,6 +101,7 @@ export function useFormManager(): UseFormManagerReturn {
     createForm,
     updateForm,
     deleteForm,
+    toggleLock,
     refresh: fetchForms,
   };
 }

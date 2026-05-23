@@ -50,6 +50,7 @@ function toEntity(doc: Record<string, unknown>): FormTemplate {
     contactRecords,
     contactFormFields,
     isActive: doc.isActive as boolean,
+    isLocked: !!doc.isLocked,
     aiAutoFillEnabled: !!doc.aiAutoFillEnabled,
     createdAt: doc.createdAt as Date,
     updatedAt: doc.updatedAt as Date,
@@ -170,6 +171,18 @@ export class MongoFormTemplateRepository implements FormTemplateRepository {
       return await SubmissionModel.countDocuments({ formTemplateId });
     } catch (error) {
       logger.error("Failed to count submissions for form template", { formTemplateId, error });
+      throw error;
+    }
+  }
+
+  async setLocked(id: string, isLocked: boolean): Promise<FormTemplate | null> {
+    try {
+      await connectToDatabase();
+      const doc = await FormTemplateModel.findByIdAndUpdate(id, { isLocked }, { new: true }).lean();
+      await CacheService.invalidateFormCache();
+      return doc ? toEntity(doc) : null;
+    } catch (error) {
+      logger.error("Failed to set locked status for form template", { id, isLocked, error });
       throw error;
     }
   }

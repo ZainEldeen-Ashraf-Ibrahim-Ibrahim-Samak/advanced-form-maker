@@ -10,6 +10,7 @@ import { LiveNotifications } from "@/presentation/components/admin/live-notifica
 import { SidebarNav } from "@/presentation/components/admin/sidebar-nav";
 import { LogoutButton } from "@/presentation/components/admin/logout-button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { getSiteBranding } from "@/components/shared/site-name";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ interface AdminLayoutProps {
 
 export default async function AdminLayout({ children }: AdminLayoutProps) {
   const session = await auth();
+  const branding = await getSiteBranding();
   const locale = await getLocale();
   const t = await getTranslations("nav");
   const userRole = (session?.user as { role?: string } | undefined)?.role;
@@ -37,7 +39,11 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
       {/* Sidebar */}
       <aside className="hidden md:flex w-64 flex-col border-e bg-card relative">
         <div className="p-6">
-          <Logo className="mb-2 hover:opacity-80 transition-opacity" />
+          <Logo 
+            className="mb-2 hover:opacity-80 transition-opacity" 
+            logoUrl={branding.siteLogoUrl} 
+            siteName={branding.siteName} 
+          />
           <p className="text-sm text-muted-foreground truncate" title={session.user.name || ""}>
             {session.user.name}
           </p>
@@ -68,7 +74,11 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
               </SheetTrigger>
               <SheetContent side={locale === "ar" ? "right" : "left"} className="w-72 p-0 flex flex-col">
                 <div className="p-6 border-b">
-                  <Logo className="mb-2" />
+                  <Logo 
+                    className="mb-2" 
+                    logoUrl={branding.siteLogoUrl} 
+                    siteName={branding.siteName} 
+                  />
                   <p className="text-sm text-muted-foreground truncate" title={session.user.name || ""}>
                     {session.user.name}
                   </p>
@@ -78,7 +88,11 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
                 </div>
               </SheetContent>
             </Sheet>
-            <Logo className="scale-90 transform origin-left rtl:origin-right" />
+            <Logo 
+              className="scale-90 transform origin-left rtl:origin-right" 
+              logoUrl={branding.siteLogoUrl} 
+              siteName={branding.siteName} 
+            />
           </div>
           <div className="flex items-center gap-1">
             <LanguageSwitcher />

@@ -26,7 +26,7 @@ export function FormManager() {
   const ts = useTranslations("sharing");
   const tAi = useTranslations("aiExtraction");
   const locale = useLocale();
-  const { forms, isLoading, createForm, updateForm, deleteForm } = useFormManager();
+  const { forms, isLoading, createForm, updateForm, deleteForm, toggleLock } = useFormManager();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newFormName, setNewFormName] = useState("");
   const [newFormDesc, setNewFormDesc] = useState("");
@@ -38,6 +38,7 @@ export function FormManager() {
   const [editFormName, setEditFormName] = useState("");
   const [editFormDesc, setEditFormDesc] = useState("");
   const [editFormAiAutoFillEnabled, setEditFormAiAutoFillEnabled] = useState(false);
+  const [editFormIsLocked, setEditFormIsLocked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   // Share Dialog State
@@ -68,6 +69,7 @@ export function FormManager() {
     setEditFormName(form.name);
     setEditFormDesc(form.description || "");
     setEditFormAiAutoFillEnabled(form.aiAutoFillEnabled || false);
+    setEditFormIsLocked(form.isLocked || false);
     setIsEditOpen(true);
   }
 
@@ -79,6 +81,7 @@ export function FormManager() {
         name: editFormName.trim(),
         description: editFormDesc.trim(),
         aiAutoFillEnabled: editFormAiAutoFillEnabled,
+        isLocked: editFormIsLocked,
       });
       setIsEditOpen(false);
       setEditingFormId(null);
@@ -230,11 +233,18 @@ export function FormManager() {
                       <CardDescription>{form.description}</CardDescription>
                     )}
                   </div>
-                  {form.isActive ? (
-                    <Badge variant="default">{t("activeForm")}</Badge>
-                  ) : (
-                    <Badge variant="secondary">{t("inactiveForm")}</Badge>
-                  )}
+                  <div className="flex flex-col items-end gap-1">
+                    {form.isActive ? (
+                      <Badge variant="default">{t("activeForm")}</Badge>
+                    ) : (
+                      <Badge variant="secondary">{t("inactiveForm")}</Badge>
+                    )}
+                    {form.isLocked && (
+                      <Badge variant="destructive">
+                        {t("locked")}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -298,7 +308,7 @@ export function FormManager() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{tc("edit") || "Edit Form"}</DialogTitle>
+            <DialogTitle>{t("editForm")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="space-y-2">
@@ -325,15 +335,40 @@ export function FormManager() {
                   {tAi("enableAiAutoFill")}
                 </Label>
                 <p className="text-[11px] text-muted-foreground leading-normal">
-                  {locale === "ar"
-                    ? "ملء حقول التواصل والبيانات المخصصة تلقائياً من صورة مستند يتم تحميلها."
-                    : "Automatically fill contact info and custom fields using uploaded document photos."}
+                  {tAi("aiAutoFillDesc")}
                 </p>
               </div>
               <Switch
                 id="edit-form-ai"
                 checked={editFormAiAutoFillEnabled}
                 onCheckedChange={setEditFormAiAutoFillEnabled}
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-zinc-200 dark:border-zinc-800 p-3 shadow-sm bg-zinc-50/50 dark:bg-zinc-900/50">
+              <div className="space-y-0.5 max-w-[80%]">
+                <Label htmlFor="edit-form-locked" className="text-sm font-semibold cursor-pointer">
+                  {t("lockForm")}
+                </Label>
+                <p className="text-[11px] text-muted-foreground leading-normal">
+                  {t("lockFormDesc")}
+                </p>
+              </div>
+              <Switch
+                id="edit-form-locked"
+                checked={editFormIsLocked}
+                onCheckedChange={async (checked) => {
+                  setEditFormIsLocked(checked);
+                  if (editingFormId) {
+                    try {
+                      // toggleLock(formId, currentState)
+                      // Current state before toggle is !checked.
+                      await toggleLock(editingFormId, !checked);
+                      toast.success(tc("success"));
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : tc("error"));
+                    }
+                  }
+                }}
               />
             </div>
             <Button

@@ -17,4 +17,5 @@ export interface FormTemplateRepository {
   delete(id: string): Promise<boolean>;
   deactivateAll(): Promise<void>;
   countSubmissions(formTemplateId: string): Promise<number>;
+  setLocked(id: string, isLocked: boolean): Promise<FormTemplate | null>;
 }

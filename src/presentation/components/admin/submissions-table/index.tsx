@@ -170,7 +170,7 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
       }
       toast.success(tc("exportedSuccess") || "Exported successfully");
     } catch (err) {
-      toast.error("Export failed");
+      toast.error(tc("exportFailed") || tc("error"));
     }
   };
 

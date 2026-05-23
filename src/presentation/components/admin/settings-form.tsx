@@ -8,11 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { MediaUpload } from "@/presentation/components/client/submission-form/media-upload";
 
 export function SettingsForm() {
   const t = useTranslations("adminSettings");
-  const { settings, isLoading, isSaving, isBackingUp, saveSettings, triggerBackup } = useAdminSettings();
+  const { settings, isLoading, isSaving, isSavingBranding, isBackingUp, saveSettings, saveBranding, triggerBackup } = useAdminSettings();
   const [localState, setLocalState] = useState<SettingsState | null>(null);
+  const [siteName, setSiteName] = useState("");
+  const [siteLogoUrl, setSiteLogoUrl] = useState("");
 
   const [isRestoring, setIsRestoring] = useState(false);
 
@@ -20,13 +23,13 @@ export function SettingsForm() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!confirm("WARNING: This will completely replace the current database with the backup data. This action is destructive and cannot be undone. Are you sure?")) {
+    if (!confirm(t("restoreConfirm"))) {
       e.target.value = "";
       return;
     }
 
     setIsRestoring(true);
-    const toastId = toast.loading("Restoring system from backup...");
+    const toastId = toast.loading(t("restoringToast"));
 
     try {
       const formData = new FormData();
@@ -38,12 +41,12 @@ export function SettingsForm() {
       });
       
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to restore backup");
+      if (!res.ok) throw new Error(data.error || t("restoreFailed"));
 
-      toast.success("System restored successfully! Reloading...", { id: toastId });
+      toast.success(t("restoreSuccess"), { id: toastId });
       setTimeout(() => window.location.reload(), 2000);
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : "Failed to restore backup";
+      const message = e instanceof Error ? e.message : t("restoreFailed");
       toast.error(message, { id: toastId });
     } finally {
       setIsRestoring(false);
@@ -55,6 +58,8 @@ export function SettingsForm() {
     if (settings) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalState(settings);
+      setSiteName(settings.branding?.siteName || "SCCT DAMAGES");
+      setSiteLogoUrl(settings.branding?.siteLogoUrl || "");
     }
   }, [settings]);
 
@@ -198,6 +203,47 @@ export function SettingsForm() {
                 {t("storageCleanupHint")}
               </p>
             </div>
+          </div>
+        </div>
+
+        <div className="space-y-4 pt-6 border-t border-zinc-200 dark:border-zinc-800">
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 pb-2">
+            {t("brandingTitle")}
+          </h3>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="site_name">{t("siteNameLabel")}</Label>
+              <Input
+                id="site_name"
+                type="text"
+                maxLength={100}
+                required
+                placeholder="e.g. SCCT DAMAGES"
+                value={siteName}
+                onChange={(e) => setSiteName(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>{t("siteLogoLabel")}</Label>
+              <MediaUpload
+                type="image"
+                currentUrl={siteLogoUrl || null}
+                onUpload={(url) => setSiteLogoUrl(url)}
+                onRemove={() => setSiteLogoUrl("")}
+                maxFileSize={2}
+                disabled={isSavingBranding}
+              />
+            </div>
+          </div>
+          <div className="pt-2">
+            <Button
+              type="button"
+              disabled={isSavingBranding || !siteName.trim()}
+              onClick={() => saveBranding({ siteName, siteLogoUrl })}
+            >
+              {isSavingBranding ? t("saving") : t("saveButton")}
+            </Button>
           </div>
         </div>
       </div>

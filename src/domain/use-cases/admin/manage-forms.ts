@@ -1,15 +1,23 @@
 import { FormTemplate, CreateFormTemplateInput, UpdateFormTemplateInput } from "@/domain/entities/form-template";
 import { FormTemplateRepository } from "@/domain/repositories/form-template-repository";
+import { DashboardCardRepository } from "@/domain/repositories/dashboard-card-repository";
 
 /**
  * Use cases for admin form template management.
  * Domain layer — orchestrates business logic.
  */
 export class ManageFormsUseCase {
-  constructor(private repo: FormTemplateRepository) {}
+  constructor(
+    private repo: FormTemplateRepository,
+    private cardRepo?: DashboardCardRepository
+  ) {}
 
   async createForm(input: CreateFormTemplateInput): Promise<FormTemplate> {
-    return this.repo.create(input);
+    const form = await this.repo.create(input);
+    if (this.cardRepo) {
+      await this.cardRepo.createForForm(form.id);
+    }
+    return form;
   }
 
   async getForm(id: string): Promise<FormTemplate | null> {
@@ -40,7 +48,21 @@ export class ManageFormsUseCase {
         error: "Cannot delete a form with existing submissions",
       };
     }
+    if (this.cardRepo) {
+      await this.cardRepo.deleteByFormId(id);
+    }
     const deleted = await this.repo.delete(id);
     return { success: deleted };
+  }
+
+  async lockForm(formId: string, isLocked: boolean): Promise<FormTemplate> {
+    if (!formId || typeof formId !== "string" || formId.trim() === "") {
+      throw new Error("Invalid form ID");
+    }
+    const updated = await this.repo.setLocked(formId, isLocked);
+    if (!updated) {
+      throw new Error("Form template not found");
+    }
+    return updated;
   }
 }
