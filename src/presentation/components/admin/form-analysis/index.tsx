@@ -52,7 +52,7 @@ function ComputedStatsCard({ analysis, t }: { analysis: any; t: any }) {
                     {items.map((item: any, idx: number) => (
                       <div key={idx} className="flex justify-between text-xs ps-2 border-s-2 border-indigo-200">
                         <span>{item.topValue}</span>
-                        <span className="text-muted-foreground">{item.count} times</span>
+                        <span className="text-muted-foreground">{item.count} {t("statsTopAnswersTimes")}</span>
                       </div>
                     ))}
                   </div>
@@ -60,7 +60,7 @@ function ComputedStatsCard({ analysis, t }: { analysis: any; t: any }) {
               ))}
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground italic">No data available</p>
+            <p className="text-xs text-muted-foreground italic">{t("statsNoData")}</p>
           )}
         </div>
       </CardContent>

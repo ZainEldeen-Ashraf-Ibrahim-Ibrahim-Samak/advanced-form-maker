@@ -8,7 +8,11 @@
       "PowerShell(cd \"C:\\\\Users\\\\ALFA2023\\\\Desktop\\\\advanced-form-maker\" && pwsh .specify/scripts/powershell/check-prerequisites.ps1 -Json)",
       "Bash(npx tsc *)",
       "Bash(node -e \"console.log\\(require\\('./node_modules/mongoose/package.json'\\).version\\)\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const en = require\\('./src/messages/en.json'\\); const ar = require\\('./src/messages/ar.json'\\); console.log\\('EN formAnalysis:', JSON.stringify\\(en.formAnalysis, null, 2\\)\\); console.log\\('AR formAnalysis:', JSON.stringify\\(ar.formAnalysis, null, 2\\)\\);\")",
+      "Bash(node -e \"const en = require\\('./src/messages/en.json'\\); console.log\\('statsTopAnswersTimes:', en.formAnalysis.statsTopAnswersTimes\\); console.log\\('statsNoData:', en.formAnalysis.statsNoData\\);\")",
+      "Bash(node -e \"const en = require\\('./src/messages/en.json'\\); const keys = Object.keys\\(en.formAnalysis\\); console.log\\(keys.join\\('\\\\n'\\)\\);\")",
+      "Bash(node -e \"const en = require\\('./src/messages/en.json'\\); console.log\\('dashboard.lockedBadge:', en.dashboard?.lockedBadge\\); console.log\\('fields.contactFormLockedBadge:', en.fields?.contactFormLockedBadge\\);\")"
     ]
   }
 }

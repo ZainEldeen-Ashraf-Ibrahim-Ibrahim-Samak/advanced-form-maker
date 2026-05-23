@@ -297,7 +297,7 @@ function SortableCardRow({
               className="h-8 text-xs"
               value={card.metricLabel ?? ""}
               onChange={(e) => onUpdateField(cardId, "metricLabel", e.target.value || null)}
-              placeholder="Submissions"
+              placeholder={t("metricLabelPlaceholder") || "Submissions"}
             />
             <p className="text-[9px] text-muted-foreground leading-snug">{t("helperMetricLabel")}</p>
           </div>
@@ -505,7 +505,7 @@ export function CardManagerDialog({ open, onOpenChange, cards, onSave, onSuggest
                     className="h-8 text-xs"
                     value={newCardEn}
                     onChange={(e) => setNewCardEn(e.target.value)}
-                    placeholder="e.g. Approved"
+                    placeholder={t("newCardEnPlaceholder") || "e.g. Approved"}
                     autoFocus
                   />
                   <p className="text-[9px] text-muted-foreground leading-snug">{t("helperNewCardEn")}</p>
@@ -519,7 +519,7 @@ export function CardManagerDialog({ open, onOpenChange, cards, onSave, onSuggest
                     dir="rtl"
                     value={newCardAr}
                     onChange={(e) => setNewCardAr(e.target.value)}
-                    placeholder="مثال: معتمد"
+                    placeholder={t("newCardArPlaceholder") || "مثال: معتمد"}
                   />
                   <p className="text-[9px] text-muted-foreground leading-snug" dir="rtl">{t("helperNewCardAr")}</p>
                 </div>
@@ -542,7 +542,7 @@ export function CardManagerDialog({ open, onOpenChange, cards, onSave, onSuggest
                     className="h-8 text-xs"
                     value={newCardMetricLabel}
                     onChange={(e) => setNewCardMetricLabel(e.target.value)}
-                    placeholder="e.g. Submissions"
+                    placeholder={t("newCardMetricLabelPlaceholder") || "e.g. Submissions"}
                   />
                   <p className="text-[9px] text-muted-foreground leading-snug">{t("helperMetricLabel")}</p>
                 </div>

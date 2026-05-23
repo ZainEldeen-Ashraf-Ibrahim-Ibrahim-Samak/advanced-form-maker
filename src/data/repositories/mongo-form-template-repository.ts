@@ -134,7 +134,7 @@ export class MongoFormTemplateRepository implements FormTemplateRepository {
   async update(id: string, input: UpdateFormTemplateInput): Promise<FormTemplate | null> {
     try {
       await connectToDatabase();
-      const doc = await FormTemplateModel.findByIdAndUpdate(id, input, { new: true }).lean();
+      const doc = await FormTemplateModel.findByIdAndUpdate(id, { $set: input }, { new: true }).lean();
       await CacheService.invalidateFormCache();
       return doc ? toEntity(doc) : null;
     } catch (error) {

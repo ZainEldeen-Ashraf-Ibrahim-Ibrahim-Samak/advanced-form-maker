@@ -168,7 +168,13 @@
     "helperVisibility": "انقر على أيقونة العين لإظهار أو إخفاء هذه البطاقة من لوحة التحكم.",
     "helperDragReorder": "اسحب مقبض الترتيب لتغيير ترتيب ظهور البطاقات في لوحة التحكم.",
     "helperNewCardEn": "مطلوب. الاسم الإنجليزي للبطاقة المخصصة الجديدة.",
-    "helperNewCardAr": "مطلوب. الاسم العربي للبطاقة المخصصة الجديدة."
+    "helperNewCardAr": "مطلوب. الاسم العربي للبطاقة المخصصة الجديدة.",
+    "lockedBadge": "مغلق",
+    "submissionsLabel": "الطلبات",
+    "metricLabelPlaceholder": "الطلبات",
+    "newCardEnPlaceholder": "مثل: مقبول",
+    "newCardMetricLabelPlaceholder": "مثل: الطلبات",
+    "newCardArPlaceholder": "مثال: معتمد"
   },
   "forms": {
     "title": "قوالب النماذج",
@@ -693,6 +699,8 @@
     "statsTopAnswersLabel": "الإجابات الأكثر تكراراً",
     "exportButton": "تصدير التحليل",
     "noAnalysisYet": "لم يتم تشغيل تحليل الذكاء الاصطناعي بعد",
-    "noDateRange": "لا توجد طلبات بعد"
+    "noDateRange": "لا توجد طلبات بعد",
+    "statsTopAnswersTimes": "مرات",
+    "statsNoData": "لا توجد بيانات"
   }
 }

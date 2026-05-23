@@ -352,29 +352,32 @@ export function FieldBuilder({ formTemplateId }: FieldBuilderProps) {
   }
 
   async function handleSaveContacts() {
-    const normalized = normalizeDraftContactFormFields(contactFormFields).filter((field) => field.id.length > 0);
+    const normalized = normalizeDraftContactFormFields(contactFormFields);
 
-    if (normalized.length < 1 || normalized.length !== normalizedContactFormFields.length) {
+    if (normalized.length < 1) {
       toast.error(t("contactFormMinOneField"));
       return;
     }
+
+    // Capture current lock value synchronously before any await
+    const lockToSave = contactFormLocked;
 
     setIsSavingContacts(true);
     try {
       const res = await fetch(`/api/admin/forms/${formTemplateId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contactFormFields: normalized, contactFormLocked }),
+        body: JSON.stringify({ contactFormFields: normalized, contactFormLocked: lockToSave }),
       });
       const data = await res.json();
       if (!data.success) {
-        throw new Error(data.error || "Failed to save contacts");
+        throw new Error(data.error || "Failed to save");
       }
-      setContactFormFields(normalized);
       setSavedContactFormFields(normalized);
-      setSavedContactFormLocked(contactFormLocked);
+      setSavedContactFormLocked(lockToSave);
       toast.success(tc("success"));
     } catch (error) {
+      console.error("[contact form save]", error);
       toast.error(error instanceof Error ? error.message : tc("error"));
     } finally {
       setIsSavingContacts(false);

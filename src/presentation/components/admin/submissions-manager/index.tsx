@@ -103,6 +103,13 @@ export function SubmissionsManager() {
     return acc;
   }, {});
 
+  const contactFormLockedByFormId = cards.reduce<Record<string, boolean>>((acc, card) => {
+    if (card.cardType === "form") {
+      acc[card.formTemplateId] = card.contactFormLocked;
+    }
+    return acc;
+  }, {});
+
   useEffect(() => {
     // In a real app, search might be a separate API param. 
     // For now we use the existing fetchSubmissions which might only filter by status.
@@ -207,7 +214,7 @@ export function SubmissionsManager() {
             {t("aiAnalysis")}
           </Button>
           <Button variant="outline" size="sm" onClick={() => setIsCardManagerOpen(true)}>
-            {td("manageCards") || "Manage Cards"}
+            {td("manageCards")}
           </Button>
         </div>
       </div>
@@ -270,7 +277,7 @@ export function SubmissionsManager() {
                         <span className="truncate">{title}</span>
                         {card.isLocked && (
                           <Badge variant="destructive" className="text-[10px] shrink-0">
-                            {locale === "ar" ? "مغلق" : "Locked"}
+                            {td("lockedBadge")}
                           </Badge>
                         )}
                       </CardTitle>
@@ -284,7 +291,7 @@ export function SubmissionsManager() {
                       </div>
                       {(card.metricLabel || card.metricValue !== null) && (
                         <p className="text-xs text-muted-foreground mt-1">
-                          {card.metricLabel ?? (locale === "ar" ? "الطلب" : "Submission")}
+                          {card.metricLabel ?? td("submissionsLabel")}
                         </p>
                       )}
                     </CardContent>
@@ -356,13 +363,14 @@ export function SubmissionsManager() {
       </div>
 
       <div className={expandId ? "ring-2 ring-primary ring-offset-4 rounded-lg" : ""}>
-        <SubmissionsTable 
-          submissions={filteredSubmissions} 
-          isLoading={isLoading} 
+        <SubmissionsTable
+          submissions={filteredSubmissions}
+          isLoading={isLoading}
           onDelete={deleteSubmission}
           onRefresh={() => fetchSubmissions(page, statusFilter, adminFilter, formFilter)}
           formNamesById={formNameById}
           formName={formFilter !== "all" ? formNameById[formFilter] : undefined}
+          contactFormLockedByFormId={contactFormLockedByFormId}
         />
       </div>
 

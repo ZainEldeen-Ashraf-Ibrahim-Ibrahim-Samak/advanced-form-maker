@@ -23,9 +23,10 @@ interface SubmissionsTableProps {
   onRefresh: () => void;
   formNamesById?: Record<string, string>;
   formName?: string;
+  contactFormLockedByFormId?: Record<string, boolean>;
 }
 
-export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, formNamesById = {}, formName }: SubmissionsTableProps) {
+export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, formNamesById = {}, formName, contactFormLockedByFormId = {} }: SubmissionsTableProps) {
   const t = useTranslations("submissions");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -36,6 +37,10 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
   };
 
   const getContactSummary = (submission: Submission) => {
+    if (contactFormLockedByFormId[submission.formTemplateId]) {
+      return { email: null, phone: null, address: null };
+    }
+
     const fromContactRecords = submission.contactRecords.find((record) => {
       return (
         normalizeContactValue(record.email) ||

@@ -36,6 +36,7 @@ export function SubmissionReview({ id }: SubmissionReviewProps) {
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [values, setValues] = useState<FieldValue[]>([]);
   const [contactFields, setContactFields] = useState<ContactFormField[]>([]);
+  const [contactFormLocked, setContactFormLocked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [rewriteComment, setRewriteComment] = useState("");
@@ -52,6 +53,7 @@ export function SubmissionReview({ id }: SubmissionReviewProps) {
            if (json.data.formTemplate?.contactFormFields) {
              setContactFields([...json.data.formTemplate.contactFormFields].sort((a: any, b: any) => a.sortOrder - b.sortOrder));
            }
+           setContactFormLocked(!!json.data.formTemplate?.contactFormLocked);
            // Auto mark as viewed if pending
            if (json.data.submission.status === "pending") {
               await updateStatus(json.data.submission.id, "viewed");
@@ -171,6 +173,7 @@ export function SubmissionReview({ id }: SubmissionReviewProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-8">
+                {!contactFormLocked && (
                 <div className="space-y-3">
                   <Label className="text-base font-semibold text-foreground/80">{t("contactRecords")}</Label>
                   {submission.contactRecords.length > 0 ? (
@@ -310,6 +313,7 @@ export function SubmissionReview({ id }: SubmissionReviewProps) {
                     <p className="text-muted-foreground italic text-sm">{t("noContactInfoProvided")}</p>
                   )}
                 </div>
+                )}
 
                 {submission.formSnapshot.map((field) => {
                   const val = values.find(v => v.fieldDefinitionId === field.id);

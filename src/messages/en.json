@@ -168,7 +168,13 @@
     "helperVisibility": "Toggle the eye icon to show or hide this card on the dashboard.",
     "helperDragReorder": "Drag the grip handle to change the order cards appear on the dashboard.",
     "helperNewCardEn": "Required. The English name for your new custom card.",
-    "helperNewCardAr": "مطلوب. الاسم العربي للبطاقة المخصصة الجديدة."
+    "helperNewCardAr": "مطلوب. الاسم العربي للبطاقة المخصصة الجديدة.",
+    "lockedBadge": "Locked",
+    "submissionsLabel": "Submissions",
+    "metricLabelPlaceholder": "Submissions",
+    "newCardEnPlaceholder": "e.g. Approved",
+    "newCardMetricLabelPlaceholder": "e.g. Submissions",
+    "newCardArPlaceholder": "e.g. Approved"
   },
   "forms": {
     "title": "Form Templates",
@@ -694,6 +700,8 @@
     "statsTopAnswersLabel": "Top Answers",
     "exportButton": "Export Analysis",
     "noAnalysisYet": "No AI analysis has been run yet",
-    "noDateRange": "No submissions yet"
+    "noDateRange": "No submissions yet",
+    "statsTopAnswersTimes": "times",
+    "statsNoData": "No data available"
   }
 }

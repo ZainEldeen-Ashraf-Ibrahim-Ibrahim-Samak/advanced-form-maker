@@ -61,6 +61,13 @@ export function AdminDashboard() {
     return acc;
   }, {});
 
+  const contactFormLockedByFormId = cards.reduce<Record<string, boolean>>((acc, card) => {
+    if (card.cardType === "form") {
+      acc[card.formTemplateId] = card.contactFormLocked;
+    }
+    return acc;
+  }, {});
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
@@ -129,9 +136,9 @@ export function AdminDashboard() {
       {/* Cards Config Manager Dialog Trigger */}
       {!isLoadingCards && cards.length > 0 && (
         <div className="flex items-center justify-between border-b pb-2">
-          <h3 className="text-lg font-semibold">{t("formSummariesTitle") || "Form Summaries"}</h3>
+          <h3 className="text-lg font-semibold">{t("formSummariesTitle")}</h3>
           <Button variant="outline" size="sm" onClick={() => setIsEditDialogOpen(true)}>
-            {t("manageCards") || "Manage Cards"}
+            {t("manageCards")}
           </Button>
           <CardManagerDialog
             open={isEditDialogOpen}
@@ -185,7 +192,7 @@ export function AdminDashboard() {
                         <span className="truncate">{title}</span>
                         {card.isLocked && (
                           <Badge variant="destructive" className="text-[10px] shrink-0">
-                            {locale === "ar" ? "مغلق" : "Locked"}
+                            {t("lockedBadge")}
                           </Badge>
                         )}
                       </CardTitle>
@@ -199,7 +206,7 @@ export function AdminDashboard() {
                       </div>
                       {(card.metricLabel || card.metricValue !== null) && (
                         <p className="text-xs text-muted-foreground mt-1">
-                          {card.metricLabel ?? (locale === "ar" ? "الطلبات" : "Submissions")}
+                          {card.metricLabel ?? t("submissionsLabel")}
                         </p>
                       )}
                     </CardContent>
@@ -290,12 +297,13 @@ export function AdminDashboard() {
       </div>
 
       <SubmissionsTable 
-        submissions={submissions} 
-        isLoading={isLoading} 
+        submissions={submissions}
+        isLoading={isLoading}
         onDelete={deleteSubmission}
-        onRefresh={() => fetchSubmissions(page, statusFilter)} 
+        onRefresh={() => fetchSubmissions(page, statusFilter)}
         formNamesById={formNamesById}
         formName="all-forms"
+        contactFormLockedByFormId={contactFormLockedByFormId}
       />
 
       {totalPages > 1 && (
