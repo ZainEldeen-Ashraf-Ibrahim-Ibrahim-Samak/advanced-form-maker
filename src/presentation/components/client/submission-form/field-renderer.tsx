@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MediaUpload } from "./media-upload";
 import type { FieldDefinition } from "@/domain/entities/field-definition";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Sparkles } from "lucide-react";
 import EmailRegix from "@/components/validation/EmailRegix";
 import PhoneRegix from "@/components/validation/PhoneRegix";
 import NameRegix from "@/components/validation/NameRegix";
@@ -25,7 +25,9 @@ interface FieldRendererProps {
   onChangeMediaItems?: (items: { url: string; publicId: string }[]) => void;
   hasError?: boolean;
   disabled?: boolean;
+  isAutoFilled?: boolean;
 }
+
 
 function normalizeTextLikeValue(raw: unknown): string {
   if (typeof raw === "string") return raw;
@@ -76,10 +78,29 @@ export function FieldRenderer({
   onChangeMediaItems,
   hasError = false,
   disabled = false,
+  isAutoFilled = false,
 }: FieldRendererProps) {
   const locale = useLocale();
   const tc = useTranslations("common");
+  const tAi = useTranslations("aiExtraction");
   const hasInitializedDateRef = useRef(false);
+
+  const controlWrapper = (children: React.ReactNode) => {
+    if (!isAutoFilled) return children;
+    return (
+      <div className="relative group/ai">
+        {children}
+        <div
+          className="absolute -top-2.5 end-2 z-10 flex items-center gap-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full shadow-sm select-none"
+          title={tAi("autoFilledBadge") || "Auto-filled by AI"}
+        >
+          <Sparkles className="h-2.5 w-2.5 animate-pulse" />
+          <span>{tAi("autoFilledBadge")}</span>
+        </div>
+      </div>
+    );
+  };
+
 
   useEffect(() => {
     if (!disabled && field.inputType === "date" && !hasInitializedDateRef.current) {
@@ -136,7 +157,27 @@ export function FieldRenderer({
         return (
           <div className="space-y-1">
             {renderLabel(field.id)}
-            <Textarea
+            {controlWrapper(
+              <Textarea
+                id={field.id}
+                value={textValue}
+                onChange={(e) => onChangeValue(e.target.value)}
+                placeholder={displayName}
+                required={isRequired}
+                minLength={minLength}
+                maxLength={maxLength}
+                disabled={disabled}
+                className={`${hasError ? "border-destructive focus-visible:ring-destructive" : ""} ${isAutoFilled ? "border-primary/50 focus-visible:ring-primary/50 ring-1 ring-primary/20" : ""}`}
+              />
+            )}
+          </div>
+        );
+      }
+      return (
+        <div className="space-y-1">
+          {renderLabel(field.id)}
+          {controlWrapper(
+            <Input
               id={field.id}
               value={textValue}
               onChange={(e) => onChangeValue(e.target.value)}
@@ -145,25 +186,9 @@ export function FieldRenderer({
               minLength={minLength}
               maxLength={maxLength}
               disabled={disabled}
-              className={hasError ? "border-destructive focus-visible:ring-destructive" : ""}
+              className={`${hasError ? "border-destructive focus-visible:ring-destructive" : ""} ${isAutoFilled ? "border-primary/50 focus-visible:ring-primary/50 ring-1 ring-primary/20" : ""}`}
             />
-          </div>
-        );
-      }
-      return (
-        <div className="space-y-1">
-          {renderLabel(field.id)}
-          <Input
-            id={field.id}
-            value={textValue}
-            onChange={(e) => onChangeValue(e.target.value)}
-            placeholder={displayName}
-            required={isRequired}
-            minLength={minLength}
-            maxLength={maxLength}
-            disabled={disabled}
-            className={hasError ? "border-destructive focus-visible:ring-destructive" : ""}
-          />
+          )}
           {field.validationRules?.regexType === 'email' && (
             <EmailRegix email={textValue} showTypoSuggestions={true} />
           )}
@@ -194,24 +219,26 @@ export function FieldRenderer({
       return (
         <div className="space-y-1">
           {renderLabel(field.id)}
-          <Input
-            id={field.id}
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={numberValue}
-            onChange={(e) => {
-              const val = e.target.value;
-              // Allow only digits to simulate number input but preserve leading zeros
-              if (val === "" || /^[0-9]*$/.test(val)) {
-                onChangeValue(val || null);
-              }
-            }}
-            placeholder={"0"}
-            required={isRequired}
-            disabled={disabled}
-            className={hasError ? "border-destructive focus-visible:ring-destructive" : ""}
-          />
+          {controlWrapper(
+            <Input
+              id={field.id}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={numberValue}
+              onChange={(e) => {
+                const val = e.target.value;
+                // Allow only digits to simulate number input but preserve leading zeros
+                if (val === "" || /^[0-9]*$/.test(val)) {
+                  onChangeValue(val || null);
+                }
+              }}
+              placeholder={"0"}
+              required={isRequired}
+              disabled={disabled}
+              className={`${hasError ? "border-destructive focus-visible:ring-destructive" : ""} ${isAutoFilled ? "border-primary/50 focus-visible:ring-primary/50 ring-1 ring-primary/20" : ""}`}
+            />
+          )}
         </div>
       );
 
@@ -232,15 +259,17 @@ export function FieldRenderer({
       return (
         <div className="space-y-1">
           {renderLabel(field.id)}
-          <Input
-            id={field.id}
-            type="date"
-            value={dateValue}
-            onChange={(e) => onChangeValue(e.target.value)}
-            required={isRequired}
-            disabled={disabled}
-            className={hasError ? "border-destructive focus-visible:ring-destructive" : ""}
-          />
+          {controlWrapper(
+            <Input
+              id={field.id}
+              type="date"
+              value={dateValue}
+              onChange={(e) => onChangeValue(e.target.value)}
+              required={isRequired}
+              disabled={disabled}
+              className={`${hasError ? "border-destructive focus-visible:ring-destructive" : ""} ${isAutoFilled ? "border-primary/50 focus-visible:ring-primary/50 ring-1 ring-primary/20" : ""}`}
+            />
+          )}
         </div>
       );
 
@@ -287,18 +316,20 @@ export function FieldRenderer({
         return (
           <div className="space-y-2">
             {renderLabel(field.id)}
-            <Select value="" onValueChange={handleAdd} disabled={disabled}>
-              <SelectTrigger id={field.id} className={hasError ? "border-destructive ring-destructive" : ""}>
-                <SelectValue placeholder={tc("optional")} />
-              </SelectTrigger>
-              <SelectContent>
-                {options.map((opt, i) => (
-                  <SelectItem key={i} value={opt} disabled={selectedValues.includes(opt)}>
-                    {opt}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {controlWrapper(
+              <Select value="" onValueChange={handleAdd} disabled={disabled}>
+                <SelectTrigger id={field.id} className={`${hasError ? "border-destructive ring-destructive" : ""} ${isAutoFilled ? "border-primary/50 ring-1 ring-primary/20" : ""}`}>
+                  <SelectValue placeholder={tc("optional")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {options.map((opt, i) => (
+                    <SelectItem key={i} value={opt} disabled={selectedValues.includes(opt)}>
+                      {opt}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
 
             <div className="flex flex-wrap gap-2">
               {selectedValues.map((item) => (
@@ -326,27 +357,30 @@ export function FieldRenderer({
       return (
         <div className="space-y-1">
           {renderLabel(field.id)}
-          <Select
-            value={dropdownValue}
-            onValueChange={(val) => onChangeValue(val)}
-            disabled={disabled}
-          >
-            <SelectTrigger
-              id={field.id}
-              className={hasError ? "border-destructive ring-destructive" : ""}
+          {controlWrapper(
+            <Select
+              value={dropdownValue}
+              onValueChange={(val) => onChangeValue(val)}
+              disabled={disabled}
             >
-              <SelectValue placeholder={tc("optional")} />
-            </SelectTrigger>
-            <SelectContent>
-              {options.map((opt, i) => (
-                <SelectItem key={i} value={opt}>
-                  {opt}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+              <SelectTrigger
+                id={field.id}
+                className={`${hasError ? "border-destructive ring-destructive" : ""} ${isAutoFilled ? "border-primary/50 ring-1 ring-primary/20" : ""}`}
+              >
+                <SelectValue placeholder={tc("optional")} />
+              </SelectTrigger>
+              <SelectContent>
+                {options.map((opt, i) => (
+                  <SelectItem key={i} value={opt}>
+                    {opt}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       );
+
 
     case "image":
     case "file":

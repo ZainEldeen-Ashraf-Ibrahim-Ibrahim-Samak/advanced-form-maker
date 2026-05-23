@@ -50,6 +50,7 @@ function toEntity(doc: Record<string, unknown>): FormTemplate {
     contactRecords,
     contactFormFields,
     isActive: doc.isActive as boolean,
+    aiAutoFillEnabled: !!doc.aiAutoFillEnabled,
     createdAt: doc.createdAt as Date,
     updatedAt: doc.updatedAt as Date,
   };
@@ -64,6 +65,7 @@ export class MongoFormTemplateRepository implements FormTemplateRepository {
         description: input.description ?? "",
         contactRecords: [{ id: "primary", name: "Primary Contact", email: "", phone: "", role: "", notes: "" }],
         isActive: true,
+        aiAutoFillEnabled: input.aiAutoFillEnabled ?? false,
       });
       await CacheService.invalidateFormCache();
       return toEntity(doc.toObject() as unknown as Record<string, unknown>);

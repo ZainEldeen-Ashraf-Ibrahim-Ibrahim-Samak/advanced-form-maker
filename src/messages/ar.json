@@ -346,6 +346,31 @@
     "toastSubmissionNeedsRevision": "طلبك يحتاج إلى تعديل",
     "toastResubmissionRequested": "تم إرسال طلب إعادة التقديم"
   },
+  "aiExtraction": {
+    "uploadTitle": "ملء تلقائي بالذكاء الاصطناعي",
+    "uploadDescription": "ارفع صورة لمستندك (مثل الهوية الشخصية، جواز السفر) لملء النموذج تلقائياً.",
+    "uploadButton": "رفع صورة المستند",
+    "analyzing": "جارٍ تحليل المستند...",
+    "extractionSuccess": "تم تحليل المستند بنجاح!",
+    "extractionPartial": "تعذر مطابقة بعض الحقول. يرجى مراجعة وتعبئة الحقول المفقودة يدوياً.",
+    "extractionFailed": "فشل تحليل المستند. يمكنك إعادة المحاولة أو تعبئة النموذج يدوياً.",
+    "timeout": "انتهت مهلة الطلب. يرجى المحاولة مرة أخرى.",
+    "retry": "إعادة المحاولة",
+    "continueManually": "المتابعة يدوياً",
+    "autoFilledBadge": "ذكاء اصطناعي",
+    "overwriteConfirm": "هل ترغب في استبدال القيم الحالية؟",
+    "overwriteConfirmTitle": "استبدال القيم الحالية؟",
+    "overwriteConfirmDescription": "يحتوي المستند على قيم تختلف عن المدخلة حالياً في النموذج. هل تريد استبدال مدخلاتك الحالية بالبيانات المستخرجة؟",
+    "overwriteCancel": "الاحتفاظ بالقيم الحالية",
+    "overwriteConfirmButton": "استبدال القيم",
+    "noMatchingFields": "لم يتم العثور على حقول متطابقة في المستند.",
+    "invalidImage": "ملف الصورة غير صالح.",
+    "fileTooLarge": "حجم ملف الصورة كبير جداً (الحد الأقصى 10 ميغابايت).",
+    "notADocument": "لم يتم الكشف عن مستند واضح في الصورة.",
+    "fieldsFilled": "تم ملء {count} حقول",
+    "fieldsNotFilled": "متبقي {count} حقول",
+    "enableAiAutoFill": "تمكين الملء التلقائي بالذكاء الاصطناعي"
+  },
   "user": {
     "submission": {
       "title": "نموذج تقديم البيانات",

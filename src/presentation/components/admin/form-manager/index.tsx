@@ -18,11 +18,13 @@ import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { useLocale } from "next-intl";
 import { useRef } from "react";
+import { Switch } from "@/components/ui/switch";
 
 export function FormManager() {
   const tc = useTranslations("common");
   const t = useTranslations("forms");
   const ts = useTranslations("sharing");
+  const tAi = useTranslations("aiExtraction");
   const locale = useLocale();
   const { forms, isLoading, createForm, updateForm, deleteForm } = useFormManager();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -35,6 +37,7 @@ export function FormManager() {
   const [editingFormId, setEditingFormId] = useState<string | null>(null);
   const [editFormName, setEditFormName] = useState("");
   const [editFormDesc, setEditFormDesc] = useState("");
+  const [editFormAiAutoFillEnabled, setEditFormAiAutoFillEnabled] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   // Share Dialog State
@@ -64,6 +67,7 @@ export function FormManager() {
     setEditingFormId(form.id);
     setEditFormName(form.name);
     setEditFormDesc(form.description || "");
+    setEditFormAiAutoFillEnabled(form.aiAutoFillEnabled || false);
     setIsEditOpen(true);
   }
 
@@ -74,6 +78,7 @@ export function FormManager() {
       await updateForm(editingFormId, {
         name: editFormName.trim(),
         description: editFormDesc.trim(),
+        aiAutoFillEnabled: editFormAiAutoFillEnabled,
       });
       setIsEditOpen(false);
       setEditingFormId(null);
@@ -312,6 +317,23 @@ export function FormManager() {
                 value={editFormDesc}
                 onChange={(e) => setEditFormDesc(e.target.value)}
                 placeholder={t("formDescription")}
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-zinc-200 dark:border-zinc-800 p-3 shadow-sm bg-zinc-50/50 dark:bg-zinc-900/50">
+              <div className="space-y-0.5 max-w-[80%]">
+                <Label htmlFor="edit-form-ai" className="text-sm font-semibold cursor-pointer">
+                  {tAi("enableAiAutoFill")}
+                </Label>
+                <p className="text-[11px] text-muted-foreground leading-normal">
+                  {locale === "ar"
+                    ? "ملء حقول التواصل والبيانات المخصصة تلقائياً من صورة مستند يتم تحميلها."
+                    : "Automatically fill contact info and custom fields using uploaded document photos."}
+                </p>
+              </div>
+              <Switch
+                id="edit-form-ai"
+                checked={editFormAiAutoFillEnabled}
+                onCheckedChange={setEditFormAiAutoFillEnabled}
               />
             </div>
             <Button

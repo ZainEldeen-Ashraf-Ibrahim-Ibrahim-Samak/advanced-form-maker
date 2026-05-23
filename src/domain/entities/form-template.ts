@@ -34,14 +34,17 @@ export interface FormTemplate {
   }>;
   contactFormFields: ContactFormField[];
   isActive: boolean;
+  aiAutoFillEnabled: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export type CreateFormTemplateInput = Pick<FormTemplate, "name"> & {
   description?: string;
+  aiAutoFillEnabled?: boolean;
 };
 
 export type UpdateFormTemplateInput = Partial<
-  Pick<FormTemplate, "name" | "description" | "isActive" | "contactRecords" | "contactFormFields">
+  Pick<FormTemplate, "name" | "description" | "isActive" | "contactRecords" | "contactFormFields" | "aiAutoFillEnabled">
 >;
+

@@ -26,9 +26,11 @@ export interface IFormTemplate extends Document {
     sortOrder: number;
   }>;
   isActive: boolean;
+  aiAutoFillEnabled: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
+
 
 const contactRecordSchema = new Schema(
   {
@@ -88,6 +90,10 @@ const formTemplateSchema = new Schema<IFormTemplate>(
       type: Boolean,
       default: true,
       index: true,
+    },
+    aiAutoFillEnabled: {
+      type: Boolean,
+      default: false,
     },
   },
   {

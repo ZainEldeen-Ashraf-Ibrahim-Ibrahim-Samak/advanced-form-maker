@@ -246,7 +246,9 @@ interface UseSubmissionReturn {
   clearDroppedFieldWarning: () => void;
   /** True briefly after an SSE status change is received — allows the UI to animate */
   statusChangedLive: boolean;
+  aiAutoFillEnabled: boolean;
 }
+
 
 export function useSubmission(tokenOrId: string): UseSubmissionReturn {
   const locale = useLocale();
@@ -267,6 +269,8 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
   const [contactFormFields, setContactFormFields] = useState<ContactFormField[]>(DEFAULT_CONTACT_FORM_FIELDS);
   const [droppedFieldIds, setDroppedFieldIds] = useState<string[]>([]);
   const [statusChangedLive, setStatusChangedLive] = useState(false);
+  const [aiAutoFillEnabled, setAiAutoFillEnabled] = useState(false);
+
 
   const { draft, updateDraft, clearDraft, isLoaded: draftLoaded } = useDraftAutosave<DraftState>(
     `scct_draft_${tokenOrId}`,
@@ -433,6 +437,7 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
         setFormDescription(data.formTemplate?.description || "");
         setFields(data.fields || []);
         setContactFormFields(normalizeContactFormFields(data.formTemplate?.contactFormFields));
+        setAiAutoFillEnabled(!!data.formTemplate?.aiAutoFillEnabled);
         formVersionRef.current = nextFormVersion;
         
         if (!hasDraftData) {
@@ -453,6 +458,7 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
         setValues(data.values || []);
         setFields(data.fields || []);
         setContactFormFields(normalizeContactFormFields(data.formTemplate?.contactFormFields));
+        setAiAutoFillEnabled(!!data.formTemplate?.aiAutoFillEnabled);
 
         // Existing submissions should reflect DB state after reload/admin updates.
         // Keep local draft only while user is actively editing and there is meaningful draft content.
@@ -784,5 +790,6 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
     droppedFieldIds,
     clearDroppedFieldWarning,
     statusChangedLive,
+    aiAutoFillEnabled,
   };
 }

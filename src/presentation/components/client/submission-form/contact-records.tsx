@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Check, AlertCircle } from "lucide-react";
+import { Check, AlertCircle, Sparkles } from "lucide-react";
 import EmailRegix from "@/components/validation/EmailRegix";
 import PhoneRegix from "@/components/validation/PhoneRegix";
 import NameRegix from "@/components/validation/NameRegix";
@@ -18,7 +18,9 @@ interface ContactRecordsProps {
   disabled?: boolean;
   showValidation?: boolean;
   onUpdate: (id: string, patch: Partial<Omit<ContactRecordDraft, "id">>) => void;
+  autoFilledKeys?: Set<string>;
 }
+
 
 export function ContactRecords({
   formFields,
@@ -26,10 +28,29 @@ export function ContactRecords({
   disabled = false,
   showValidation = false,
   onUpdate,
+  autoFilledKeys = new Set(),
 }: ContactRecordsProps) {
   const t = useTranslations("client");
   const tv = useTranslations("VALIDATION");
+  const tAi = useTranslations("aiExtraction");
   const locale = useLocale();
+
+  const controlWrapper = (fieldKey: string, children: React.ReactNode) => {
+    if (!autoFilledKeys.has(fieldKey)) return children;
+    return (
+      <div className="relative group/ai">
+        {children}
+        <div
+          className="absolute -top-2.5 end-2 z-10 flex items-center gap-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full shadow-sm select-none"
+          title={tAi("autoFilledBadge") || "Auto-filled by AI"}
+        >
+          <Sparkles className="h-2.5 w-2.5 animate-pulse" />
+          <span>{tAi("autoFilledBadge")}</span>
+        </div>
+      </div>
+    );
+  };
+
 
   const contactRecord = useMemo<ContactRecordDraft>(() => {
     if (records.length > 0) return records[0];
@@ -143,15 +164,19 @@ export function ContactRecords({
                 {field.required && <span className="text-destructive">*</span>}
               </Label>
 
-              <Input
-                id={`contact-${field.key}-${field.id}`}
-                type={getInputType(field)}
-                value={fieldValue}
-                onChange={(e) => updateFieldValue(field, e.target.value)}
-                placeholder={getLocalizedPlaceholder(field)}
-                disabled={disabled}
-                required={field.required}
-              />
+              {controlWrapper(
+                field.key,
+                <Input
+                  id={`contact-${field.key}-${field.id}`}
+                  type={getInputType(field)}
+                  value={fieldValue}
+                  onChange={(e) => updateFieldValue(field, e.target.value)}
+                  placeholder={getLocalizedPlaceholder(field)}
+                  disabled={disabled}
+                  required={field.required}
+                  className={autoFilledKeys.has(field.key) ? "border-primary/50 focus-visible:ring-primary/50 ring-1 ring-primary/20" : ""}
+                />
+              )}
 
               {!disabled && field.key === "email" && (
                 <EmailRegix email={fieldValue} showTypoSuggestions={true} />

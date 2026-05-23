@@ -29,8 +29,7 @@ export function SubmissionReview({ id }: SubmissionReviewProps) {
   const tClient = useTranslations("client");
   const locale = useLocale();
   const router = useRouter();
-  const submissionDataTitle =
-    locale === "ar" ? "بيانات الطلب" : "Submission Data";
+  const submissionDataTitle = t("submissionData");
   
   const { updateStatus } = useSubmissionsList();
   

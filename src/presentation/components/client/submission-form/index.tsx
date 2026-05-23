@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useState, useMemo } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { useSubmission } from "@/presentation/view-models/use-submission";
 import { FieldRenderer } from "./field-renderer";
 import { ContactRecords } from "./contact-records";
@@ -11,6 +11,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, CheckCircle2, Loader2, Send } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EMAIL_REGEX, PHONE_REGEX, NAME_REGEX, TEXT_REGEX } from "@/constants/constants";
+import { useAiExtraction } from "@/presentation/view-models/use-ai-extraction";
+import { AiPhotoUpload } from "./ai-photo-upload";
+import { AiExtractionSummary } from "./ai-extraction-summary";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 interface SubmissionFormProps {
   tokenOrId: string;
@@ -20,6 +33,9 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
   const t = useTranslations("client");
   const tc = useTranslations("common");
   const te = useTranslations("errors");
+  const locale = useLocale() as "en" | "ar";
+  const tAi = useTranslations("aiExtraction");
+
   const {
     isNew,
     isLoading,
@@ -41,7 +57,66 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
     droppedFieldIds,
     clearDroppedFieldWarning,
     statusChangedLive,
+    aiAutoFillEnabled,
   } = useSubmission(tokenOrId);
+
+  const currentFieldValues = useMemo(() => {
+    const res: Record<string, string | number | null> = {};
+    fields.forEach((f) => {
+      const fd = formData[f.id];
+      if (fd) {
+        if (Array.isArray(fd.value)) {
+          res[f.id] = fd.value as any;
+        } else {
+          res[f.id] = fd.value ?? null;
+        }
+      } else {
+        res[f.id] = null;
+      }
+    });
+    return res;
+  }, [fields, formData]);
+
+  const currentContactValues = useMemo(() => {
+    const primary = contactRecords[0] || {};
+    return {
+      name: primary.name || "",
+      email: primary.email || "",
+      phone: primary.phone || "",
+      address: primary.address || "",
+    };
+  }, [contactRecords]);
+
+  const {
+    isExtracting,
+    stage: aiStage,
+    elapsedSeconds: aiElapsedSeconds,
+    error: aiError,
+    warning: aiWarning,
+    autoFilledFieldIds,
+    autoFilledKeys,
+    showOverwriteConfirm,
+    retryCount: aiRetryCount,
+    handleExtractFromPhoto,
+    retryExtraction,
+    confirmOverwrite,
+    clearAutoFillIndicator,
+    clearAutoFillContactIndicator,
+    resetState: resetAiState,
+  } = useAiExtraction({
+    fieldDefinitions: fields,
+    contactFormFields,
+    currentFieldValues,
+    currentContactValues,
+    onApplyField: (fieldId, val) => {
+      setFieldValue(fieldId, val);
+    },
+    onApplyContact: (key, val) => {
+      const primary = contactRecords[0] || { id: "fallback_contact_record" };
+      updateContactRecord(primary.id, { [key]: val });
+    },
+    locale,
+  });
 
   const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
 
@@ -283,50 +358,82 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
 
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-8">
+            {aiAutoFillEnabled && (
+              <div className="space-y-4">
+                <AiPhotoUpload
+                  onFileSelected={handleExtractFromPhoto}
+                  isExtracting={isExtracting}
+                  stage={aiStage}
+                  elapsedSeconds={aiElapsedSeconds}
+                  disabled={isViewOnly}
+                  locale={locale}
+                />
+                <AiExtractionSummary
+                  stage={aiStage}
+                  autoFilledFieldIds={autoFilledFieldIds}
+                  autoFilledKeys={autoFilledKeys}
+                  error={aiError}
+                  warning={aiWarning}
+                  onRetry={retryExtraction}
+                  onContinueManually={resetAiState}
+                  fieldDefinitions={fields}
+                  contactFormFields={contactFormFields}
+                  retryCount={aiRetryCount}
+                  locale={locale}
+                />
+              </div>
+            )}
+
             <ContactRecords
               formFields={contactFormFields}
               records={contactRecords}
               disabled={isViewOnly || isSubmitting}
               showValidation={!!validationErrors.contactRecords}
+              autoFilledKeys={autoFilledKeys}
               onUpdate={(id, patch) => {
                 updateContactRecord(id, patch);
+                Object.keys(patch).forEach((key) => {
+                  clearAutoFillContactIndicator(key);
+                });
                 if (validationErrors.contactRecords) {
                   setValidationErrors((prev) => ({ ...prev, contactRecords: false }));
                 }
               }}
             />
 
-              <div className="space-y-6">
-                {fields.map((field) => {
-                   const currentVal = formData[field.id];
-                   return (
-                     <div key={field.id} className="p-1">
-                       <FieldRenderer
-                          field={field}
-                          value={currentVal?.value}
-                          mediaUrl={currentVal?.mediaUrl}
-                          mediaPublicId={currentVal?.mediaPublicId}
-                          mediaItems={currentVal?.mediaItems}
-                          onChangeValue={(v) => {
-                             setFieldValue(field.id, v);
-                             if (validationErrors[field.id]) setValidationErrors(prev => ({ ...prev, [field.id]: false }));
-                          }}
-                          onChangeMedia={(url, pid) => {
-                             setMediaValue(field.id, url, pid);
-                             if (validationErrors[field.id]) setValidationErrors(prev => ({ ...prev, [field.id]: false }));
-                          }}
-                          onChangeMediaItems={(items) => {
-                             setMediaItems(field.id, items);
-                             if (validationErrors[field.id]) setValidationErrors(prev => ({ ...prev, [field.id]: false }));
-                          }}
-                          hasError={validationErrors[field.id]}
-                          disabled={isViewOnly}
-                        />
-                     </div>
-                   );
-                })}
-              </div>
-            </CardContent>
+            <div className="space-y-6">
+              {fields.map((field) => {
+                const currentVal = formData[field.id];
+                return (
+                  <div key={field.id} className="p-1">
+                    <FieldRenderer
+                      field={field}
+                      value={currentVal?.value}
+                      mediaUrl={currentVal?.mediaUrl}
+                      mediaPublicId={currentVal?.mediaPublicId}
+                      mediaItems={currentVal?.mediaItems}
+                      isAutoFilled={autoFilledFieldIds.has(field.id)}
+                      onChangeValue={(v) => {
+                        setFieldValue(field.id, v);
+                        clearAutoFillIndicator(field.id);
+                        if (validationErrors[field.id]) setValidationErrors(prev => ({ ...prev, [field.id]: false }));
+                      }}
+                      onChangeMedia={(url, pid) => {
+                        setMediaValue(field.id, url, pid);
+                        if (validationErrors[field.id]) setValidationErrors(prev => ({ ...prev, [field.id]: false }));
+                      }}
+                      onChangeMediaItems={(items) => {
+                        setMediaItems(field.id, items);
+                        if (validationErrors[field.id]) setValidationErrors(prev => ({ ...prev, [field.id]: false }));
+                      }}
+                      hasError={validationErrors[field.id]}
+                      disabled={isViewOnly}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
 
             {error && error !== "not_found" && (
               <div className="px-6 pb-2">
@@ -350,6 +457,21 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
             )}
         </form>
       </Card>
+
+      <AlertDialog open={showOverwriteConfirm} onOpenChange={(open) => { if (!open) confirmOverwrite(false); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tAi("overwriteConfirmTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {tAi("overwriteConfirmDescription")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => confirmOverwrite(false)}>{tAi("overwriteCancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => confirmOverwrite(true)}>{tAi("overwriteConfirmButton")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

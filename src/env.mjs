@@ -15,6 +15,7 @@ export const env = createEnv({
     CLOUDINARY_API_SECRET: z.string().min(1).optional(),
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
     UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
+    GEMINI_API_KEY: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_LOG_LEVEL: z
@@ -44,6 +45,7 @@ export const env = createEnv({
     NEXT_PUBLIC_CLOUDINARY_API_KEY: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
     NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
   },
   skipValidation:
     !!process.env.SKIP_ENV_VALIDATION ||
