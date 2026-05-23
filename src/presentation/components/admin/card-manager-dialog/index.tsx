@@ -10,7 +10,7 @@ import { useSensors, useSensor, PointerSensor, KeyboardSensor, DragEndEvent, Dnd
 import { useSortable, SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { UnifiedCardItem } from "@/domain/use-cases/admin/manage-dashboard-cards";
-import { CARD_ICON_MAP, CARD_ICON_KEYS, getCardIcon, getCardIconColor, getCardIconBg, suggestIconLocally } from "@/lib/card-icons";
+import { CARD_ICON_MAP, CARD_ICON_KEYS, getCardIcon, getCardIconColor, getCardIconBg } from "@/lib/card-icons";
 
 const getCardId = (c: UnifiedCardItem) => c.cardType === "stat" ? c.slug : c.formTemplateId;
 
@@ -253,6 +253,7 @@ function SortableCardRow({
 
       {card.visible && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2 border-t text-xs">
+          {/* AR name */}
           <div className="space-y-1" dir="rtl">
             <label className="text-[10px] text-muted-foreground font-semibold block text-right">{t("editCardNameAr") || "Card Name (AR)"}</label>
             <Input
@@ -263,7 +264,9 @@ function SortableCardRow({
               onChange={(e) => onUpdateField(cardId, "displayNameAr", e.target.value || null)}
               placeholder={card.cardType === "stat" ? card.defaultLabelAr : card.name}
             />
+            <p className="text-[9px] text-muted-foreground leading-snug" dir="rtl">{t("helperCardNameAr")}</p>
           </div>
+          {/* EN name */}
           <div className="space-y-1">
             <label className="text-[10px] text-muted-foreground font-semibold">{t("editCardNameEn") || "Card Name (EN)"}</label>
             <Input
@@ -273,41 +276,43 @@ function SortableCardRow({
               onChange={(e) => onUpdateField(cardId, "displayNameEn", e.target.value || null)}
               placeholder={card.cardType === "stat" ? card.defaultLabelEn : card.name}
             />
+            <p className="text-[9px] text-muted-foreground leading-snug">{t("helperCardNameEn")}</p>
           </div>
-          <div className="col-span-2 sm:col-span-3">
-                <IconPicker
-                  value={card.logoUrl ?? null}
-                  onChange={(icon) => onUpdateField(cardId, "logoUrl", icon)}
-                  onSuggest={handleSuggestIcon}
-                  isSuggesting={isSuggesting}
-                  t={t}
-                />
-              </div>
-              {card.cardType === "form" && (
-                <>
-                  <div className="space-y-1">
-                    <label className="text-[10px] text-muted-foreground font-semibold">{t("editMetricLabel") || "Metric Label"}</label>
-                    <Input
-                      size={undefined}
-                      className="h-8 text-xs"
-                      value={card.metricLabel ?? ""}
-                      onChange={(e) => onUpdateField(cardId, "metricLabel", e.target.value || null)}
-                      placeholder="Submissions"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] text-muted-foreground font-semibold">{t("editMetricValue") || "Metric Value"}</label>
-                    <Input
-                      size={undefined}
-                      className="h-8 text-xs"
-                      value={card.metricValue ?? ""}
-                      onChange={(e) => onUpdateField(cardId, "metricValue", e.target.value || null)}
-                      placeholder={card.submissionCount.toString()}
-                    />
-                  </div>
-                </>
-              )}
+          {/* Icon picker */}
+          <div className="col-span-2 sm:col-span-3 space-y-1">
+            <IconPicker
+              value={card.logoUrl ?? null}
+              onChange={(icon) => onUpdateField(cardId, "logoUrl", icon)}
+              onSuggest={handleSuggestIcon}
+              isSuggesting={isSuggesting}
+              t={t}
+            />
+            <p className="text-[9px] text-muted-foreground leading-snug">{t("helperIcon")}</p>
+          </div>
+          {/* Metric label */}
+          <div className="space-y-1">
+            <label className="text-[10px] text-muted-foreground font-semibold">{t("editMetricLabel") || "Metric Label"}</label>
+            <Input
+              size={undefined}
+              className="h-8 text-xs"
+              value={card.metricLabel ?? ""}
+              onChange={(e) => onUpdateField(cardId, "metricLabel", e.target.value || null)}
+              placeholder="Submissions"
+            />
+            <p className="text-[9px] text-muted-foreground leading-snug">{t("helperMetricLabel")}</p>
+          </div>
+          {/* Metric value */}
+          <div className="space-y-1">
+            <label className="text-[10px] text-muted-foreground font-semibold">{t("editMetricValue") || "Metric Value"}</label>
+            <Input
+              size={undefined}
+              className="h-8 text-xs"
+              value={card.metricValue ?? ""}
+              onChange={(e) => onUpdateField(cardId, "metricValue", e.target.value || null)}
+              placeholder={card.cardType === "form" ? card.submissionCount.toString() : "Live"}
+            />
+            <p className="text-[9px] text-muted-foreground leading-snug">{t("helperMetricValue")}</p>
+          </div>
         </div>
       )}
     </div>
@@ -320,7 +325,13 @@ export interface CardManagerDialogProps {
   cards: UnifiedCardItem[];
   onSave: (cards: UnifiedCardItem[]) => Promise<void>;
   onSuggestIcon: (titleAr: string, titleEn: string) => Promise<string | null>;
-  onAddStatCard: (displayNameEn: string, displayNameAr: string) => Promise<boolean>;
+  onAddStatCard: (
+    displayNameEn: string,
+    displayNameAr: string,
+    logoUrl?: string | null,
+    metricLabel?: string | null,
+    metricValue?: string | null
+  ) => Promise<boolean>;
   onDeleteStatCard: (slug: string) => Promise<void>;
   t: any;
 }
@@ -331,7 +342,11 @@ export function CardManagerDialog({ open, onOpenChange, cards, onSave, onSuggest
   const [showAddForm, setShowAddForm] = useState(false);
   const [newCardEn, setNewCardEn] = useState("");
   const [newCardAr, setNewCardAr] = useState("");
+  const [newCardLogoUrl, setNewCardLogoUrl] = useState<string | null>(null);
+  const [newCardMetricLabel, setNewCardMetricLabel] = useState("");
+  const [newCardMetricValue, setNewCardMetricValue] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [isSuggestingNew, setIsSuggestingNew] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -378,14 +393,23 @@ export function CardManagerDialog({ open, onOpenChange, cards, onSave, onSuggest
   };
 
   const handleSuggestIconForCard = async (id: string, nameAr: string, nameEn: string) => {
-    let icon = suggestIconLocally(nameEn, nameAr);
-    if (!icon) {
-      icon = await onSuggestIcon(nameAr, nameEn);
-    }
+    const icon = await onSuggestIcon(nameAr, nameEn);
     if (icon) {
       setDraftCards((prev) =>
         prev.map((c) => (getCardId(c) === id ? { ...c, logoUrl: icon } : c))
       );
+    }
+  };
+
+  const handleSuggestNewCardIcon = async () => {
+    setIsSuggestingNew(true);
+    try {
+      const icon = await onSuggestIcon(newCardAr, newCardEn);
+      if (icon) {
+        setNewCardLogoUrl(icon);
+      }
+    } finally {
+      setIsSuggestingNew(false);
     }
   };
 
@@ -397,14 +421,20 @@ export function CardManagerDialog({ open, onOpenChange, cards, onSave, onSuggest
     if (!newCardEn.trim() || !newCardAr.trim()) return;
     setIsAdding(true);
     try {
-      const success = await onAddStatCard(newCardEn.trim(), newCardAr.trim());
+      const success = await onAddStatCard(
+        newCardEn.trim(),
+        newCardAr.trim(),
+        newCardLogoUrl,
+        newCardMetricLabel.trim() || null,
+        newCardMetricValue.trim() || null
+      );
       if (success) {
         setShowAddForm(false);
         setNewCardEn("");
         setNewCardAr("");
-        // cards prop is updated reactively by the parent view model after add,
-        // so we close + reopen the dialog effect by toggling the draft sync flag
-        // We'll rely on the useEffect below which watches `cards`
+        setNewCardLogoUrl(null);
+        setNewCardMetricLabel("");
+        setNewCardMetricValue("");
       }
     } finally {
       setIsAdding(false);
@@ -439,6 +469,12 @@ export function CardManagerDialog({ open, onOpenChange, cards, onSave, onSuggest
           <DialogTitle>{t("manageCardsTitle") || "Manage Dashboard Cards"}</DialogTitle>
           <DialogDescription>{t("manageCardsDesc") || "Drag to reorder cards or toggle visibility."}</DialogDescription>
         </DialogHeader>
+        {/* Top-level usage hints */}
+        <div className="flex gap-3 px-1 text-[9px] text-muted-foreground">
+          <span>⠿ {t("helperDragReorder")}</span>
+          <span className="text-muted-foreground/60">·</span>
+          <span>👁 {t("helperVisibility")}</span>
+        </div>
         <div className="py-4 flex-1 overflow-y-auto space-y-2 pr-1">
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDraftDragEnd}>
             <SortableContext items={draftCards.map(getCardId)} strategy={verticalListSortingStrategy}>
@@ -461,6 +497,7 @@ export function CardManagerDialog({ open, onOpenChange, cards, onSave, onSuggest
             <div className="p-3 rounded-lg border border-violet-300 dark:border-violet-700 bg-violet-50 dark:bg-violet-950/20 space-y-3">
               <p className="text-xs font-semibold text-violet-700 dark:text-violet-300">{t("addCustomCardTitle") || "New Custom Card"}</p>
               <div className="grid grid-cols-2 gap-2">
+                {/* EN name */}
                 <div className="space-y-1">
                   <label className="text-[10px] text-muted-foreground font-semibold">{t("editCardNameEn") || "Card Name (EN)"}</label>
                   <Input
@@ -471,7 +508,9 @@ export function CardManagerDialog({ open, onOpenChange, cards, onSave, onSuggest
                     placeholder="e.g. Approved"
                     autoFocus
                   />
+                  <p className="text-[9px] text-muted-foreground leading-snug">{t("helperNewCardEn")}</p>
                 </div>
+                {/* AR name */}
                 <div className="space-y-1" dir="rtl">
                   <label className="text-[10px] text-muted-foreground font-semibold block text-right">{t("editCardNameAr") || "Card Name (AR)"}</label>
                   <Input
@@ -482,6 +521,42 @@ export function CardManagerDialog({ open, onOpenChange, cards, onSave, onSuggest
                     onChange={(e) => setNewCardAr(e.target.value)}
                     placeholder="مثال: معتمد"
                   />
+                  <p className="text-[9px] text-muted-foreground leading-snug" dir="rtl">{t("helperNewCardAr")}</p>
+                </div>
+                {/* Icon picker */}
+                <div className="col-span-2 space-y-1">
+                  <IconPicker
+                    value={newCardLogoUrl}
+                    onChange={setNewCardLogoUrl}
+                    onSuggest={handleSuggestNewCardIcon}
+                    isSuggesting={isSuggestingNew}
+                    t={t}
+                  />
+                  <p className="text-[9px] text-muted-foreground leading-snug">{t("helperIcon")}</p>
+                </div>
+                {/* Metric label */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-muted-foreground font-semibold">{t("editMetricLabel") || "Metric Label"}</label>
+                  <Input
+                    size={undefined}
+                    className="h-8 text-xs"
+                    value={newCardMetricLabel}
+                    onChange={(e) => setNewCardMetricLabel(e.target.value)}
+                    placeholder="e.g. Submissions"
+                  />
+                  <p className="text-[9px] text-muted-foreground leading-snug">{t("helperMetricLabel")}</p>
+                </div>
+                {/* Metric value */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-muted-foreground font-semibold">{t("editMetricValue") || "Metric Value"}</label>
+                  <Input
+                    size={undefined}
+                    className="h-8 text-xs"
+                    value={newCardMetricValue}
+                    onChange={(e) => setNewCardMetricValue(e.target.value)}
+                    placeholder="Live"
+                  />
+                  <p className="text-[9px] text-muted-foreground leading-snug">{t("helperMetricValue")}</p>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -499,7 +574,14 @@ export function CardManagerDialog({ open, onOpenChange, cards, onSave, onSuggest
                   variant="ghost"
                   size="sm"
                   className="h-8 text-xs"
-                  onClick={() => { setShowAddForm(false); setNewCardEn(""); setNewCardAr(""); }}
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setNewCardEn("");
+                    setNewCardAr("");
+                    setNewCardLogoUrl(null);
+                    setNewCardMetricLabel("");
+                    setNewCardMetricValue("");
+                  }}
                 >
                   {t("cancelEdit") || "Cancel"}
                 </Button>

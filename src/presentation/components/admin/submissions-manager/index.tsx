@@ -35,7 +35,7 @@ export function SubmissionsManager() {
   const [uniqueAdmins, setUniqueAdmins] = useState<string[]>([]);
   const [formOptions, setFormOptions] = useState<FormOption[]>([]);
   const [isCardManagerOpen, setIsCardManagerOpen] = useState(false);
-  const { cards, reorderCards, suggestIcon, addStatCard, deleteStatCard } = useDashboardAnalytics();
+  const { cards, reorderCards, saveCards, suggestIcon, addStatCard, deleteStatCard } = useDashboardAnalytics();
 
   const formNameById = formOptions.reduce<Record<string, string>>((acc, form) => {
     acc[form.id] = form.name;
@@ -144,7 +144,7 @@ export function SubmissionsManager() {
         open={isCardManagerOpen}
         onOpenChange={setIsCardManagerOpen}
         cards={cards}
-        onSave={reorderCards}
+        onSave={saveCards}
         onSuggestIcon={suggestIcon}
         onAddStatCard={addStatCard}
         onDeleteStatCard={deleteStatCard}

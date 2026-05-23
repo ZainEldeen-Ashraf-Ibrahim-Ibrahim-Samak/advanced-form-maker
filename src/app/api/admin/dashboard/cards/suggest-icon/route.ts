@@ -60,7 +60,24 @@ Rules:
     });
 
     const suggested = result.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
-    const icon = CARD_ICON_KEYS.includes(suggested) ? suggested : "file-text";
+    
+    // Clean and normalize the suggested icon name from Gemini
+    const cleanSuggested = suggested
+      .replace(/['"`]/g, "") // remove quotes/backticks
+      .trim()
+      .toLowerCase();
+
+    // Perform a robust check: first strict match, then fuzzy substring match
+    let icon: string | null = null;
+    if (CARD_ICON_KEYS.includes(cleanSuggested)) {
+      icon = cleanSuggested;
+    } else {
+      // Find the first icon key that is contained inside the AI response
+      const matched = CARD_ICON_KEYS.find((key) => cleanSuggested.includes(key));
+      if (matched) {
+        icon = matched;
+      }
+    }
 
     return successResponse({ icon });
   } catch (error: any) {

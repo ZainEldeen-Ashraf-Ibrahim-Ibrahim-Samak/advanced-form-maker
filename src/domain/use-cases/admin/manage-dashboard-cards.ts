@@ -147,15 +147,16 @@ export class ManageDashboardCardsUseCase {
       }
 
       if (card.cardType === "stat") {
+        const sc = card as UpdateStatCardConfigInput & { cardType: "stat" };
         statUpdates.push({
-          slug: card.slug,
-          visible: card.visible,
-          sortOrder: card.sortOrder,
-          displayNameAr: card.displayNameAr,
-          displayNameEn: card.displayNameEn,
-          logoUrl: card.logoUrl,
-          metricLabel: card.metricLabel,
-          metricValue: card.metricValue,
+          slug: sc.slug,
+          visible: sc.visible,
+          sortOrder: sc.sortOrder,
+          displayNameAr: sc.displayNameAr,
+          displayNameEn: sc.displayNameEn,
+          logoUrl: sc.logoUrl,
+          metricLabel: sc.metricLabel,
+          metricValue: sc.metricValue,
         });
       } else {
         const fc = card as UpdateDashboardCardInput & { cardType: "form" };
@@ -178,7 +179,13 @@ export class ManageDashboardCardsUseCase {
     ]);
   }
 
-  async addCustomStatCard(displayNameEn: string, displayNameAr: string): Promise<StatCardItem> {
+  async addCustomStatCard(
+    displayNameEn: string,
+    displayNameAr: string,
+    logoUrl?: string | null,
+    metricLabel?: string | null,
+    metricValue?: string | null
+  ): Promise<StatCardItem> {
     // Generate a unique slug from the English name
     const baseSlug = displayNameEn
       .toLowerCase()
@@ -194,6 +201,9 @@ export class ManageDashboardCardsUseCase {
       slug,
       displayNameEn: displayNameEn || null,
       displayNameAr: displayNameAr || null,
+      logoUrl: logoUrl || null,
+      metricLabel: metricLabel || null,
+      metricValue: metricValue || null,
       sortOrder: maxOrder + 1,
     });
 

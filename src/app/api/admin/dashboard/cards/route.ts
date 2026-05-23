@@ -91,6 +91,9 @@ export async function PUT(request: Request) {
 const createStatCardSchema = z.object({
   displayNameEn: z.string().min(1),
   displayNameAr: z.string().min(1),
+  logoUrl: z.string().nullable().optional(),
+  metricLabel: z.string().nullable().optional(),
+  metricValue: z.string().nullable().optional(),
 });
 
 export async function POST(request: Request) {
@@ -109,7 +112,13 @@ export async function POST(request: Request) {
       return errorResponse("Validation failed", 400, "VALIDATION_FAILED", parsed.error.flatten());
     }
 
-    const card = await useCase.addCustomStatCard(parsed.data.displayNameEn, parsed.data.displayNameAr);
+    const card = await useCase.addCustomStatCard(
+      parsed.data.displayNameEn,
+      parsed.data.displayNameAr,
+      parsed.data.logoUrl,
+      parsed.data.metricLabel,
+      parsed.data.metricValue
+    );
     const allCards = await useCase.listCardsWithFormData();
     return successResponse({ card, allCards });
   } catch (error) {

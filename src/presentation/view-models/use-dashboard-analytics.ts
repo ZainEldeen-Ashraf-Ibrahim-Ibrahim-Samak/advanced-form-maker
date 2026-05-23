@@ -140,6 +140,39 @@ export function useDashboardAnalytics() {
     }
   };
 
+  /**
+   * Persists ALL editable card fields (names, icon, metricLabel, metricValue,
+   * visibility, sort order) to the API. This is the correct handler for the
+   * CardManagerDialog's onSave prop.
+   */
+  const saveCards = async (updatedCards: UnifiedCardItem[]): Promise<void> => {
+    const previousCards = [...cards];
+    // Re-assign sortOrder from position so drag order is preserved
+    const withOrder = updatedCards.map((c, idx) => ({ ...c, sortOrder: idx }));
+    setCards(withOrder); // optimistic update
+
+    try {
+      const payload = mapToPayload(withOrder);
+      const res = await fetch("/api/admin/dashboard/cards", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Failed to save cards");
+      const data = await res.json();
+      if (data.success) {
+        setCards(data.data); // use server-confirmed state
+        toast.success(t("layoutSaved") || "Dashboard layout saved successfully");
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (err) {
+      setCards(previousCards); // rollback
+      toast.error("Failed to save cards");
+    }
+  };
+
   const suggestIcon = async (titleAr: string, titleEn: string): Promise<string | null> => {
     try {
       const res = await fetch("/api/admin/dashboard/cards/suggest-icon", {
@@ -147,20 +180,36 @@ export function useDashboardAnalytics() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ titleAr, titleEn }),
       });
-      if (!res.ok) return null;
+      if (!res.ok) {
+        toast.error(t("iconSuggestionFailed") || "Failed to suggest icon");
+        return null;
+      }
       const data = await res.json();
-      return data.success ? (data.data.icon as string) : null;
+      if (data.success && data.data.icon) {
+        toast.success(t("iconSuggested") || "Icon suggested successfully");
+        return data.data.icon as string;
+      } else {
+        toast.info(t("iconNoSuggestion") || "AI could not determine a suitable icon");
+        return null;
+      }
     } catch {
+      toast.error(t("iconSuggestionFailed") || "Failed to suggest icon");
       return null;
     }
   };
 
-  const addStatCard = async (displayNameEn: string, displayNameAr: string): Promise<boolean> => {
+  const addStatCard = async (
+    displayNameEn: string,
+    displayNameAr: string,
+    logoUrl?: string | null,
+    metricLabel?: string | null,
+    metricValue?: string | null
+  ): Promise<boolean> => {
     try {
       const res = await fetch("/api/admin/dashboard/cards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ displayNameEn, displayNameAr }),
+        body: JSON.stringify({ displayNameEn, displayNameAr, logoUrl, metricLabel, metricValue }),
       });
       if (!res.ok) throw new Error("Failed to create stat card");
       const data = await res.json();
@@ -205,6 +254,7 @@ export function useDashboardAnalytics() {
     cards,
     isLoadingCards,
     reorderCards,
+    saveCards,
     toggleCardVisibility,
     refreshCards: fetchCards,
     suggestIcon,

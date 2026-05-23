@@ -50,7 +50,7 @@ export function AdminDashboard() {
   const t = useTranslations("dashboard");
   const locale = useLocale();
   const { submissions, total, totalPages, counts, isLoading, fetchSubmissions, deleteSubmission } = useSubmissionsList();
-  const { cloudinaryUsage, isLoadingUsage, cards, isLoadingCards, reorderCards, suggestIcon, addStatCard, deleteStatCard } = useDashboardAnalytics();
+  const { cloudinaryUsage, isLoadingUsage, cards, isLoadingCards, saveCards, suggestIcon, addStatCard, deleteStatCard } = useDashboardAnalytics();
   
   const formNamesById = cards.reduce<Record<string, string>>((acc, card) => {
     if (card.cardType === "form") {
@@ -95,6 +95,30 @@ export function AdminDashboard() {
     return 0;
   };
 
+  /**
+   * Resolves a metric value string for a stat card.
+   * If the raw value contains an @slug token (e.g. "@draft", "@pending"),
+   * it is replaced with the live count for that status.
+   * Supported tokens: @total, @pending, @draft, @viewed, @needs_rewrite
+   */
+  const resolveMetricValue = (raw: string | null | undefined, cardSlug: string): string | number => {
+    if (raw === null || raw === undefined || raw === "") return getLiveCount(cardSlug);
+    const tokenMap: Record<string, number> = {
+      "@total": counts.total,
+      "@pending": counts.pending,
+      "@draft": counts.draft,
+      "@viewed": counts.viewed,
+      "@needs_rewrite": counts.needs_rewrite,
+    };
+    // If the whole value is a known token, return just the number
+    if (tokenMap[raw.trim()] !== undefined) return tokenMap[raw.trim()];
+    // Otherwise do inline replacement inside a string
+    return Object.entries(tokenMap).reduce(
+      (acc, [token, val]) => acc.replace(token, String(val)),
+      raw
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -113,7 +137,7 @@ export function AdminDashboard() {
             open={isEditDialogOpen}
             onOpenChange={setIsEditDialogOpen}
             cards={cards}
-            onSave={reorderCards}
+            onSave={saveCards}
             onSuggestIcon={suggestIcon}
             onAddStatCard={addStatCard}
             onDeleteStatCard={deleteStatCard}
@@ -139,7 +163,14 @@ export function AdminDashboard() {
                       <CardHeaderIcon logoUrl={card.logoUrl} iconName={card.defaultIcon} slug={card.slug} />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{getLiveCount(card.slug)}</div>
+                      <div className="text-2xl font-bold">
+                        {resolveMetricValue(card.metricValue, card.slug)}
+                      </div>
+                      {card.metricLabel && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {card.metricLabel}
+                        </p>
+                      )}
                     </CardContent>
                   </Card>
                 );
