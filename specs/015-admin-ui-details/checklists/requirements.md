@@ -32,11 +32,16 @@
 ## Notes
 
 - All items pass. No [NEEDS CLARIFICATION] markers.
-- 5 clarifications applied on 2026-05-23:
+- 5 clarifications applied on 2026-05-23 (session 1):
   1. AI analysis produces business insights (leads, engagement, marketing intelligence) + computed stats side by side
   2. Analysis tab exports a combined file: stats + AI narrative + raw submission rows (`[form-name] analysis.[ext]`)
   3. Dashboard cards have freeform metric label + value (both manually set by admin)
   4. Export from Analysis tab works even before analysis has been run (computed stats always included; AI narrative shows "no analysis yet")
   5. Computed stats (count, date range) always appear in the analysis section regardless of AI run state
+- 3 clarifications applied on 2026-05-23 (session 2):
+  6. AI analysis narrative MUST be generated in the admin's active UI locale (Arabic UI → Arabic narrative; English UI → English narrative) — added FR-025
+  7. ALL new UI text MUST have AR/EN i18n keys; no hardcoded strings in components — added FR-026, SC-008
+  8. All new features MUST be reachable from existing navigation without direct URL access — added FR-027
 - Key scope note: FR-008 explicitly restricts lock toggle to the contact form only — this revises the "any form" clarification from spec 001-admin-platform-suite.
-- Spec is ready for `/speckit.plan`.
+- Tasks T044–T046 added to Phase 7 for locale, i18n, and navigation verification.
+- Spec complete.

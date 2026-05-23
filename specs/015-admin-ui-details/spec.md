@@ -129,6 +129,12 @@ An admin wants to configure the dashboard cards — not only controlling visibil
 - **FR-016**: The Analysis tab MUST include an export button that downloads a combined report in any of the four supported formats (PDF, CSV, Excel, JSON), named `[form-name] analysis.[ext]`. The combined report contains: (a) the analysis section — computed statistics and AI-generated narrative at the top; (b) all raw submission rows below, following the same column structure as the standard submissions export.
 - **FR-016b**: The Analysis tab export button MUST be available regardless of whether analysis has been run. The exported file ALWAYS includes computed statistics (total submission count, date range of submissions) in the analysis section. If no AI analysis has been run, the AI narrative portion shows a "no analysis yet" placeholder. Raw submission rows are always included below the analysis section.
 - **FR-016a**: The Analysis tab MUST include an enable/disable toggle; when AI analysis is disabled for a form, the "Run Analysis" button and export button are hidden and a disabled-state message is shown.
+- **FR-025**: The AI-generated analysis narrative MUST be generated in the admin's active UI locale. The analysis trigger POST request MUST pass the current locale to the AI service, and the Gemini prompt MUST include an explicit language instruction (e.g., "Respond entirely in Arabic" when `locale === "ar"`, "Respond in English" when `locale === "en"`). The UI language and the analysis language MUST always match.
+
+**Internationalization & Navigation**
+
+- **FR-026**: Every new UI text element introduced by this spec (labels, buttons, empty states, status messages, error messages, column headers) MUST have corresponding keys in both `src/messages/en.json` and `src/messages/ar.json`. No English or Arabic strings may be hardcoded directly in UI components.
+- **FR-027**: All new features introduced by this spec MUST be reachable from existing admin navigation without requiring direct URL entry. Specifically: the Analysis tab MUST be visible in the form detail tab bar; the submissions index column and export buttons MUST appear on page load of the submissions page; the "Manage Cards" button MUST be visible on the dashboard on page load; the contact form lock toggle MUST be visible in the form edit dialog when `isContactForm` is true.
 
 **Dashboard Card Management UI**
 
@@ -163,6 +169,8 @@ An admin wants to configure the dashboard cards — not only controlling visibil
 - **SC-005**: Dashboard card configuration changes (hide/reorder) are visible to all admin sessions within 5 seconds of saving.
 - **SC-006**: Admin can complete a full dashboard card reorder and save in under 2 minutes.
 - **SC-007**: No form other than the contact form displays a lock toggle — verified across 100% of non-contact forms.
+- **SC-008**: 100% of new UI text strings introduced by this spec have corresponding keys in both `src/messages/en.json` and `src/messages/ar.json`; no English or Arabic strings are hardcoded in any component file.
+- **SC-009**: When the admin's active locale is Arabic (`ar`), the AI-generated analysis narrative (summary, patterns, findings, sentiment) is returned in Arabic. When the locale is English (`en`), the narrative is in English.
 
 ---
 
@@ -179,6 +187,8 @@ An admin wants to configure the dashboard cards — not only controlling visibil
 - Q: What does the Analysis tab export contain — analysis only, or combined analysis + submission rows? → A: Combined — analysis summary (stats + AI narrative) at the top, followed by all raw submission rows in the same file.
 - Q: If analysis has never been run, is the export button disabled or does it still work? → A: Export still works — the analysis section of the file shows a "no analysis yet" placeholder; raw submission rows are always included regardless of analysis state.
 - Q: When exporting with no prior AI run, should the export still include computed stats (count, date range)? → A: Yes — computed stats (total submission count, date range) are always included in the analysis section even when AI narrative is absent. Only the AI narrative portion shows "no analysis yet."
+- Q: Should the AI-generated analysis narrative be generated in the admin's active UI locale? → A: Yes — the AI MUST generate its narrative in the admin's current UI language. When locale is Arabic, the analysis is written in Arabic; when English, in English. The Gemini prompt MUST include an explicit language instruction matching the active locale.
+- Q: Must all new UI text have AR/EN translation keys, and must all new features be accessible from existing navigation? → A: Yes — every new UI string MUST have keys in both `en.json` and `ar.json` (no hardcoding); all features introduced by this spec MUST be reachable from the existing admin UI without direct URL access.
 
 ## Assumptions
 
@@ -187,5 +197,6 @@ An admin wants to configure the dashboard cards — not only controlling visibil
 - The form detail page already has a tab-based navigation structure; the "Analysis" tab is added to the existing tab bar.
 - The dashboard already displays form cards; this spec adds a "Manage Cards" button and edit-mode behavior to the existing dashboard.
 - Export downloads triggered from the submissions page use the same naming convention as specified in the Admin Platform Suite spec (`[form-name] data.[ext]`).
-- AR/EN bilingual labels are required for all new UI text (index column header, export button labels, analysis tab label, manage cards button, edit mode labels).
+- AR/EN bilingual labels are required for ALL new UI text (index column header, export button labels, analysis tab label, manage cards button, edit mode labels, stats section labels, metric field labels, lock toggle labels). No English or Arabic string may be hardcoded in a component.
+- The AI service receives the admin's current locale on each analysis trigger and generates the narrative output in the matching language.
 - Dashboard card edit mode operates on a shared global configuration (one order for all admins), consistent with the Admin Platform Suite spec clarification.
