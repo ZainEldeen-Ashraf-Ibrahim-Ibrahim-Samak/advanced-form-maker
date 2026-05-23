@@ -6,7 +6,9 @@
       "PowerShell(cd \"C:\\\\Users\\\\ALFA2023\\\\Desktop\\\\advanced-form-maker\" && pwsh .specify/scripts/powershell/update-agent-context.ps1 -AgentType claude)",
       "PowerShell(New-Item *)",
       "PowerShell(cd \"C:\\\\Users\\\\ALFA2023\\\\Desktop\\\\advanced-form-maker\" && pwsh .specify/scripts/powershell/check-prerequisites.ps1 -Json)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/mongoose/package.json'\\).version\\)\")",
+      "Bash(node -e ' *)"
     ]
   }
 }

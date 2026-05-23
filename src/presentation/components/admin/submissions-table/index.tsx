@@ -396,7 +396,12 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
                     {idx + 1}
                   </TableCell>
                   <TableCell className="font-medium group-hover:text-primary transition-colors wrap-break-word">
-                    <div>{sub.clientName || `${formatDate(sub.submittedAt)} - ${t("unnamedSubmission")} ${idx + 1}`}</div>
+                    <div>
+                      {sub.clientName
+                        ? sub.clientName
+                        : <span className="italic text-muted-foreground font-normal">{t("unnamedSubmission")}</span>
+                      }
+                    </div>
                     <div className="mt-1 text-xs text-muted-foreground font-normal md:hidden">
                       {t("formName")}: {formName}
                     </div>
