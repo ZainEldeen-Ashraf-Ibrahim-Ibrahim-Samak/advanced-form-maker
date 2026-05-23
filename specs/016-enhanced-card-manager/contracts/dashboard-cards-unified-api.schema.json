@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Unified Dashboard Cards API",
+  "description": "GET returns all cards (form summaries + stat cards). PUT updates card configuration for both types.",
+
+  "GET /api/admin/dashboard/cards": {
+    "description": "Returns unified sorted list of all dashboard cards (stat cards + form summary cards)",
+    "auth": "admin session required",
+    "response": {
+      "success": true,
+      "data": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            { "$ref": "#/definitions/FormSummaryCardItem" },
+            { "$ref": "#/definitions/StatCardItem" }
+          ]
+        }
+      }
+    }
+  },
+
+  "PUT /api/admin/dashboard/cards": {
+    "description": "Updates sort order, visibility, and display names for all card types in one request",
+    "auth": "admin session required",
+    "body": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/definitions/UpdateFormCardInput" },
+          { "$ref": "#/definitions/UpdateStatCardInput" }
+        ]
+      }
+    },
+    "response": {
+      "success": true,
+      "data": "array of updated UnifiedCardItem (same shape as GET response)"
+    }
+  },
+
+  "definitions": {
+    "FormSummaryCardItem": {
+      "type": "object",
+      "required": ["cardType", "formTemplateId", "name", "visible", "sortOrder"],
+      "properties": {
+        "cardType": { "type": "string", "enum": ["form"] },
+        "formTemplateId": { "type": "string" },
+        "name": { "type": "string", "description": "Internal form template name (fallback display)" },
+        "description": { "type": "string" },
+        "visible": { "type": "boolean" },
+        "sortOrder": { "type": "integer", "minimum": 0 },
+        "submissionCount": { "type": "integer" },
+        "isLocked": { "type": "boolean" },
+        "displayNameAr": { "type": ["string", "null"] },
+        "displayNameEn": { "type": ["string", "null"] },
+        "logoUrl": { "type": ["string", "null"], "format": "uri-reference" },
+        "metricLabel": { "type": ["string", "null"] },
+        "metricValue": { "type": ["string", "null"] }
+      }
+    },
+
+    "StatCardItem": {
+      "type": "object",
+      "required": ["cardType", "slug", "visible", "sortOrder"],
+      "properties": {
+        "cardType": { "type": "string", "enum": ["stat"] },
+        "slug": {
+          "type": "string",
+          "enum": ["total", "pending", "draft", "viewed", "needs_rewrite"]
+        },
+        "defaultLabelEn": { "type": "string", "description": "Hardcoded fallback EN label" },
+        "defaultLabelAr": { "type": "string", "description": "Hardcoded fallback AR label" },
+        "defaultIcon": { "type": "string", "description": "Icon identifier for the stat type" },
+        "visible": { "type": "boolean" },
+        "sortOrder": { "type": "integer", "minimum": 0 },
+        "displayNameAr": { "type": ["string", "null"] },
+        "displayNameEn": { "type": ["string", "null"] }
+      }
+    },
+
+    "UpdateFormCardInput": {
+      "type": "object",
+      "required": ["cardType", "formTemplateId"],
+      "properties": {
+        "cardType": { "type": "string", "enum": ["form"] },
+        "formTemplateId": { "type": "string" },
+        "visible": { "type": "boolean" },
+        "sortOrder": { "type": "integer", "minimum": 0 },
+        "displayNameAr": { "type": ["string", "null"] },
+        "displayNameEn": { "type": ["string", "null"] },
+        "logoUrl": { "type": ["string", "null"] },
+        "metricLabel": { "type": ["string", "null"] },
+        "metricValue": { "type": ["string", "null"] }
+      }
+    },
+
+    "UpdateStatCardInput": {
+      "type": "object",
+      "required": ["cardType", "slug"],
+      "properties": {
+        "cardType": { "type": "string", "enum": ["stat"] },
+        "slug": {
+          "type": "string",
+          "enum": ["total", "pending", "draft", "viewed", "needs_rewrite"]
+        },
+        "visible": { "type": "boolean" },
+        "sortOrder": { "type": "integer", "minimum": 0 },
+        "displayNameAr": { "type": ["string", "null"] },
+        "displayNameEn": { "type": ["string", "null"] }
+      }
+    }
+  }
+}
