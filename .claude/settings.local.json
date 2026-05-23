@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(cd \"C:\\\\Users\\\\ALFA2023\\\\Desktop\\\\advanced-form-maker\" && pwsh .specify/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly)",
+      "PowerShell(cd \"C:\\\\Users\\\\ALFA2023\\\\Desktop\\\\advanced-form-maker\" && pwsh .specify/scripts/powershell/setup-plan.ps1 -Json)",
+      "PowerShell(cd \"C:\\\\Users\\\\ALFA2023\\\\Desktop\\\\advanced-form-maker\" && pwsh .specify/scripts/powershell/update-agent-context.ps1 -AgentType claude)",
+      "PowerShell(New-Item *)",
+      "PowerShell(cd \"C:\\\\Users\\\\ALFA2023\\\\Desktop\\\\advanced-form-maker\" && pwsh .specify/scripts/powershell/check-prerequisites.ps1 -Json)"
+    ]
+  }
+}

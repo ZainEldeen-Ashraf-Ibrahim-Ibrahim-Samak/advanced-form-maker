@@ -1,0 +1,105 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Dashboard Cards Edit API — Extended Fields",
+    "version": "2.0.0",
+    "description": "Extension to the existing PUT /api/admin/dashboard/cards endpoint — adds displayName, metricLabel, metricValue fields"
+  },
+  "paths": {
+    "/api/admin/dashboard/cards": {
+      "put": {
+        "summary": "Save dashboard card configuration (extended)",
+        "description": "Existing endpoint extended to accept displayName, metricLabel, metricValue per card. All new fields are optional; omitting them preserves existing values.",
+        "tags": ["Dashboard"],
+        "security": [{ "session": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["formTemplateId"],
+                  "properties": {
+                    "formTemplateId": {
+                      "type": "string",
+                      "description": "MongoDB ObjectId of the form template this card represents"
+                    },
+                    "visible": { "type": "boolean" },
+                    "sortOrder": { "type": "integer", "minimum": 0 },
+                    "displayName": {
+                      "type": ["string", "null"],
+                      "description": "Custom card title shown on dashboard. null = fall back to form name."
+                    },
+                    "metricLabel": {
+                      "type": ["string", "null"],
+                      "description": "Freeform metric label (e.g., 'Leads', 'Views'). null = show 'Submissions'."
+                    },
+                    "metricValue": {
+                      "type": ["string", "null"],
+                      "description": "Freeform metric value (e.g., '42', '$5,000'). null = show live submission count."
+                    }
+                  }
+                }
+              },
+              "example": [
+                {
+                  "formTemplateId": "68311a2b3f4e5d6c7b8a9012",
+                  "visible": true,
+                  "sortOrder": 0,
+                  "displayName": "Agency Pipeline",
+                  "metricLabel": "Leads",
+                  "metricValue": "42"
+                },
+                {
+                  "formTemplateId": "68311a2b3f4e5d6c7b8a9013",
+                  "visible": false,
+                  "sortOrder": 1,
+                  "displayName": null,
+                  "metricLabel": null,
+                  "metricValue": null
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated card list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "enum": [true] },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "formTemplateId": { "type": "string" },
+                          "name": { "type": "string", "description": "Raw form name (fallback)" },
+                          "description": { "type": "string" },
+                          "visible": { "type": "boolean" },
+                          "sortOrder": { "type": "integer" },
+                          "submissionCount": { "type": "integer" },
+                          "isLocked": { "type": "boolean" },
+                          "displayName": { "type": ["string", "null"] },
+                          "metricLabel": { "type": ["string", "null"] },
+                          "metricValue": { "type": ["string", "null"] }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Validation failed" },
+          "401": { "description": "Unauthorized — admin session required" }
+        }
+      }
+    }
+  }
+}

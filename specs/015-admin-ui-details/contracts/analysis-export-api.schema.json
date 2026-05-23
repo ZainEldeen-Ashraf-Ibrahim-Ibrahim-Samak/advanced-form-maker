@@ -1,0 +1,91 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Analysis Export API",
+    "version": "1.0.0",
+    "description": "Downloads a combined analysis report (computed stats + AI narrative + raw submission rows)"
+  },
+  "paths": {
+    "/api/admin/forms/{formId}/analysis/export": {
+      "get": {
+        "summary": "Download combined analysis export",
+        "tags": ["Analysis"],
+        "security": [{ "session": [] }],
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "MongoDB ObjectId of the form template"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "enum": ["pdf", "csv", "xlsx", "json"] },
+            "description": "Export format"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Binary file download",
+            "headers": {
+              "Content-Disposition": {
+                "schema": { "type": "string" },
+                "example": "attachment; filename*=UTF-8''Agency%20Form%20analysis.pdf"
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "application/pdf",
+                    "text/csv",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/json"
+                  ]
+                }
+              }
+            },
+            "content": {
+              "application/octet-stream": {
+                "schema": { "type": "string", "format": "binary" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid format parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "enum": [false] },
+                    "error": { "type": "string" },
+                    "code": { "type": "string", "example": "INVALID_FORMAT" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized — admin session required" },
+          "404": {
+            "description": "Form not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "enum": [false] },
+                    "error": { "type": "string" },
+                    "code": { "type": "string", "example": "FORM_NOT_FOUND" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

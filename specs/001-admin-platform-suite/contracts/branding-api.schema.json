@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Site Branding API Contract",
+
+  "endpoints": {
+    "GET /api/admin/settings": {
+      "description": "Existing settings endpoint — now includes branding fields in response",
+      "responseAdditions": {
+        "branding": {
+          "type": "object",
+          "properties": {
+            "siteName": { "type": "string", "maxLength": 100 },
+            "siteLogoUrl": { "type": "string", "maxLength": 500 }
+          }
+        }
+      }
+    },
+
+    "PATCH /api/admin/settings/branding": {
+      "description": "Update site name and/or logo URL. Both fields are optional — omitting one leaves it unchanged.",
+      "auth": "admin",
+      "requestBody": {
+        "type": "object",
+        "minProperties": 1,
+        "properties": {
+          "siteName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "New display name for the site. Reflected in browser titles, headers, and HTML metadata."
+          },
+          "siteLogoUrl": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Cloudinary URL of the uploaded logo image. Empty string resets to default placeholder."
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "type": "object",
+          "properties": {
+            "siteName": { "type": "string" },
+            "siteLogoUrl": { "type": "string" }
+          }
+        },
+        "400": {
+          "description": "Validation failure",
+          "examples": [
+            "siteName cannot be empty",
+            "siteName exceeds 100 characters",
+            "siteLogoUrl is not a valid URL"
+          ]
+        },
+        "401": { "description": "Unauthenticated" }
+      }
+    }
+  },
+
+  "propagationContract": {
+    "description": "After a successful PATCH /api/admin/settings/branding, all server-rendered pages reflect the new branding on the next page load. No client cache invalidation step is required beyond a single page reload.",
+    "affectedSurfaces": [
+      "Browser <title> tag (via generateMetadata)",
+      "Site header / navigation logo",
+      "Favicon (<link rel='icon'>)",
+      "HTML <meta property='og:image'> (if applicable)",
+      "Admin panel page titles"
+    ]
+  },
+
+  "logoUploadFlow": {
+    "description": "Logo file is NOT sent directly to /api/admin/settings/branding. The admin UI first uploads the image via the existing Cloudinary sign endpoint, receives a Cloudinary URL, then sends that URL to PATCH /api/admin/settings/branding.",
+    "steps": [
+      "1. Client calls POST /api/cloudinary/sign to get an upload signature",
+      "2. Client uploads image directly to Cloudinary",
+      "3. Cloudinary returns the secure_url",
+      "4. Client calls PATCH /api/admin/settings/branding with { siteLogoUrl: secure_url }",
+      "5. Server validates URL and persists to SettingsConfiguration.branding.siteLogoUrl"
+    ],
+    "validFormats": ["image/png", "image/jpeg", "image/svg+xml"],
+    "maxSizeMB": 2
+  }
+}

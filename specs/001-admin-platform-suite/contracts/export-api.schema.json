@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Export API Contracts",
+  "description": "REST API contracts for form export (single and bulk)",
+
+  "endpoints": {
+    "GET /api/admin/system/export": {
+      "description": "Export a single form's submissions or a database collection in a chosen format",
+      "queryParams": {
+        "collection": {
+          "type": "string",
+          "required": true,
+          "description": "Collection to export (e.g. 'submissions')"
+        },
+        "formId": {
+          "type": "string",
+          "required": false,
+          "description": "Filter submissions by form ID (ObjectId string)"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["xlsx", "csv", "pdf", "json"],
+          "default": "xlsx",
+          "required": false
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "File download with correct Content-Disposition filename",
+          "headers": {
+            "Content-Disposition": "attachment; filename=\"[form-name] data.[ext]\"",
+            "Content-Type": {
+              "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              "csv": "text/csv; charset=utf-8",
+              "pdf": "application/pdf",
+              "json": "application/json"
+            }
+          },
+          "pdfMetadata": {
+            "title": "[form-name]",
+            "description": "PDF document title MUST equal the form name — not 'all submission data'"
+          }
+        },
+        "400": { "description": "Missing or invalid query parameters" },
+        "401": { "description": "Unauthenticated — admin session required" },
+        "404": { "description": "No data found for the requested collection/formId" },
+        "500": { "description": "Export generation failed" }
+      }
+    },
+
+    "GET /api/admin/system/export/bulk": {
+      "description": "Export all forms' submissions as a single merged file (server-side). Client handles ZIP assembly separately using JSZip.",
+      "queryParams": {
+        "format": {
+          "type": "string",
+          "enum": ["xlsx", "pdf"],
+          "required": true,
+          "description": "Only xlsx and pdf are supported for server-side merged export"
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Single merged file with one section/sheet per form",
+          "note": "XLSX: one worksheet per form named after the form. PDF: one section per form separated by page break, each with form-name heading."
+        },
+        "400": { "description": "Invalid format parameter" },
+        "401": { "description": "Unauthenticated" },
+        "404": { "description": "No forms or submissions found" }
+      }
+    },
+
+    "NOTE_bulk_zip": {
+      "description": "Bulk ZIP export is assembled client-side: the browser calls GET /api/admin/system/export?formId=X&format=Y for each form in parallel, then uses JSZip to bundle results into a .zip archive named 'all-forms-data.zip'."
+    }
+  },
+
+  "fileNamingConvention": {
+    "rule": "[form-name] data.[ext]",
+    "examples": [
+      "Contact Form data.pdf",
+      "Registration Form data.xlsx",
+      "Survey 2026 data.csv",
+      "Application Form data.json"
+    ],
+    "note": "form-name is the exact FormTemplate.name value. Spaces are preserved; only characters invalid in HTTP headers are percent-encoded."
+  }
+}

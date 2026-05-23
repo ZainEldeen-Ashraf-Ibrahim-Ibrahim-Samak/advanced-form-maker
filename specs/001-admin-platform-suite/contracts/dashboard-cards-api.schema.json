@@ -1,0 +1,147 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Dashboard Cards API + Form Lock API Contracts",
+
+  "endpoints": {
+    "GET /api/admin/dashboard/cards": {
+      "description": "List all dashboard cards with their form metadata and visibility/order state",
+      "auth": "admin",
+      "response": {
+        "200": {
+          "type": "object",
+          "properties": {
+            "cards": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "description": "DashboardCard document ID" },
+                  "formTemplateId": { "type": "string" },
+                  "formName": { "type": "string" },
+                  "visible": { "type": "boolean" },
+                  "sortOrder": { "type": "integer", "minimum": 0 },
+                  "submissionCount": { "type": "integer", "minimum": 0 },
+                  "isLocked": { "type": "boolean" }
+                },
+                "required": ["id", "formTemplateId", "formName", "visible", "sortOrder", "submissionCount"]
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "PUT /api/admin/dashboard/cards": {
+      "description": "Replace the full card configuration (visibility + order) for all forms. Shared — affects all admins.",
+      "auth": "admin",
+      "requestBody": {
+        "type": "object",
+        "properties": {
+          "cards": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "formTemplateId": { "type": "string" },
+                "visible": { "type": "boolean" },
+                "sortOrder": { "type": "integer", "minimum": 0 }
+              },
+              "required": ["formTemplateId", "visible", "sortOrder"]
+            }
+          }
+        },
+        "required": ["cards"]
+      },
+      "responses": {
+        "200": { "description": "Updated card list returned" },
+        "400": { "description": "Invalid payload" },
+        "401": { "description": "Unauthenticated" }
+      }
+    },
+
+    "PATCH /api/admin/forms/[formId]/lock": {
+      "description": "Toggle the lock state of any form. When locked, new public submissions are rejected.",
+      "auth": "admin",
+      "requestBody": {
+        "type": "object",
+        "properties": {
+          "isLocked": { "type": "boolean" }
+        },
+        "required": ["isLocked"]
+      },
+      "responses": {
+        "200": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "isLocked": { "type": "boolean" }
+          }
+        },
+        "400": { "description": "Invalid formId or missing isLocked" },
+        "401": { "description": "Unauthenticated" },
+        "404": { "description": "Form not found" }
+      }
+    },
+
+    "GET /api/admin/forms/[formId]/analysis": {
+      "description": "Get the current analysis record for a form (or null if none exists yet)",
+      "auth": "admin",
+      "responses": {
+        "200": {
+          "type": "object",
+          "properties": {
+            "analysis": {
+              "oneOf": [
+                { "type": "null" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "formTemplateId": { "type": "string" },
+                    "enabled": { "type": "boolean" },
+                    "summary": { "type": ["string", "null"] },
+                    "patterns": { "type": "array", "items": { "type": "string" } },
+                    "findings": { "type": "array", "items": { "type": "string" } },
+                    "sentimentOverview": { "type": ["string", "null"] },
+                    "analyzedAt": { "type": ["string", "null"], "format": "date-time" },
+                    "submissionCount": { "type": "integer" },
+                    "analysisStatus": { "type": "string", "enum": ["idle", "running", "done", "failed"] },
+                    "errorMessage": { "type": ["string", "null"] }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+
+    "POST /api/admin/forms/[formId]/analysis": {
+      "description": "Manually trigger an AI analysis run for the form. Returns immediately with status 'running'; poll GET to check completion.",
+      "auth": "admin",
+      "requestBody": { "type": "object", "description": "No body required" },
+      "responses": {
+        "202": { "description": "Analysis run accepted; check GET for results" },
+        "400": { "description": "Analysis is disabled for this form (FR-021)" },
+        "404": { "description": "Form not found" },
+        "503": { "description": "AI service unavailable" }
+      }
+    },
+
+    "PATCH /api/admin/forms/[formId]/analysis": {
+      "description": "Enable or disable AI analysis for a form",
+      "auth": "admin",
+      "requestBody": {
+        "type": "object",
+        "properties": {
+          "enabled": { "type": "boolean" }
+        },
+        "required": ["enabled"]
+      },
+      "responses": {
+        "200": { "description": "Updated analysis record" },
+        "404": { "description": "Form or analysis record not found" }
+      }
+    }
+  }
+}
