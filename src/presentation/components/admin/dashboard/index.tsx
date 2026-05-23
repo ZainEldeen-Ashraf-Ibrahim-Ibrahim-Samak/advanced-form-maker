@@ -8,51 +8,55 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { SubmissionsTable } from "@/presentation/components/admin/submissions-table";
-import { FileText, Clock, Eye, AlertCircle, ChevronLeft, ChevronRight, Cloud, HardDrive } from "lucide-react";
+import { ChevronLeft, ChevronRight, Cloud, HardDrive } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CardManagerDialog } from "@/presentation/components/admin/card-manager-dialog";
+import { getCardIcon, getCardIconColor, getCardIconBg } from "@/lib/card-icons";
 
 function CardHeaderIcon({ logoUrl, iconName, slug }: { logoUrl?: string | null; iconName?: string; slug?: string }) {
-  const [imgFailed, setImgFailed] = useState(false);
+  // Determine icon component
+  const iconKey = logoUrl || iconName || null;
+  const Icon = logoUrl ? getCardIcon(logoUrl) : iconName ? getCardIcon(iconName) : getCardIcon(null);
 
-  const className = `h-4 w-4 shrink-0 ${
-    slug === "pending"
-      ? "text-amber-500"
-      : slug === "draft"
-      ? "text-blue-500"
-      : slug === "viewed"
-      ? "text-emerald-500"
-      : slug === "needs_rewrite"
-      ? "text-destructive"
-      : "text-muted-foreground"
-  }`;
+  // Semantic color for default stat card slugs
+  const isCustomIcon = !!logoUrl;
+  const slugColor = isCustomIcon ? null : (
+    slug === "pending"       ? "text-amber-500"    :
+    slug === "draft"         ? "text-blue-500"     :
+    slug === "viewed"        ? "text-emerald-500"  :
+    slug === "needs_rewrite" ? "text-destructive"  :
+    slug === "total"         ? "text-violet-500"   : null
+  );
 
-  if (logoUrl && !imgFailed) {
-    return (
-      <img
-        src={logoUrl}
-        alt=""
-        className="h-4 w-4 object-contain rounded shrink-0"
-        onError={() => setImgFailed(true)}
-      />
-    );
-  }
+  const slugBg = isCustomIcon ? null : (
+    slug === "pending"       ? "bg-amber-100 dark:bg-amber-950"    :
+    slug === "draft"         ? "bg-blue-100 dark:bg-blue-950"      :
+    slug === "viewed"        ? "bg-emerald-100 dark:bg-emerald-950" :
+    slug === "needs_rewrite" ? "bg-red-100 dark:bg-red-950"        :
+    slug === "total"         ? "bg-violet-100 dark:bg-violet-950"  : null
+  );
 
-  if (iconName === "clock") return <Clock className={className} />;
-  if (iconName === "eye") return <Eye className={className} />;
-  if (iconName === "alert-circle") return <AlertCircle className={className} />;
-  return <FileText className={className} />;
+  const colorClass = slugColor ?? getCardIconColor(iconKey, "text-muted-foreground");
+  const bgClass    = slugBg    ?? getCardIconBg(iconKey, "bg-muted");
+
+  return (
+    <div className={`p-2 rounded-lg ${bgClass} shrink-0`}>
+      <Icon className={`h-4 w-4 ${colorClass}`} />
+    </div>
+  );
 }
 
 export function AdminDashboard() {
   const t = useTranslations("dashboard");
   const locale = useLocale();
   const { submissions, total, totalPages, counts, isLoading, fetchSubmissions, deleteSubmission } = useSubmissionsList();
-  const { cloudinaryUsage, isLoadingUsage, cards, isLoadingCards, reorderCards } = useDashboardAnalytics();
+  const { cloudinaryUsage, isLoadingUsage, cards, isLoadingCards, reorderCards, suggestIcon, addStatCard, deleteStatCard } = useDashboardAnalytics();
   
   const formNamesById = cards.reduce<Record<string, string>>((acc, card) => {
     if (card.cardType === "form") {
-      acc[card.formTemplateId] = card.displayName ?? card.name;
+      acc[card.formTemplateId] = locale === "ar"
+        ? (card.displayNameAr ?? card.displayNameEn ?? card.name)
+        : (card.displayNameEn ?? card.displayNameAr ?? card.name);
     }
     return acc;
   }, {});
@@ -110,6 +114,9 @@ export function AdminDashboard() {
             onOpenChange={setIsEditDialogOpen}
             cards={cards}
             onSave={reorderCards}
+            onSuggestIcon={suggestIcon}
+            onAddStatCard={addStatCard}
+            onDeleteStatCard={deleteStatCard}
             t={t}
           />
         </div>
@@ -129,7 +136,7 @@ export function AdminDashboard() {
                   <Card key={card.slug} className="hover:shadow-md transition-shadow">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                      <CardHeaderIcon iconName={card.defaultIcon} slug={card.slug} />
+                      <CardHeaderIcon logoUrl={card.logoUrl} iconName={card.defaultIcon} slug={card.slug} />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{getLiveCount(card.slug)}</div>

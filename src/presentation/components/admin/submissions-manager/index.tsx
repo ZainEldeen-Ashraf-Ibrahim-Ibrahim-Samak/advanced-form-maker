@@ -35,7 +35,7 @@ export function SubmissionsManager() {
   const [uniqueAdmins, setUniqueAdmins] = useState<string[]>([]);
   const [formOptions, setFormOptions] = useState<FormOption[]>([]);
   const [isCardManagerOpen, setIsCardManagerOpen] = useState(false);
-  const { cards, reorderCards } = useDashboardAnalytics();
+  const { cards, reorderCards, suggestIcon, addStatCard, deleteStatCard } = useDashboardAnalytics();
 
   const formNameById = formOptions.reduce<Record<string, string>>((acc, form) => {
     acc[form.id] = form.name;
@@ -145,6 +145,9 @@ export function SubmissionsManager() {
         onOpenChange={setIsCardManagerOpen}
         cards={cards}
         onSave={reorderCards}
+        onSuggestIcon={suggestIcon}
+        onAddStatCard={addStatCard}
+        onDeleteStatCard={deleteStatCard}
         t={td}
       />
 
@@ -152,7 +155,9 @@ export function SubmissionsManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{td("totalSubmissions")}</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-950 shrink-0">
+              <FileText className="h-4 w-4 text-violet-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{counts.total}</div>
@@ -161,7 +166,9 @@ export function SubmissionsManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{td("pendingCount")}</CardTitle>
-            <Clock className="h-4 w-4 text-amber-500" />
+            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-950 shrink-0">
+              <Clock className="h-4 w-4 text-amber-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{counts.pending}</div>
@@ -170,7 +177,9 @@ export function SubmissionsManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{td("draftCount")}</CardTitle>
-            <FileText className="h-4 w-4 text-blue-500" />
+            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-950 shrink-0">
+              <FileText className="h-4 w-4 text-blue-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{counts.draft}</div>
@@ -179,7 +188,9 @@ export function SubmissionsManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{td("viewedCount")}</CardTitle>
-            <Eye className="h-4 w-4 text-emerald-500" />
+            <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950 shrink-0">
+              <Eye className="h-4 w-4 text-emerald-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{counts.viewed}</div>
@@ -188,7 +199,9 @@ export function SubmissionsManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{td("needsRewriteCount")}</CardTitle>
-            <AlertCircle className="h-4 w-4 text-destructive" />
+            <div className="p-2 rounded-lg bg-red-100 dark:bg-red-950 shrink-0">
+              <AlertCircle className="h-4 w-4 text-destructive" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{counts.needs_rewrite}</div>

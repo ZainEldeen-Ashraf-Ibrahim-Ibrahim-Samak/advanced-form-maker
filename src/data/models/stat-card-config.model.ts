@@ -1,11 +1,15 @@
 import mongoose, { Schema, type Document, type Model } from "mongoose";
 
 export interface IDashboardStatCard extends Document {
-  slug: "total" | "pending" | "draft" | "viewed" | "needs_rewrite";
+  slug: string;
   visible: boolean;
   sortOrder: number;
   displayNameAr: string | null;
   displayNameEn: string | null;
+  logoUrl: string | null;
+  metricLabel: string | null;
+  metricValue: string | null;
+  isDefault: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,7 +20,6 @@ const statCardConfigSchema = new Schema<IDashboardStatCard>(
       type: String,
       required: true,
       unique: true,
-      enum: ["total", "pending", "draft", "viewed", "needs_rewrite"],
       index: true,
     },
     visible: {
@@ -35,6 +38,22 @@ const statCardConfigSchema = new Schema<IDashboardStatCard>(
     displayNameEn: {
       type: String,
       default: null,
+    },
+    logoUrl: {
+      type: String,
+      default: null,
+    },
+    metricLabel: {
+      type: String,
+      default: null,
+    },
+    metricValue: {
+      type: String,
+      default: null,
+    },
+    isDefault: {
+      type: Boolean,
+      default: false,
     },
   },
   {

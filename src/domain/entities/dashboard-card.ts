@@ -3,7 +3,6 @@ export interface DashboardCard {
   formTemplateId: string;
   visible: boolean;
   sortOrder: number;
-  displayName: string | null;
   displayNameAr: string | null;
   displayNameEn: string | null;
   logoUrl: string | null;
@@ -23,7 +22,6 @@ export interface UpdateDashboardCardInput {
   formTemplateId: string;
   visible?: boolean;
   sortOrder?: number;
-  displayName?: string | null;
   displayNameAr?: string | null;
   displayNameEn?: string | null;
   logoUrl?: string | null;

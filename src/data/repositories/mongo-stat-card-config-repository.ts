@@ -1,8 +1,14 @@
 import { StatCardConfigRepository } from "@/domain/repositories/stat-card-config-repository";
-import { StatCardConfig, UpdateStatCardConfigInput } from "@/domain/entities/stat-card-config";
+import {
+  StatCardConfig,
+  UpdateStatCardConfigInput,
+  CreateStatCardConfigInput,
+} from "@/domain/entities/stat-card-config";
 import { StatCardConfigModel } from "@/data/models/stat-card-config.model";
 import { connectToDatabase } from "@/lib/db";
 import { logger } from "@/lib/dev-logger";
+
+const DEFAULT_SLUGS = new Set(["total", "pending", "draft", "viewed", "needs_rewrite"]);
 
 function toEntity(doc: any): StatCardConfig {
   return {
@@ -12,6 +18,10 @@ function toEntity(doc: any): StatCardConfig {
     sortOrder: typeof doc.sortOrder === "number" ? doc.sortOrder : 0,
     displayNameAr: doc.displayNameAr ?? null,
     displayNameEn: doc.displayNameEn ?? null,
+    logoUrl: doc.logoUrl ?? null,
+    metricLabel: doc.metricLabel ?? null,
+    metricValue: doc.metricValue ?? null,
+    isDefault: DEFAULT_SLUGS.has(doc.slug),
     createdAt: doc.createdAt as Date,
     updatedAt: doc.updatedAt as Date,
   };
@@ -32,6 +42,10 @@ export class MongoStatCardConfigRepository implements StatCardConfigRepository {
   async seedDefaults(): Promise<void> {
     try {
       await connectToDatabase();
+      // Only seed on first-ever run — if any cards already exist, skip
+      const count = await StatCardConfigModel.countDocuments();
+      if (count > 0) return;
+
       const defaults = [
         { slug: "total", sortOrder: 0 },
         { slug: "pending", sortOrder: 1 },
@@ -50,13 +64,14 @@ export class MongoStatCardConfigRepository implements StatCardConfigRepository {
               sortOrder: def.sortOrder,
               displayNameAr: null,
               displayNameEn: null,
+              logoUrl: null,
             },
           },
           upsert: true,
         },
       }));
 
-      await StatCardConfigModel.bulkWrite(bulkOps);
+      await StatCardConfigModel.bulkWrite(bulkOps as any);
     } catch (error) {
       logger.error("Failed to seed default stat card configs", error);
       throw error;
@@ -74,6 +89,9 @@ export class MongoStatCardConfigRepository implements StatCardConfigRepository {
         if (config.sortOrder !== undefined) updateDoc.sortOrder = config.sortOrder;
         if (config.displayNameAr !== undefined) updateDoc.displayNameAr = config.displayNameAr;
         if (config.displayNameEn !== undefined) updateDoc.displayNameEn = config.displayNameEn;
+        if (config.logoUrl !== undefined) updateDoc.logoUrl = config.logoUrl;
+        if (config.metricLabel !== undefined) updateDoc.metricLabel = config.metricLabel;
+        if (config.metricValue !== undefined) updateDoc.metricValue = config.metricValue;
 
         return {
           updateOne: {
@@ -84,9 +102,40 @@ export class MongoStatCardConfigRepository implements StatCardConfigRepository {
         };
       });
 
-      await StatCardConfigModel.bulkWrite(bulkOps);
+      await StatCardConfigModel.bulkWrite(bulkOps as any);
     } catch (error) {
       logger.error("Failed to upsert stat card configs", { configs, error });
+      throw error;
+    }
+  }
+
+  async create(input: CreateStatCardConfigInput): Promise<StatCardConfig> {
+    try {
+      await connectToDatabase();
+      const doc = await StatCardConfigModel.create({
+        slug: input.slug,
+        displayNameAr: input.displayNameAr,
+        displayNameEn: input.displayNameEn,
+        logoUrl: input.logoUrl ?? null,
+        metricLabel: input.metricLabel ?? null,
+        metricValue: input.metricValue ?? null,
+        sortOrder: input.sortOrder,
+        visible: true,
+        isDefault: false,
+      });
+      return toEntity(doc.toObject());
+    } catch (error) {
+      logger.error("Failed to create stat card config", { input, error });
+      throw error;
+    }
+  }
+
+  async deleteBySlug(slug: string): Promise<void> {
+    try {
+      await connectToDatabase();
+      await StatCardConfigModel.deleteOne({ slug });
+    } catch (error) {
+      logger.error("Failed to delete stat card config", { slug, error });
       throw error;
     }
   }

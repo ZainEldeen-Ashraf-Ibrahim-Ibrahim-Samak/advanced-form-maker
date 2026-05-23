@@ -13,7 +13,6 @@ export interface FormSummaryCardItem {
   sortOrder: number;
   submissionCount: number;
   isLocked: boolean;
-  displayName: string | null;
   displayNameAr: string | null;
   displayNameEn: string | null;
   logoUrl: string | null;
@@ -31,6 +30,10 @@ export interface StatCardItem {
   sortOrder: number;
   displayNameAr: string | null;
   displayNameEn: string | null;
+  logoUrl: string | null;
+  metricLabel: string | null;
+  metricValue: string | null;
+  isDefault: boolean;
 }
 
 export type UnifiedCardItem = FormSummaryCardItem | StatCardItem;
@@ -67,13 +70,17 @@ export class ManageDashboardCardsUseCase {
       return {
         cardType: "stat",
         slug: c.slug,
-        defaultLabelEn: def?.defaultLabelEn || "",
-        defaultLabelAr: def?.defaultLabelAr || "",
+        defaultLabelEn: def?.defaultLabelEn || c.displayNameEn || c.slug,
+        defaultLabelAr: def?.defaultLabelAr || c.displayNameAr || c.slug,
         defaultIcon: def?.defaultIcon || "file-text",
         visible: c.visible,
         sortOrder: c.sortOrder,
         displayNameAr: c.displayNameAr,
         displayNameEn: c.displayNameEn,
+        logoUrl: c.logoUrl,
+        metricLabel: c.metricLabel,
+        metricValue: c.metricValue,
+        isDefault: c.isDefault,
       };
     });
 
@@ -111,7 +118,6 @@ export class ManageDashboardCardsUseCase {
           sortOrder: card.sortOrder,
           submissionCount,
           isLocked: template.isLocked,
-          displayName: card.displayName,
           displayNameAr: card.displayNameAr,
           displayNameEn: card.displayNameEn,
           logoUrl: card.logoUrl,
@@ -147,17 +153,21 @@ export class ManageDashboardCardsUseCase {
           sortOrder: card.sortOrder,
           displayNameAr: card.displayNameAr,
           displayNameEn: card.displayNameEn,
-        });
-      } else {
-        formUpdates.push({
-          formTemplateId: card.formTemplateId,
-          visible: card.visible,
-          sortOrder: card.sortOrder,
-          displayNameAr: card.displayNameAr,
-          displayNameEn: card.displayNameEn,
           logoUrl: card.logoUrl,
           metricLabel: card.metricLabel,
           metricValue: card.metricValue,
+        });
+      } else {
+        const fc = card as UpdateDashboardCardInput & { cardType: "form" };
+        formUpdates.push({
+          formTemplateId: fc.formTemplateId,
+          visible: fc.visible,
+          sortOrder: fc.sortOrder,
+          displayNameAr: fc.displayNameAr,
+          displayNameEn: fc.displayNameEn,
+          logoUrl: fc.logoUrl,
+          metricLabel: fc.metricLabel,
+          metricValue: fc.metricValue,
         });
       }
     }
@@ -166,5 +176,45 @@ export class ManageDashboardCardsUseCase {
       this.cardRepo.updateMany(formUpdates),
       this.statCardRepo.upsertMany(statUpdates),
     ]);
+  }
+
+  async addCustomStatCard(displayNameEn: string, displayNameAr: string): Promise<StatCardItem> {
+    // Generate a unique slug from the English name
+    const baseSlug = displayNameEn
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_|_$/g, "") || "custom";
+    const slug = `custom_${baseSlug}_${Date.now()}`;
+
+    // Determine the next sortOrder
+    const existing = await this.statCardRepo.listAll();
+    const maxOrder = existing.reduce((max, c) => Math.max(max, c.sortOrder), -1);
+
+    const created = await this.statCardRepo.create({
+      slug,
+      displayNameEn: displayNameEn || null,
+      displayNameAr: displayNameAr || null,
+      sortOrder: maxOrder + 1,
+    });
+
+    return {
+      cardType: "stat",
+      slug: created.slug,
+      defaultLabelEn: displayNameEn || slug,
+      defaultLabelAr: displayNameAr || slug,
+      defaultIcon: "file-text",
+      visible: true,
+      sortOrder: created.sortOrder,
+      displayNameAr: created.displayNameAr,
+      displayNameEn: created.displayNameEn,
+      logoUrl: created.logoUrl,
+      metricLabel: created.metricLabel,
+      metricValue: created.metricValue,
+      isDefault: false,
+    };
+  }
+
+  async deleteStatCard(slug: string): Promise<void> {
+    await this.statCardRepo.deleteBySlug(slug);
   }
 }

@@ -59,6 +59,9 @@ export function useDashboardAnalytics() {
           visible: c.visible,
           displayNameAr: c.displayNameAr,
           displayNameEn: c.displayNameEn,
+          logoUrl: c.logoUrl,
+          metricLabel: c.metricLabel,
+          metricValue: c.metricValue,
         };
       } else {
         return {
@@ -66,7 +69,6 @@ export function useDashboardAnalytics() {
           formTemplateId: c.formTemplateId,
           sortOrder: c.sortOrder,
           visible: c.visible,
-          displayName: c.displayName,
           displayNameAr: c.displayNameAr,
           displayNameEn: c.displayNameEn,
           logoUrl: c.logoUrl,
@@ -138,6 +140,65 @@ export function useDashboardAnalytics() {
     }
   };
 
+  const suggestIcon = async (titleAr: string, titleEn: string): Promise<string | null> => {
+    try {
+      const res = await fetch("/api/admin/dashboard/cards/suggest-icon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ titleAr, titleEn }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.success ? (data.data.icon as string) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const addStatCard = async (displayNameEn: string, displayNameAr: string): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/admin/dashboard/cards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ displayNameEn, displayNameAr }),
+      });
+      if (!res.ok) throw new Error("Failed to create stat card");
+      const data = await res.json();
+      if (data.success) {
+        setCards(data.data.allCards);
+        toast.success(t("cardCreated") || "Card created successfully");
+        return true;
+      }
+      throw new Error(data.error);
+    } catch (err) {
+      toast.error(t("cardCreateFailed") || "Failed to create card");
+      return false;
+    }
+  };
+
+  const deleteStatCard = async (slug: string): Promise<void> => {
+    const previousCards = [...cards];
+    setCards((prev) => prev.filter((c) => !(c.cardType === "stat" && c.slug === slug)));
+    try {
+      const res = await fetch("/api/admin/dashboard/cards", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug }),
+      });
+      if (!res.ok) throw new Error("Failed to delete stat card");
+      const data = await res.json();
+      if (data.success) {
+        setCards(data.data);
+        toast.success(t("cardDeleted") || "Card deleted");
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (err) {
+      setCards(previousCards);
+      toast.error(t("cardDeleteFailed") || "Failed to delete card");
+    }
+  };
+
   return {
     cloudinaryUsage,
     isLoadingUsage,
@@ -146,5 +207,8 @@ export function useDashboardAnalytics() {
     reorderCards,
     toggleCardVisibility,
     refreshCards: fetchCards,
+    suggestIcon,
+    addStatCard,
+    deleteStatCard,
   };
 }

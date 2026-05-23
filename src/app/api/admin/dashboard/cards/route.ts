@@ -35,7 +35,6 @@ const formCardSchema = z.object({
   formTemplateId: z.string(),
   visible: z.boolean().optional(),
   sortOrder: z.number().int().nonnegative().optional(),
-  displayName: z.string().nullable().optional(),
   displayNameAr: z.string().nullable().optional(),
   displayNameEn: z.string().nullable().optional(),
   logoUrl: z.string().nullable().optional(),
@@ -50,6 +49,9 @@ const statCardSchema = z.object({
   sortOrder: z.number().int().nonnegative().optional(),
   displayNameAr: z.string().nullable().optional(),
   displayNameEn: z.string().nullable().optional(),
+  logoUrl: z.string().nullable().optional(),
+  metricLabel: z.string().nullable().optional(),
+  metricValue: z.string().nullable().optional(),
 });
 
 const updateCardSchema = z.discriminatedUnion("cardType", [
@@ -83,5 +85,64 @@ export async function PUT(request: Request) {
   } catch (error) {
     logger.error("Failed to update dashboard cards config", error);
     return errorResponse("Failed to update dashboard cards config", 500, "CARDS_UPDATE_FAILED");
+  }
+}
+
+const createStatCardSchema = z.object({
+  displayNameEn: z.string().min(1),
+  displayNameAr: z.string().min(1),
+});
+
+export async function POST(request: Request) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "admin") {
+    return unauthorizedResponse();
+  }
+
+  try {
+    const parsedBody = await parseSecureJson(request);
+    if (!parsedBody.success) {
+      return errorResponse(parsedBody.error, 400, parsedBody.code);
+    }
+    const parsed = createStatCardSchema.safeParse(parsedBody.data);
+    if (!parsed.success) {
+      return errorResponse("Validation failed", 400, "VALIDATION_FAILED", parsed.error.flatten());
+    }
+
+    const card = await useCase.addCustomStatCard(parsed.data.displayNameEn, parsed.data.displayNameAr);
+    const allCards = await useCase.listCardsWithFormData();
+    return successResponse({ card, allCards });
+  } catch (error) {
+    logger.error("Failed to create custom stat card", error);
+    return errorResponse("Failed to create custom stat card", 500, "CARD_CREATE_FAILED");
+  }
+}
+
+const deleteStatCardSchema = z.object({
+  slug: z.string(),
+});
+
+export async function DELETE(request: Request) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "admin") {
+    return unauthorizedResponse();
+  }
+
+  try {
+    const parsedBody = await parseSecureJson(request);
+    if (!parsedBody.success) {
+      return errorResponse(parsedBody.error, 400, parsedBody.code);
+    }
+    const parsed = deleteStatCardSchema.safeParse(parsedBody.data);
+    if (!parsed.success) {
+      return errorResponse("Validation failed", 400, "VALIDATION_FAILED", parsed.error.flatten());
+    }
+
+    await useCase.deleteStatCard(parsed.data.slug);
+    const allCards = await useCase.listCardsWithFormData();
+    return successResponse(allCards);
+  } catch (error: any) {
+    logger.error("Failed to delete stat card", error);
+    return errorResponse("Failed to delete stat card", 500, "CARD_DELETE_FAILED");
   }
 }
