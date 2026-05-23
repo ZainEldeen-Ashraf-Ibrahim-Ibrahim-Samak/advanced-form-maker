@@ -4,6 +4,9 @@ export interface DashboardCard {
   visible: boolean;
   sortOrder: number;
   displayName: string | null;
+  displayNameAr: string | null;
+  displayNameEn: string | null;
+  logoUrl: string | null;
   metricLabel: string | null;
   metricValue: string | null;
   createdAt: Date;
@@ -21,6 +24,9 @@ export interface UpdateDashboardCardInput {
   visible?: boolean;
   sortOrder?: number;
   displayName?: string | null;
+  displayNameAr?: string | null;
+  displayNameEn?: string | null;
+  logoUrl?: string | null;
   metricLabel?: string | null;
   metricValue?: string | null;
 }

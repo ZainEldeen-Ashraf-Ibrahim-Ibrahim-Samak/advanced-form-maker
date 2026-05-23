@@ -195,7 +195,9 @@ export class MongoSubmissionRepository implements SubmissionRepository {
   async findByFormId(formTemplateId: string): Promise<Submission[]> {
     try {
       await connectToDatabase();
-      const docs = await SubmissionModel.find({ formTemplateId }).lean();
+      const docs = await SubmissionModel.find({
+        formTemplateId: new mongoose.Types.ObjectId(formTemplateId),
+      }).lean();
       return docs.map(toEntity);
     } catch (error) {
       logger.error("Failed to find submissions by form id", { formTemplateId, error });

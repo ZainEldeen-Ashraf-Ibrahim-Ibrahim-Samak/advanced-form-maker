@@ -133,7 +133,17 @@
     "editMetricLabel": "Metric Label",
     "editMetricValue": "Metric Value",
     "saveLayout": "Save",
-    "cancelEdit": "Cancel"
+    "cancelEdit": "Cancel",
+    "editCardNameAr": "Card Name (AR)",
+    "editCardNameEn": "Card Name (EN)",
+    "editLogoUrl": "Logo URL",
+    "logoUrlPlaceholder": "https://example.com/logo.png",
+    "statCardTotal": "Total Submissions",
+    "statCardPending": "Pending",
+    "statCardDraft": "Drafts",
+    "statCardViewed": "Viewed",
+    "statCardNeedsRewrite": "Needs Rewrite",
+    "formSummariesTitle": "Form Summaries"
   },
   "forms": {
     "title": "Form Templates",

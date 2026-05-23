@@ -133,7 +133,17 @@
     "editMetricLabel": "تسمية المؤشر",
     "editMetricValue": "قيمة المؤشر",
     "saveLayout": "حفظ",
-    "cancelEdit": "إلغاء"
+    "cancelEdit": "إلغاء",
+    "editCardNameAr": "اسم البطاقة (عربي)",
+    "editCardNameEn": "اسم البطاقة (إنجليزي)",
+    "editLogoUrl": "رابط الشعار",
+    "logoUrlPlaceholder": "https://example.com/logo.png",
+    "statCardTotal": "إجمالي الطلبات",
+    "statCardPending": "قيد الانتظار",
+    "statCardDraft": "المسودات",
+    "statCardViewed": "تمت المراجعة",
+    "statCardNeedsRewrite": "يحتاج تعديل",
+    "formSummariesTitle": "ملخص النماذج"
   },
   "forms": {
     "title": "قوالب النماذج",

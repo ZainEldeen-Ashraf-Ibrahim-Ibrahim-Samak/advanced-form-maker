@@ -11,6 +11,8 @@ import { SubmissionsTable } from "@/presentation/components/admin/submissions-ta
 import { FileText, Clock, Eye, AlertCircle, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "next/navigation";
+import { useDashboardAnalytics } from "@/presentation/view-models/use-dashboard-analytics";
+import { CardManagerDialog } from "@/presentation/components/admin/card-manager-dialog";
 
 interface FormOption {
   id: string;
@@ -32,6 +34,8 @@ export function SubmissionsManager() {
   const [search, setSearch] = useState("");
   const [uniqueAdmins, setUniqueAdmins] = useState<string[]>([]);
   const [formOptions, setFormOptions] = useState<FormOption[]>([]);
+  const [isCardManagerOpen, setIsCardManagerOpen] = useState(false);
+  const { cards, reorderCards } = useDashboardAnalytics();
 
   const formNameById = formOptions.reduce<Record<string, string>>((acc, form) => {
     acc[form.id] = form.name;
@@ -126,10 +130,23 @@ export function SubmissionsManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold tracking-tight">{t("title")}</h2>
-        <p className="text-muted-foreground">{t("subtitle")}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-3xl font-bold tracking-tight">{t("title")}</h2>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setIsCardManagerOpen(true)}>
+          {td("manageCards") || "Manage Cards"}
+        </Button>
       </div>
+
+      <CardManagerDialog
+        open={isCardManagerOpen}
+        onOpenChange={setIsCardManagerOpen}
+        cards={cards}
+        onSave={reorderCards}
+        t={td}
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>

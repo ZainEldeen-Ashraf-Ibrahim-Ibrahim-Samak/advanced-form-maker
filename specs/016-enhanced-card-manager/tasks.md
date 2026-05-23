@@ -23,11 +23,11 @@ No new setup required — this feature modifies an existing Next.js project. Pro
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T001 [P] Add `displayNameAr`, `displayNameEn`, `logoUrl` fields (all `String, default: null`) to `IDashboardCard` interface and `dashboardCardSchema` in `src/data/models/dashboard-card.model.ts`
-- [ ] T002 [P] Add `displayNameAr: string | null`, `displayNameEn: string | null`, `logoUrl: string | null` to `DashboardCard` interface and `UpdateDashboardCardInput` interface in `src/domain/entities/dashboard-card.ts`
-- [ ] T003 [P] Create `StatCardConfig` Mongoose schema and model (`IDashboardStatCard` interface, fields: `slug` String required unique enum, `visible` Boolean default true, `sortOrder` Number default 0, `displayNameAr` String null, `displayNameEn` String null, timestamps, collection `stat_card_configs`) in `src/data/models/stat-card-config.model.ts`
-- [ ] T004 [P] Create `StatCardConfig` domain entity (`id`, `slug`, `visible`, `sortOrder`, `displayNameAr`, `displayNameEn`, `createdAt`, `updatedAt`) and `UpdateStatCardConfigInput` interface in `src/domain/entities/stat-card-config.ts`
-- [ ] T005 [P] Create `StatCardConfigRepository` interface with `listAll(): Promise<StatCardConfig[]>`, `seedDefaults(): Promise<void>`, `upsertMany(configs: UpdateStatCardConfigInput[]): Promise<void>` in `src/domain/repositories/stat-card-config-repository.ts`
+- [x] T001 [P] Add `displayNameAr`, `displayNameEn`, `logoUrl` fields (all `String, default: null`) to `IDashboardCard` interface and `dashboardCardSchema` in `src/data/models/dashboard-card.model.ts`
+- [x] T002 [P] Add `displayNameAr: string | null`, `displayNameEn: string | null`, `logoUrl: string | null` to `DashboardCard` interface and `UpdateDashboardCardInput` interface in `src/domain/entities/dashboard-card.ts`
+- [x] T003 [P] Create `StatCardConfig` Mongoose schema and model (`IDashboardStatCard` interface, fields: `slug` String required unique enum, `visible` Boolean default true, `sortOrder` Number default 0, `displayNameAr` String null, `displayNameEn` String null, timestamps, collection `stat_card_configs`) in `src/data/models/stat-card-config.model.ts`
+- [x] T004 [P] Create `StatCardConfig` domain entity (`id`, `slug`, `visible`, `sortOrder`, `displayNameAr`, `displayNameEn`, `createdAt`, `updatedAt`) and `UpdateStatCardConfigInput` interface in `src/domain/entities/stat-card-config.ts`
+- [x] T005 [P] Create `StatCardConfigRepository` interface with `listAll(): Promise<StatCardConfig[]>`, `seedDefaults(): Promise<void>`, `upsertMany(configs: UpdateStatCardConfigInput[]): Promise<void>` in `src/domain/repositories/stat-card-config-repository.ts`
 
 **Checkpoint**: All shared entities and schemas in place — user story implementation can now begin.
 
@@ -39,7 +39,7 @@ No new setup required — this feature modifies an existing Next.js project. Pro
 
 **Independent Test**: Navigate to any form with ≥1 submission → Analysis tab shows correct Total Submissions count and a real date range (not "No submissions yet").
 
-- [ ] T006 [US6] Fix `findByFormId` in `src/data/repositories/mongo-submission-repository.ts` — change `SubmissionModel.find({ formTemplateId }).lean()` to `SubmissionModel.find({ formTemplateId: new mongoose.Types.ObjectId(formTemplateId) }).lean()` (add import for mongoose if not already imported at top of file)
+- [x] T006 [US6] Fix `findByFormId` in `src/data/repositories/mongo-submission-repository.ts` — change `SubmissionModel.find({ formTemplateId }).lean()` to `SubmissionModel.find({ formTemplateId: new mongoose.Types.ObjectId(formTemplateId) }).lean()` (add import for mongoose if not already imported at top of file)
 
 **Checkpoint**: Analysis panel correctly shows submission count and date range for any form with ≥1 submissions.
 
@@ -51,11 +51,11 @@ No new setup required — this feature modifies an existing Next.js project. Pro
 
 **Independent Test**: Set AR + EN names for a form card in the card manager → switch locale AR/EN on dashboard → correct name shown. Set logo URL → logo appears on card face.
 
-- [ ] T007 [P] [US1] Update `toEntity()` mapper and `updateMany()` bulk write in `src/data/repositories/mongo-dashboard-card-repository.ts` to include `displayNameAr`, `displayNameEn`, `logoUrl` fields
-- [ ] T008 [P] [US1] Add `displayNameAr: string | null`, `displayNameEn: string | null`, `logoUrl: string | null` to `DashboardCardWithData` interface and `FormSummaryCardItem` (introduce if not yet present) in `src/presentation/view-models/use-dashboard-analytics.ts`; update `reorderCards` payload to include new fields
-- [ ] T009 [P] [US1] Add `displayNameAr`, `displayNameEn`, `logoUrl` to the `updateCardSchema` Zod object in `src/app/api/admin/dashboard/cards/route.ts` (all `.string().nullable().optional()`)
-- [ ] T010 [P] [US1] Add i18n keys `editCardNameAr`, `editCardNameEn`, `editLogoUrl`, `logoUrlPlaceholder` under the `dashboard` namespace in `src/messages/en.json` and `src/messages/ar.json`
-- [ ] T011 [US1] Update `SortableCardRow` in `src/presentation/components/admin/dashboard/index.tsx`: (a) replace single `displayName` `<Input>` with two inputs for `displayNameAr` and `displayNameEn`; (b) add `logoUrl` `<Input>` field; (c) update card display to use `locale === 'ar' ? (card.displayNameAr ?? card.displayNameEn ?? card.name) : (card.displayNameEn ?? card.displayNameAr ?? card.name)` via `useLocale()`; (d) update `onUpdateField` type to include the new fields; (e) update `updateDraftCardField` in `AdminDashboard` to handle new field names
+- [x] T007 [P] [US1] Update `toEntity()` mapper and `updateMany()` bulk write in `src/data/repositories/mongo-dashboard-card-repository.ts` to include `displayNameAr`, `displayNameEn`, `logoUrl` fields
+- [x] T008 [P] [US1] Add `displayNameAr: string | null`, `displayNameEn: string | null`, `logoUrl: string | null` to `DashboardCardWithData` interface and `FormSummaryCardItem` (introduce if not yet present) in `src/presentation/view-models/use-dashboard-analytics.ts`; update `reorderCards` payload to include new fields
+- [x] T009 [P] [US1] Add `displayNameAr`, `displayNameEn`, `logoUrl` to the `updateCardSchema` Zod object in `src/app/api/admin/dashboard/cards/route.ts` (all `.string().nullable().optional()`)
+- [x] T010 [P] [US1] Add i18n keys `editCardNameAr`, `editCardNameEn`, `editLogoUrl`, `logoUrlPlaceholder` under the `dashboard` namespace in `src/messages/en.json` and `src/messages/ar.json`
+- [x] T011 [US1] Update `SortableCardRow` in `src/presentation/components/admin/dashboard/index.tsx`: (a) replace single `displayName` `<Input>` with two inputs for `displayNameAr` and `displayNameEn`; (b) add `logoUrl` `<Input>` field; (c) update card display to use `locale === 'ar' ? (card.displayNameAr ?? card.displayNameEn ?? card.name) : (card.displayNameEn ?? card.displayNameAr ?? card.name)` via `useLocale()`; (d) update `onUpdateField` type to include the new fields; (e) update `updateDraftCardField` in `AdminDashboard` to handle new field names
 
 **Checkpoint**: Card manager dialog shows AR Name / EN Name / Logo URL inputs. Dashboard cards show locale-correct title. Logo renders when URL is set.
 
@@ -67,7 +67,7 @@ No new setup required — this feature modifies an existing Next.js project. Pro
 
 **Independent Test**: Load dashboard → form summary cards section appears before the Total Submissions / Pending / Drafts / Viewed / Needs Rewrite count cards.
 
-- [ ] T012 [US2] In `src/presentation/components/admin/dashboard/index.tsx`, move the `{!isLoadingCards && cards.length > 0 && (…)}` Form Summaries block to immediately after the page title `<div>` (before the `<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">` stat cards grid)
+- [x] T012 [US2] In `src/presentation/components/admin/dashboard/index.tsx`, move the `{!isLoadingCards && cards.length > 0 && (…)}` Form Summaries block to immediately after the page title `<div>` (before the `<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">` stat cards grid)
 
 **Checkpoint**: Dashboard renders Form Summaries first, stat counts below.
 
@@ -79,12 +79,12 @@ No new setup required — this feature modifies an existing Next.js project. Pro
 
 **Independent Test**: Open card manager → stat cards appear as entries → hide "Needs Rewrite" → save → card disappears from dashboard → re-enable → it reappears.
 
-- [ ] T013 [US3] Implement `MongoStatCardConfigRepository` in `src/data/repositories/mongo-stat-card-config-repository.ts`: `listAll()` finds all sorted by sortOrder; `seedDefaults()` bulkWrite upserts 5 slugs (`total`, `pending`, `draft`, `viewed`, `needs_rewrite`) with defaults (visible true, sortOrder 0–4, null labels) using `setOnInsert` so existing config is not overwritten; `upsertMany()` bulkWrite `$set` per slug
-- [ ] T014 [US3] Extend `ManageDashboardCardsUseCase` in `src/domain/use-cases/admin/manage-dashboard-cards.ts`: add `StatCardConfigRepository` constructor parameter; define `STAT_CARD_DEFAULTS` constant (slug → `defaultLabelEn`, `defaultLabelAr`, `defaultIcon`, initial sortOrder); update `listCardsWithFormData()` to call `statCardRepo.seedDefaults()` then `statCardRepo.listAll()`, build a `StatCardItem[]` array, merge with form card items into a single sorted array by `sortOrder`, return `UnifiedCardItem[]`; update `saveCardConfig()` to split input by `cardType` and route to the correct repo
-- [ ] T015 [US3] Export `UnifiedCardItem`, `FormSummaryCardItem`, `StatCardItem` types from `src/domain/use-cases/admin/manage-dashboard-cards.ts` (or a new `src/domain/entities/unified-card.ts` if preferred); update `DashboardCardWithData` export to be an alias or union
-- [ ] T016 [US3] Update `src/app/api/admin/dashboard/cards/route.ts`: instantiate `MongoStatCardConfigRepository`; pass it to `ManageDashboardCardsUseCase` constructor; extend the `updateCardSchema` Zod union to discriminate on `cardType: z.enum(['form','stat'])` — form items require `formTemplateId`, stat items require `slug`
-- [ ] T017 [P] [US3] Add stat card label i18n keys (`statCardTotal`, `statCardPending`, `statCardDraft`, `statCardViewed`, `statCardNeedsRewrite`, `formSummariesTitle`) under `dashboard` namespace in `src/messages/en.json` and `src/messages/ar.json`
-- [ ] T018 [US3] Update `useDashboardAnalytics` view-model in `src/presentation/view-models/use-dashboard-analytics.ts`: change `cards` state type to `UnifiedCardItem[]`; update `reorderCards` to include `cardType` in payload; update `DashboardCardWithData` export to `UnifiedCardItem` (or re-export). Update `AdminDashboard` in `src/presentation/components/admin/dashboard/index.tsx`: render stat cards from the unified `cards` array (filter `cardType === 'stat'`) instead of hardcoded JSX, using `counts` from `useSubmissionsList()` for live values; keep form summary cards from filtering `cardType === 'form'`; update `SortableCardRow` to accept both card types and render appropriate inputs (stat cards show only AR/EN name; form cards show AR/EN name + logo + metric)
+- [x] T013 [US3] Implement `MongoStatCardConfigRepository` in `src/data/repositories/mongo-stat-card-config-repository.ts`: `listAll()` finds all sorted by sortOrder; `seedDefaults()` bulkWrite upserts 5 slugs (`total`, `pending`, `draft`, `viewed`, `needs_rewrite`) with defaults (visible true, sortOrder 0–4, null labels) using `setOnInsert` so existing config is not overwritten; `upsertMany()` bulkWrite `$set` per slug
+- [x] T014 [US3] Extend `ManageDashboardCardsUseCase` in `src/domain/use-cases/admin/manage-dashboard-cards.ts`: add `StatCardConfigRepository` constructor parameter; define `STAT_CARD_DEFAULTS` constant (slug → `defaultLabelEn`, `defaultLabelAr`, `defaultIcon`, initial sortOrder); update `listCardsWithFormData()` to call `statCardRepo.seedDefaults()` then `statCardRepo.listAll()`, build a `StatCardItem[]` array, merge with form card items into a single sorted array by `sortOrder`, return `UnifiedCardItem[]`; update `saveCardConfig()` to split input by `cardType` and route to the correct repo
+- [x] T015 [US3] Export `UnifiedCardItem`, `FormSummaryCardItem`, `StatCardItem` types from `src/domain/use-cases/admin/manage-dashboard-cards.ts` (or a new `src/domain/entities/unified-card.ts` if preferred); update `DashboardCardWithData` export to be an alias or union
+- [x] T016 [US3] Update `src/app/api/admin/dashboard/cards/route.ts`: instantiate `MongoStatCardConfigRepository`; pass it to `ManageDashboardCardsUseCase` constructor; extend the `updateCardSchema` Zod union to discriminate on `cardType: z.enum(['form','stat'])` — form items require `formTemplateId`, stat items require `slug`
+- [x] T017 [P] [US3] Add stat card label i18n keys (`statCardTotal`, `statCardPending`, `statCardDraft`, `statCardViewed`, `statCardNeedsRewrite`, `formSummariesTitle`) under `dashboard` namespace in `src/messages/en.json` and `src/messages/ar.json`
+- [x] T018 [US3] Update `useDashboardAnalytics` view-model in `src/presentation/view-models/use-dashboard-analytics.ts`: change `cards` state type to `UnifiedCardItem[]`; update `reorderCards` to include `cardType` in payload; update `DashboardCardWithData` export to `UnifiedCardItem` (or re-export). Update `AdminDashboard` in `src/presentation/components/admin/dashboard/index.tsx`: render stat cards from the unified `cards` array (filter `cardType === 'stat'`) instead of hardcoded JSX, using `counts` from `useSubmissionsList()` for live values; keep form summary cards from filtering `cardType === 'form'`; update `SortableCardRow` to accept both card types and render appropriate inputs (stat cards show only AR/EN name; form cards show AR/EN name + logo + metric)
 
 **Checkpoint**: Card manager lists all 7+ cards (5 stat + form cards). Toggling stat card visibility shows/hides it on dashboard. Custom AR/EN labels render correctly.
 
@@ -96,9 +96,9 @@ No new setup required — this feature modifies an existing Next.js project. Pro
 
 **Independent Test**: Navigate to Submissions page → click "Manage Cards" → dialog opens → make change → save → visit Dashboard → change is reflected.
 
-- [ ] T019 [US4] Extract the card manager `<Dialog>` JSX and `SortableCardRow` component from `src/presentation/components/admin/dashboard/index.tsx` into a new shared component `src/presentation/components/admin/card-manager-dialog/index.tsx` with props: `open: boolean`, `onOpenChange: (v: boolean) => void`, `cards: UnifiedCardItem[]`, `onSave: (cards: UnifiedCardItem[]) => Promise<void>`, `t: ReturnType<typeof useTranslations>`
-- [ ] T020 [US4] Update `src/presentation/components/admin/dashboard/index.tsx` to import and use `<CardManagerDialog>` instead of the inline Dialog JSX (pass existing `isEditDialogOpen`, `draftCards`, `handleSave`, `handleCancel` state/handlers)
-- [ ] T021 [US4] In `src/presentation/components/admin/submissions-manager/index.tsx`: import `useDashboardAnalytics` and `CardManagerDialog`; add `isCardManagerOpen` state; add a "Manage Cards" `<Button variant="outline" size="sm">` in the page header section; render `<CardManagerDialog>` wired to the cards/reorderCards from the hook
+- [x] T019 [US4] Extract the card manager `<Dialog>` JSX and `SortableCardRow` component from `src/presentation/components/admin/dashboard/index.tsx` into a new shared component `src/presentation/components/admin/card-manager-dialog/index.tsx` with props: `open: boolean`, `onOpenChange: (v: boolean) => void`, `cards: UnifiedCardItem[]`, `onSave: (cards: UnifiedCardItem[]) => Promise<void>`, `t: ReturnType<typeof useTranslations>`
+- [x] T020 [US4] Update `src/presentation/components/admin/dashboard/index.tsx` to import and use `<CardManagerDialog>` instead of the inline Dialog JSX (pass existing `isEditDialogOpen`, `draftCards`, `handleSave`, `handleCancel` state/handlers)
+- [x] T021 [US4] In `src/presentation/components/admin/submissions-manager/index.tsx`: import `useDashboardAnalytics` and `CardManagerDialog`; add `isCardManagerOpen` state; add a "Manage Cards" `<Button variant="outline" size="sm">` in the page header section; render `<CardManagerDialog>` wired to the cards/reorderCards from the hook
 
 **Checkpoint**: "Manage Cards" button visible on Submissions page. Dialog opens and saves correctly from that page.
 
@@ -110,7 +110,7 @@ No new setup required — this feature modifies an existing Next.js project. Pro
 
 **Independent Test**: Compare a form summary card to the Total Submissions stat card — same compact height, same `text-sm font-medium` title, same `text-2xl font-bold` metric, icon top-right.
 
-- [ ] T022 [US5] In `src/presentation/components/admin/dashboard/index.tsx`, update the form summary card rendering in the `cards.filter(c => c.cardType === 'form').map(…)` block: replace `CardDescription` with no description; set `CardHeader` to `flex-row items-center justify-between space-y-0 pb-2`; set `CardTitle` to `text-sm font-medium`; render locale-aware name as title; render logo `<img>` or `<FileText className="h-4 w-4 text-muted-foreground" />` icon on the right; render metric value or submission count with `text-2xl font-bold` in `CardContent`; remove the "Manage →" link from the card face (card becomes a pure stat display; navigation is via the existing form manager page)
+- [x] T022 [US5] In `src/presentation/components/admin/dashboard/index.tsx`, update the form summary card rendering in the `cards.filter(c => c.cardType === 'form').map(…)` block: replace `CardDescription` with no description; set `CardHeader` to `flex-row items-center justify-between space-y-0 pb-2`; set `CardTitle` to `text-sm font-medium`; render locale-aware name as title; render logo `<img>` or `<FileText className="h-4 w-4 text-muted-foreground" />` icon on the right; render metric value or submission count with `text-2xl font-bold` in `CardContent`; remove the "Manage →" link from the card face (card becomes a pure stat display; navigation is via the existing form manager page)
 
 **Checkpoint**: Form summary cards are visually identical in layout to the hardcoded stat cards.
 
@@ -118,9 +118,9 @@ No new setup required — this feature modifies an existing Next.js project. Pro
 
 ## Phase 9: Polish & Cross-Cutting Concerns
 
-- [ ] T023 [P] Audit all dashboard i18n keys added in T010 and T017 — confirm every new string in components uses `t("key")` and has entries in both `src/messages/en.json` and `src/messages/ar.json`
-- [ ] T024 [P] Verify RTL layout in card manager dialog inputs for Arabic locale — `<Input>` fields for AR names should be `dir="rtl"` or inherit RTL from the page; confirm no text overflow in AR names
-- [ ] T025 Run production build to verify TypeScript compilation: `npm run build` (resolves any type errors from the `UnifiedCardItem` union)
+- [x] T023 [P] Audit all dashboard i18n keys added in T010 and T017 — confirm every new string in components uses `t("key")` and has entries in both `src/messages/en.json` and `src/messages/ar.json`
+- [x] T024 [P] Verify RTL layout in card manager dialog inputs for Arabic locale — `<Input>` fields for AR names should be `dir="rtl"` or inherit RTL from the page; confirm no text overflow in AR names
+- [x] T025 Run production build to verify TypeScript compilation: `npm run build` (resolves any type errors from the `UnifiedCardItem` union)
 
 **Checkpoint**: Feature complete, all stories independently testable, build passing.
 

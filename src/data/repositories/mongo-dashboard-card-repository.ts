@@ -12,6 +12,9 @@ function toEntity(doc: any): DashboardCard {
     visible: !!doc.visible,
     sortOrder: typeof doc.sortOrder === "number" ? doc.sortOrder : 0,
     displayName: doc.displayName ?? null,
+    displayNameAr: doc.displayNameAr ?? null,
+    displayNameEn: doc.displayNameEn ?? null,
+    logoUrl: doc.logoUrl ?? null,
     metricLabel: doc.metricLabel ?? null,
     metricValue: doc.metricValue ?? null,
     createdAt: doc.createdAt as Date,
@@ -41,6 +44,9 @@ export class MongoDashboardCardRepository implements DashboardCardRepository {
         if (card.visible !== undefined) updateDoc.visible = card.visible;
         if (card.sortOrder !== undefined) updateDoc.sortOrder = card.sortOrder;
         if (card.displayName !== undefined) updateDoc.displayName = card.displayName;
+        if (card.displayNameAr !== undefined) updateDoc.displayNameAr = card.displayNameAr;
+        if (card.displayNameEn !== undefined) updateDoc.displayNameEn = card.displayNameEn;
+        if (card.logoUrl !== undefined) updateDoc.logoUrl = card.logoUrl;
         if (card.metricLabel !== undefined) updateDoc.metricLabel = card.metricLabel;
         if (card.metricValue !== undefined) updateDoc.metricValue = card.metricValue;
         

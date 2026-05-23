@@ -5,6 +5,9 @@ export interface IDashboardCard extends Document {
   visible: boolean;
   sortOrder: number;
   displayName: string | null;
+  displayNameAr: string | null;
+  displayNameEn: string | null;
+  logoUrl: string | null;
   metricLabel: string | null;
   metricValue: string | null;
   createdAt: Date;
@@ -30,6 +33,18 @@ const dashboardCardSchema = new Schema<IDashboardCard>(
       index: true,
     },
     displayName: {
+      type: String,
+      default: null,
+    },
+    displayNameAr: {
+      type: String,
+      default: null,
+    },
+    displayNameEn: {
+      type: String,
+      default: null,
+    },
+    logoUrl: {
       type: String,
       default: null,
     },

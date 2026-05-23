@@ -2,25 +2,17 @@ import { useState, useEffect, useCallback } from "react";
 import { StorageUsageMetrics } from "@/domain/repositories/storage-repository";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { UnifiedCardItem, UnifiedCardUpdateInput } from "@/domain/use-cases/admin/manage-dashboard-cards";
 
-export interface DashboardCardWithData {
-  formTemplateId: string;
-  name: string;
-  description: string;
-  visible: boolean;
-  sortOrder: number;
-  submissionCount: number;
-  isLocked: boolean;
-  displayName: string | null;
-  metricLabel: string | null;
-  metricValue: string | null;
-}
+export type DashboardCardWithData = UnifiedCardItem;
+
+const getCardId = (c: UnifiedCardItem) => c.cardType === "stat" ? c.slug : c.formTemplateId;
 
 export function useDashboardAnalytics() {
   const t = useTranslations("dashboard");
   const [cloudinaryUsage, setCloudinaryUsage] = useState<StorageUsageMetrics | null>(null);
   const [isLoadingUsage, setIsLoadingUsage] = useState(true);
-  const [cards, setCards] = useState<DashboardCardWithData[]>([]);
+  const [cards, setCards] = useState<UnifiedCardItem[]>([]);
   const [isLoadingCards, setIsLoadingCards] = useState(true);
 
   const fetchCards = useCallback(async () => {
@@ -57,21 +49,42 @@ export function useDashboardAnalytics() {
     void fetchCards();
   }, [fetchCards]);
 
-  const reorderCards = async (newOrder: DashboardCardWithData[]) => {
+  const mapToPayload = (list: UnifiedCardItem[]): UnifiedCardUpdateInput[] => {
+    return list.map((c) => {
+      if (c.cardType === "stat") {
+        return {
+          cardType: "stat" as const,
+          slug: c.slug,
+          sortOrder: c.sortOrder,
+          visible: c.visible,
+          displayNameAr: c.displayNameAr,
+          displayNameEn: c.displayNameEn,
+        };
+      } else {
+        return {
+          cardType: "form" as const,
+          formTemplateId: c.formTemplateId,
+          sortOrder: c.sortOrder,
+          visible: c.visible,
+          displayName: c.displayName,
+          displayNameAr: c.displayNameAr,
+          displayNameEn: c.displayNameEn,
+          logoUrl: c.logoUrl,
+          metricLabel: c.metricLabel,
+          metricValue: c.metricValue,
+        };
+      }
+    });
+  };
+
+  const reorderCards = async (newOrder: UnifiedCardItem[]) => {
     const previousCards = [...cards];
     // Map with new sequential sort orders
     const updatedWithOrder = newOrder.map((c, idx) => ({ ...c, sortOrder: idx }));
     setCards(updatedWithOrder);
 
     try {
-      const payload = updatedWithOrder.map((c) => ({
-        formTemplateId: c.formTemplateId,
-        sortOrder: c.sortOrder,
-        visible: c.visible,
-        displayName: c.displayName,
-        metricLabel: c.metricLabel,
-        metricValue: c.metricValue,
-      }));
+      const payload = mapToPayload(updatedWithOrder);
 
       const res = await fetch("/api/admin/dashboard/cards", {
         method: "PUT",
@@ -93,10 +106,10 @@ export function useDashboardAnalytics() {
     }
   };
 
-  const toggleCardVisibility = async (formId: string) => {
+  const toggleCardVisibility = async (cardId: string) => {
     const previousCards = [...cards];
     const updated = cards.map((c) => {
-      if (c.formTemplateId === formId) {
+      if (getCardId(c) === cardId) {
         return { ...c, visible: !c.visible };
       }
       return c;
@@ -104,14 +117,7 @@ export function useDashboardAnalytics() {
     setCards(updated);
 
     try {
-      const payload = updated.map((c) => ({
-        formTemplateId: c.formTemplateId,
-        sortOrder: c.sortOrder,
-        visible: c.visible,
-        displayName: c.displayName,
-        metricLabel: c.metricLabel,
-        metricValue: c.metricValue,
-      }));
+      const payload = mapToPayload(updated);
 
       const res = await fetch("/api/admin/dashboard/cards", {
         method: "PUT",

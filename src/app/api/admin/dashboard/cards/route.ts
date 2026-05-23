@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { MongoDashboardCardRepository } from "@/data/repositories/mongo-dashboard-card-repository";
 import { MongoFormTemplateRepository } from "@/data/repositories/mongo-form-template-repository";
+import { MongoStatCardConfigRepository } from "@/data/repositories/mongo-stat-card-config-repository";
 import { ManageDashboardCardsUseCase } from "@/domain/use-cases/admin/manage-dashboard-cards";
 import { errorResponse, successResponse, unauthorizedResponse } from "@/lib/api-response";
 import { logger } from "@/lib/dev-logger";
@@ -9,7 +10,8 @@ import { z } from "zod";
 
 const cardRepo = new MongoDashboardCardRepository();
 const formRepo = new MongoFormTemplateRepository();
-const useCase = new ManageDashboardCardsUseCase(cardRepo, formRepo);
+const statCardRepo = new MongoStatCardConfigRepository();
+const useCase = new ManageDashboardCardsUseCase(cardRepo, formRepo, statCardRepo);
 
 export const dynamic = "force-dynamic";
 
@@ -28,14 +30,32 @@ export async function GET() {
   }
 }
 
-const updateCardSchema = z.object({
+const formCardSchema = z.object({
+  cardType: z.literal("form"),
   formTemplateId: z.string(),
   visible: z.boolean().optional(),
   sortOrder: z.number().int().nonnegative().optional(),
   displayName: z.string().nullable().optional(),
+  displayNameAr: z.string().nullable().optional(),
+  displayNameEn: z.string().nullable().optional(),
+  logoUrl: z.string().nullable().optional(),
   metricLabel: z.string().nullable().optional(),
   metricValue: z.string().nullable().optional(),
 });
+
+const statCardSchema = z.object({
+  cardType: z.literal("stat"),
+  slug: z.string(),
+  visible: z.boolean().optional(),
+  sortOrder: z.number().int().nonnegative().optional(),
+  displayNameAr: z.string().nullable().optional(),
+  displayNameEn: z.string().nullable().optional(),
+});
+
+const updateCardSchema = z.discriminatedUnion("cardType", [
+  formCardSchema,
+  statCardSchema,
+]);
 
 const updateCardsSchema = z.array(updateCardSchema);
 
