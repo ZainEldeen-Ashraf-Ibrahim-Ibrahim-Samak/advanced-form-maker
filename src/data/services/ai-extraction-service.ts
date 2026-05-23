@@ -111,7 +111,7 @@ Extract exactly as instructed. Do not include any explanation.`;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-flash-latest",
       contents: [
         {
           inlineData: {

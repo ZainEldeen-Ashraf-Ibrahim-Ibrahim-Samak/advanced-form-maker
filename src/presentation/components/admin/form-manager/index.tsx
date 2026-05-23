@@ -26,7 +26,7 @@ export function FormManager() {
   const ts = useTranslations("sharing");
   const tAi = useTranslations("aiExtraction");
   const locale = useLocale();
-  const { forms, isLoading, createForm, updateForm, deleteForm, toggleLock } = useFormManager();
+  const { forms, isLoading, createForm, updateForm, deleteForm } = useFormManager();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newFormName, setNewFormName] = useState("");
   const [newFormDesc, setNewFormDesc] = useState("");
@@ -39,7 +39,6 @@ export function FormManager() {
   const [editFormDesc, setEditFormDesc] = useState("");
   const [editFormAiAutoFillEnabled, setEditFormAiAutoFillEnabled] = useState(false);
   const [editFormIsLocked, setEditFormIsLocked] = useState(false);
-  const [editFormIsContactForm, setEditFormIsContactForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   // Share Dialog State
@@ -71,7 +70,6 @@ export function FormManager() {
     setEditFormDesc(form.description || "");
     setEditFormAiAutoFillEnabled(form.aiAutoFillEnabled || false);
     setEditFormIsLocked(form.isLocked || false);
-    setEditFormIsContactForm(form.isContactForm || false);
     setIsEditOpen(true);
   }
 
@@ -83,8 +81,7 @@ export function FormManager() {
         name: editFormName.trim(),
         description: editFormDesc.trim(),
         aiAutoFillEnabled: editFormAiAutoFillEnabled,
-        isLocked: editFormIsContactForm ? editFormIsLocked : false,
-        isContactForm: editFormIsContactForm,
+        isLocked: editFormIsLocked,
       });
       setIsEditOpen(false);
       setEditingFormId(null);
@@ -242,7 +239,7 @@ export function FormManager() {
                     ) : (
                       <Badge variant="secondary">{t("inactiveForm")}</Badge>
                     )}
-                    {form.isContactForm && form.isLocked && (
+                    {form.isLocked && (
                       <Badge variant="destructive">
                         {t("locked")}
                       </Badge>
@@ -349,48 +346,19 @@ export function FormManager() {
             </div>
             <div className="flex items-center justify-between rounded-lg border border-zinc-200 dark:border-zinc-800 p-3 shadow-sm bg-zinc-50/50 dark:bg-zinc-900/50">
               <div className="space-y-0.5 max-w-[80%]">
-                <Label htmlFor="edit-form-is-contact" className="text-sm font-semibold cursor-pointer">
-                  {t("isContactForm") || "This is the contact form"}
+                <Label htmlFor="edit-form-locked" className="text-sm font-semibold cursor-pointer">
+                  {t("lockForm")}
                 </Label>
                 <p className="text-[11px] text-muted-foreground leading-normal">
-                  {t("isContactFormDesc") || "Designate this form as the designated contact form."}
+                  {t("lockFormDesc")}
                 </p>
               </div>
               <Switch
-                id="edit-form-is-contact"
-                checked={editFormIsContactForm}
-                onCheckedChange={setEditFormIsContactForm}
+                id="edit-form-locked"
+                checked={editFormIsLocked}
+                onCheckedChange={setEditFormIsLocked}
               />
             </div>
-            {editFormIsContactForm && (
-              <div className="flex items-center justify-between rounded-lg border border-zinc-200 dark:border-zinc-800 p-3 shadow-sm bg-zinc-50/50 dark:bg-zinc-900/50">
-                <div className="space-y-0.5 max-w-[80%]">
-                  <Label htmlFor="edit-form-locked" className="text-sm font-semibold cursor-pointer">
-                    {t("lockForm")}
-                  </Label>
-                  <p className="text-[11px] text-muted-foreground leading-normal">
-                    {t("lockFormDesc")}
-                  </p>
-                </div>
-                <Switch
-                  id="edit-form-locked"
-                  checked={editFormIsLocked}
-                  onCheckedChange={async (checked) => {
-                    setEditFormIsLocked(checked);
-                    if (editingFormId) {
-                      try {
-                        // toggleLock(formId, currentState)
-                        // Current state before toggle is !checked.
-                        await toggleLock(editingFormId, !checked);
-                        toast.success(tc("success"));
-                      } catch (err) {
-                        toast.error(err instanceof Error ? err.message : tc("error"));
-                      }
-                    }
-                  }}
-                />
-              </div>
-            )}
             <Button
               onClick={handleUpdate}
               disabled={!editFormName.trim() || isEditing}

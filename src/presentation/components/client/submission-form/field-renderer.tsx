@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MediaUpload } from "./media-upload";
+import { CameraCapture } from "./camera-capture";
 import type { FieldDefinition } from "@/domain/entities/field-definition";
 import { Button } from "@/components/ui/button";
 import { X, Sparkles } from "lucide-react";
@@ -418,6 +419,38 @@ export function FieldRenderer({
           {hasError && <p className="text-xs text-destructive">{tc("required")}</p>}
         </div>
       );
+
+    case "camera": {
+      const hasCameraMedia = !!mediaUrl && mediaUrl.trim().length > 0;
+
+      if (disabled && !hasCameraMedia) {
+        return (
+          <div className="space-y-1">
+            {renderLabel()}
+            {renderReadonlyEmpty()}
+          </div>
+        );
+      }
+
+      return (
+        <div className="space-y-1">
+          {renderLabel(disabled ? undefined : field.id)}
+          <CameraCapture
+            inputId={field.id}
+            currentUrl={mediaUrl}
+            onUpload={(url, pubId) => onChangeMedia(url, pubId)}
+            onRemove={() => {
+              onChangeMedia("", "");
+              onChangeValue(null);
+            }}
+            maxFileSize={field.validationRules?.maxFileSize}
+            disabled={disabled}
+            hasError={hasError}
+          />
+          {hasError && <p className="text-xs text-destructive">{tc("required")}</p>}
+        </div>
+      );
+    }
 
     default:
       return null;

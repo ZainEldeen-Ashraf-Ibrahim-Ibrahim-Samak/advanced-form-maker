@@ -13,7 +13,7 @@
 - The project already has a precedent for AI integration (Gemini was used for nationality normalization in a previous feature — see conversation history `98564986`).
 - Gemini's vision API natively supports structured output via `response_schema` with `responseMimeType: "application/json"`, which perfectly aligns with the need to return field-ID-keyed JSON.
 - Zod schema integration is supported, matching the project's existing Zod 4.x usage.
-- The `gemini-2.5-flash` model offers fast inference (typically < 5 seconds) well within the 15-second target.
+- The `gemini-flash-latest` model offers fast inference (typically < 5 seconds) well within the 15-second target.
 - Cost-effective for document extraction compared to alternatives.
 
 **Alternatives considered**:

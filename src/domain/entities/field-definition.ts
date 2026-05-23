@@ -3,7 +3,7 @@
  * Domain layer — zero framework imports.
  */
 
-export type InputType = "text" | "number" | "image" | "file" | "date" | "dropdown";
+export type InputType = "text" | "number" | "image" | "file" | "date" | "dropdown" | "camera";
 
 export interface ValidationRules {
   required?: boolean;

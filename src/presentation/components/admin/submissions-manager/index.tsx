@@ -8,13 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { SubmissionsTable } from "@/presentation/components/admin/submissions-table";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "next/navigation";
 import { useDashboardAnalytics } from "@/presentation/view-models/use-dashboard-analytics";
 import { CardManagerDialog } from "@/presentation/components/admin/card-manager-dialog";
 import { getCardIcon, getCardIconColor, getCardIconBg } from "@/lib/card-icons";
 import { Badge } from "@/components/ui/badge";
+import { SubmissionAnalysisDialog } from "../submissions-analysis-dialog";
 
 interface FormOption {
   id: string;
@@ -69,6 +70,7 @@ export function SubmissionsManager() {
   const [uniqueAdmins, setUniqueAdmins] = useState<string[]>([]);
   const [formOptions, setFormOptions] = useState<FormOption[]>([]);
   const [isCardManagerOpen, setIsCardManagerOpen] = useState(false);
+  const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
   const { cards, reorderCards, saveCards, suggestIcon, addStatCard, deleteStatCard, isLoadingCards } = useDashboardAnalytics();
 
   const getLiveCount = (slug: string) => {
@@ -194,9 +196,20 @@ export function SubmissionsManager() {
           <h2 className="text-3xl font-bold tracking-tight">{t("title")}</h2>
           <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setIsCardManagerOpen(true)}>
-          {td("manageCards") || "Manage Cards"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsAnalysisOpen(true)}
+            className="gap-2 border-indigo-200 hover:border-indigo-300 text-indigo-600 hover:text-indigo-700 bg-indigo-50/50 hover:bg-indigo-50 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 dark:border-indigo-900"
+          >
+            <Sparkles className="h-4 w-4 text-indigo-500" />
+            {t("aiAnalysis")}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setIsCardManagerOpen(true)}>
+            {td("manageCards") || "Manage Cards"}
+          </Button>
+        </div>
       </div>
 
       <CardManagerDialog
@@ -208,6 +221,14 @@ export function SubmissionsManager() {
         onAddStatCard={addStatCard}
         onDeleteStatCard={deleteStatCard}
         t={td}
+      />
+
+      <SubmissionAnalysisDialog
+        open={isAnalysisOpen}
+        onOpenChange={setIsAnalysisOpen}
+        statusFilter={statusFilter}
+        adminFilter={adminFilter}
+        formFilter={formFilter}
       />
 
       {/* Unified Dynamic Cards Grid (Form Summaries + Stat Cards) */}

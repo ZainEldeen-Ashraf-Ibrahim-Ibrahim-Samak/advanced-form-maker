@@ -247,6 +247,9 @@
     "contactRecordMinOne": "يجب وجود سجل تواصل واحد على الأقل.",
     "contactChangesPending": "تغييرات غير محفوظة",
     "contactChangesSaved": "جميع التغييرات محفوظة",
+    "contactFormLockToggle": "قفل نموذج التواصل",
+    "contactFormUnlockToggle": "إلغاء قفل نموذج التواصل",
+    "contactFormLockedBadge": "مقفل",
     "dropdownOptions": "خيارات القائمة المنسدلة",
     "dropdownOptionsEn": "الخيارات (إنجليزي)",
     "dropdownOptionsAr": "الخيارات (عربي)",
@@ -262,7 +265,8 @@
       "image": "رفع صورة",
       "file": "رفع ملف",
       "date": "تاريخ",
-      "dropdown": "قائمة منسدلة"
+      "dropdown": "قائمة منسدلة",
+      "camera": "التقاط بالكاميرا"
     },
     "validation": {
       "minLength": "الحد الأدنى للطول",
@@ -298,6 +302,12 @@
     "rewriteCommentPlaceholder": "اشرح ما يحتاج إلى تصحيح...",
     "subtitle": "مراقبة ومراجعة كافة البيانات المرسلة من العملاء",
     "searchPlaceholder": "ابحث باسم العميل...",
+    "aiAnalysis": "تحليل الذكاء الاصطناعي",
+    "aiAnalysisDesc": "تحليل قائمة الطلبات المفلترة حالياً في الوقت الفعلي.",
+    "analyzedCount": "تم تحليل {count} من الطلبات",
+    "analyzing": "يقوم الذكاء الاصطناعي بتحليل الطلبات المفلترة حالياً...",
+    "tryAgain": "حاول مرة أخرى",
+    "noSubmissionsForAnalysis": "لم يتم العثور على أي طلبات تطابق الفلاتر الحالية. يرجى تعديل الفلاتر والمحاولة مرة أخرى.",
     "previous": "السابق",
     "next": "التالي",
     "rewriteCommentRequired": "التعليق مطلوب عند طلب إعادة الكتابة",
@@ -407,7 +417,19 @@
     "toastContactFormUpdated": "تم تحديث نموذج التواصل. يرجى مراجعة الحقول الجديدة.",
     "toastSubmissionViewed": "✓ تمت مشاهدة طلبك",
     "toastSubmissionNeedsRevision": "طلبك يحتاج إلى تعديل",
-    "toastResubmissionRequested": "تم إرسال طلب إعادة التقديم"
+    "toastResubmissionRequested": "تم إرسال طلب إعادة التقديم",
+    "openCamera": "فتح الكاميرا",
+    "tapToOpenCamera": "اضغط لفتح الكاميرا والتقاط صورة",
+    "takePhoto": "التقاط صورة",
+    "retakePhoto": "إعادة التقاط",
+    "usePhoto": "استخدام الصورة",
+    "switchCamera": "تبديل الكاميرا",
+    "flashOn": "الفلاش شغال",
+    "flashOff": "الفلاش مطفأ",
+    "cameraNotSupported": "الكاميرا غير مدعومة في هذا المتصفح.",
+    "cameraPermissionDenied": "تم رفض الوصول إلى الكاميرا. يرجى السماح باستخدامها من إعدادات المتصفح.",
+    "cameraNotFound": "لا توجد كاميرا على هذا الجهاز.",
+    "cameraError": "تعذر فتح الكاميرا. يرجى المحاولة مرة أخرى."
   },
   "aiExtraction": {
     "uploadTitle": "ملء تلقائي بالذكاء الاصطناعي",
@@ -433,7 +455,8 @@
     "fieldsFilled": "تم ملء {count} حقول",
     "fieldsNotFilled": "متبقي {count} حقول",
     "enableAiAutoFill": "تمكين الملء التلقائي بالذكاء الاصطناعي",
-    "aiAutoFillDesc": "ملء حقول التواصل والبيانات المخصصة تلقائياً من صورة مستند يتم تحميلها."
+    "aiAutoFillDesc": "ملء حقول التواصل والبيانات المخصصة تلقائياً من صورة مستند يتم تحميلها.",
+    "rescan": "إعادة المسح"
   },
   "user": {
     "submission": {

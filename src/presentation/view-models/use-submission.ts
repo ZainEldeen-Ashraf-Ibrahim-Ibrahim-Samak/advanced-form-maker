@@ -233,6 +233,7 @@ interface UseSubmissionReturn {
   values: FieldValue[];
   formData: Record<string, FormFieldData>;
   contactFormFields: ContactFormField[];
+  contactFormLocked: boolean;
   clientName: string;
   setClientName: (name: string) => void;
   contactRecords: ContactRecordDraft[];
@@ -267,6 +268,7 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [values, setValues] = useState<FieldValue[]>([]);
   const [contactFormFields, setContactFormFields] = useState<ContactFormField[]>(DEFAULT_CONTACT_FORM_FIELDS);
+  const [contactFormLocked, setContactFormLocked] = useState(false);
   const [droppedFieldIds, setDroppedFieldIds] = useState<string[]>([]);
   const [statusChangedLive, setStatusChangedLive] = useState(false);
   const [aiAutoFillEnabled, setAiAutoFillEnabled] = useState(false);
@@ -437,6 +439,7 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
         setFormDescription(data.formTemplate?.description || "");
         setFields(data.fields || []);
         setContactFormFields(normalizeContactFormFields(data.formTemplate?.contactFormFields));
+        setContactFormLocked(!!data.formTemplate?.contactFormLocked);
         setAiAutoFillEnabled(!!data.formTemplate?.aiAutoFillEnabled);
         formVersionRef.current = nextFormVersion;
         
@@ -458,6 +461,7 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
         setValues(data.values || []);
         setFields(data.fields || []);
         setContactFormFields(normalizeContactFormFields(data.formTemplate?.contactFormFields));
+        setContactFormLocked(!!data.formTemplate?.contactFormLocked);
         setAiAutoFillEnabled(!!data.formTemplate?.aiAutoFillEnabled);
 
         // Existing submissions should reflect DB state after reload/admin updates.
@@ -778,6 +782,7 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
     values,
     formData,
     contactFormFields,
+    contactFormLocked,
     clientName,
     setClientName,
     contactRecords,

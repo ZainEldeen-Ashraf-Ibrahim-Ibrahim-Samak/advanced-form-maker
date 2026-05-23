@@ -84,42 +84,63 @@ export async function analyzeFormSubmissions(submissions: any[], locale: string 
 
   Please generate the structured analysis according to the schema.`;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => {
-    controller.abort();
-  }, 30000); // 30 seconds hard timeout
+  // Try models in order; fall back on 503 overload
+  const MODEL_FALLBACKS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"];
+  const MAX_RETRIES = 2;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: responseSchema as any,
-        abortSignal: controller.signal,
-      },
-    });
+  let lastError: any;
 
-    const text = response.text;
-    if (!text) {
-      throw new Error("Received empty response text from Gemini API");
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const model = MODEL_FALLBACKS[Math.min(attempt, MODEL_FALLBACKS.length - 1)];
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    try {
+      const response = await ai.models.generateContent({
+        model,
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: responseSchema as any,
+          abortSignal: controller.signal,
+        },
+      });
+
+      clearTimeout(timeoutId);
+
+      const text = response.text;
+      if (!text) throw new Error("Received empty response text from Gemini API");
+
+      const result = JSON.parse(text);
+      return {
+        summary: result.summary || "",
+        patterns: Array.isArray(result.patterns) ? result.patterns : [],
+        findings: Array.isArray(result.findings) ? result.findings : [],
+        sentimentOverview: result.sentimentOverview || "",
+      };
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      lastError = error;
+
+      if (error.name === "AbortError" || error.message?.includes("aborted")) {
+        logger.error("AI form analysis request timed out after 30s");
+        throw new Error("AI analysis timed out. Please try again with fewer submissions.");
+      }
+
+      const status: number = error?.status ?? error?.response?.status ?? 0;
+      const isOverloaded = status === 503 || error?.message?.includes("503") || error?.message?.includes("UNAVAILABLE");
+
+      if (isOverloaded && attempt < MAX_RETRIES) {
+        const delay = 1500 * (attempt + 1);
+        logger.error(`Gemini model "${model}" overloaded (503), retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES})`);
+        await new Promise((r) => setTimeout(r, delay));
+        continue;
+      }
+
+      logger.error("Error during AI form analysis:", error);
+      throw error;
     }
-
-    const result = JSON.parse(text);
-    return {
-      summary: result.summary || "",
-      patterns: Array.isArray(result.patterns) ? result.patterns : [],
-      findings: Array.isArray(result.findings) ? result.findings : [],
-      sentimentOverview: result.sentimentOverview || "",
-    };
-  } catch (error: any) {
-    if (error.name === "AbortError" || error.message?.includes("aborted")) {
-      logger.error("AI form analysis request timed out after 30s");
-      throw new Error("AI analysis timed out. Please try again with fewer submissions or check server connectivity.");
-    }
-    logger.error("Error during AI form analysis:", error);
-    throw error;
-  } finally {
-    clearTimeout(timeoutId);
   }
+
+  throw lastError;
 }

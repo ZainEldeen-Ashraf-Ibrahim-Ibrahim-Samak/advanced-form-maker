@@ -52,6 +52,7 @@ function toEntity(doc: Record<string, unknown>): FormTemplate {
     isActive: doc.isActive as boolean,
     isLocked: !!doc.isLocked,
     isContactForm: !!doc.isContactForm,
+    contactFormLocked: !!doc.contactFormLocked,
     aiAutoFillEnabled: !!doc.aiAutoFillEnabled,
     createdAt: doc.createdAt as Date,
     updatedAt: doc.updatedAt as Date,

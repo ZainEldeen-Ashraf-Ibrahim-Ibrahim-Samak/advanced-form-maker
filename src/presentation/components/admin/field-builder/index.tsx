@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { GripVertical, Plus, Trash2 } from "lucide-react";
+import { GripVertical, Plus, Trash2, Lock, LockOpen } from "lucide-react";
 import { toast } from "sonner";
 import { FieldCard } from "./field-card";
 import { FieldFormDialog } from "./field-form-dialog";
@@ -228,6 +228,8 @@ export function FieldBuilder({ formTemplateId }: FieldBuilderProps) {
   );
   const [isLoadingContacts, setIsLoadingContacts] = useState(true);
   const [isSavingContacts, setIsSavingContacts] = useState(false);
+  const [contactFormLocked, setContactFormLocked] = useState(false);
+  const [savedContactFormLocked, setSavedContactFormLocked] = useState(false);
 
   const fetchFormContacts = useCallback(async () => {
     setIsLoadingContacts(true);
@@ -244,6 +246,9 @@ export function FieldBuilder({ formTemplateId }: FieldBuilderProps) {
 
       setContactFormFields(normalized);
       setSavedContactFormFields(normalized);
+      const locked = !!data.data?.contactFormLocked;
+      setContactFormLocked(locked);
+      setSavedContactFormLocked(locked);
     } catch (error) {
       const fallback = normalizeDraftContactFormFields(normalizeContactFormFields(undefined));
       setContactFormFields(fallback);
@@ -326,8 +331,10 @@ export function FieldBuilder({ formTemplateId }: FieldBuilderProps) {
   );
 
   const hasContactChanges = useMemo(
-    () => !areContactFormFieldsEqual(normalizedContactFormFields, savedContactFormFields),
-    [normalizedContactFormFields, savedContactFormFields],
+    () =>
+      !areContactFormFieldsEqual(normalizedContactFormFields, savedContactFormFields) ||
+      contactFormLocked !== savedContactFormLocked,
+    [normalizedContactFormFields, savedContactFormFields, contactFormLocked, savedContactFormLocked],
   );
 
   useEffect(() => {
@@ -357,7 +364,7 @@ export function FieldBuilder({ formTemplateId }: FieldBuilderProps) {
       const res = await fetch(`/api/admin/forms/${formTemplateId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contactFormFields: normalized }),
+        body: JSON.stringify({ contactFormFields: normalized, contactFormLocked }),
       });
       const data = await res.json();
       if (!data.success) {
@@ -365,12 +372,17 @@ export function FieldBuilder({ formTemplateId }: FieldBuilderProps) {
       }
       setContactFormFields(normalized);
       setSavedContactFormFields(normalized);
+      setSavedContactFormLocked(contactFormLocked);
       toast.success(tc("success"));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : tc("error"));
     } finally {
       setIsSavingContacts(false);
     }
+  }
+
+  function handleToggleContactFormLock() {
+    setContactFormLocked((prev) => !prev);
   }
 
   function handleAddContact() {
@@ -483,25 +495,63 @@ export function FieldBuilder({ formTemplateId }: FieldBuilderProps) {
         </DndContext>
       )}
 
-      <div className="space-y-4 rounded-xl border border-border/60 bg-muted/20 p-4">
-        <div className="flex items-center justify-between gap-3">
+      <div className={`rounded-xl border transition-colors ${contactFormLocked ? "border-destructive/40 bg-destructive/5" : "border-border/60 bg-muted/20"}`}>
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3 p-4">
           <div className="space-y-1">
-            <h3 className="text-lg font-semibold">{t("contactFormTitle")}</h3>
+            <div className="flex items-center gap-2">
+              {contactFormLocked ? (
+                <Lock className="h-4 w-4 text-destructive shrink-0" />
+              ) : (
+                <LockOpen className="h-4 w-4 text-muted-foreground shrink-0" />
+              )}
+              <h3 className="text-lg font-semibold">{t("contactFormTitle")}</h3>
+            </div>
             <p className="text-xs text-muted-foreground">{t("contactFormDescription")}</p>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleAddContact}
-            disabled={isLoadingContacts || isSavingContacts}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            {t("contactFormAddInput")}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant={contactFormLocked ? "destructive" : "outline"}
+              size="sm"
+              onClick={handleToggleContactFormLock}
+              disabled={isLoadingContacts}
+              className={contactFormLocked ? "" : "text-muted-foreground"}
+            >
+              {contactFormLocked ? (
+                <LockOpen className="h-4 w-4" />
+              ) : (
+                <Lock className="h-4 w-4" />
+              )}
+              <span className="ms-2 hidden sm:inline">
+                {contactFormLocked ? t("contactFormUnlockToggle") : t("contactFormLockToggle")}
+              </span>
+            </Button>
+            {!contactFormLocked && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddContact}
+                disabled={isLoadingContacts || isSavingContacts}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                {t("contactFormAddInput")}
+              </Button>
+            )}
+          </div>
         </div>
 
-        <div className="space-y-3">
+        {/* Fields — locked overlay only covers this block */}
+        <div className={`relative px-4 pb-4 space-y-3 ${contactFormLocked ? "pointer-events-none select-none" : ""}`}>
+          {contactFormLocked && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-b-xl bg-destructive/5 backdrop-blur-[1px]">
+              <div className="flex flex-col items-center gap-2 text-destructive/70">
+                <Lock className="h-8 w-8" />
+                <span className="text-sm font-medium">{t("contactFormLockedBadge")}</span>
+              </div>
+            </div>
+          )}
           {isLoadingContacts
             ? [1, 2].map((item) => <Skeleton key={item} className="h-52 w-full rounded-md" />)
             : (
@@ -520,7 +570,7 @@ export function FieldBuilder({ formTemplateId }: FieldBuilderProps) {
                           key={field.id}
                           field={field}
                           index={index}
-                          disabled={isSavingContacts}
+                          disabled={isSavingContacts || contactFormLocked}
                           canRemove={contactFormFields.length > 1}
                           t={t}
                           tc={tc}
@@ -533,21 +583,23 @@ export function FieldBuilder({ formTemplateId }: FieldBuilderProps) {
                 </DndContext>
             )}
         </div>
+      </div>
 
-        <div className="flex items-center justify-between gap-3">
-          {!isLoadingContacts && (
-            <Badge variant={hasContactChanges ? "secondary" : "outline"}>
-              {hasContactChanges ? t("contactChangesPending") : t("contactChangesSaved")}
-            </Badge>
-          )}
-          <Button
-            type="button"
-            onClick={handleSaveContacts}
-            disabled={isLoadingContacts || isSavingContacts || !hasContactChanges}
-          >
-            {isSavingContacts ? tc("loading") : tc("save")}
-          </Button>
-        </div>
+      {/* Save footer — always outside the locked section */}
+      <div className="flex items-center justify-between gap-3 px-1">
+        {!isLoadingContacts && (
+          <Badge variant={hasContactChanges ? "secondary" : "outline"}>
+            {hasContactChanges ? t("contactChangesPending") : t("contactChangesSaved")}
+          </Badge>
+        )}
+        <Button
+          type="button"
+          onClick={handleSaveContacts}
+          disabled={isLoadingContacts || isSavingContacts || !hasContactChanges}
+          className="ms-auto"
+        >
+          {isSavingContacts ? tc("loading") : tc("save")}
+        </Button>
       </div>
 
       <FieldFormDialog

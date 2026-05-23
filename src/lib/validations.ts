@@ -160,6 +160,7 @@ export const updateFormTemplateSchema = z.object({
   aiAutoFillEnabled: z.boolean().optional(),
   isLocked: z.boolean().optional(),
   isContactForm: z.boolean().optional(),
+  contactFormLocked: z.boolean().optional(),
 });
 
 // ── Submission Schemas ─────────────────────────────────────────────

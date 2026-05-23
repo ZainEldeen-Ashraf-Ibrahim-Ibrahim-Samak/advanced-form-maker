@@ -4,6 +4,7 @@ import { DEFAULT_CONTACT_FORM_FIELDS } from "@/lib/contact-form";
 export interface IFormTemplate extends Document {
   name: string;
   description: string;
+  contactFormLocked: boolean;
   contactRecords: Array<{
     id: string;
     name: string;
@@ -104,6 +105,10 @@ const formTemplateSchema = new Schema<IFormTemplate>(
       index: true,
     },
     aiAutoFillEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    contactFormLocked: {
       type: Boolean,
       default: false,
     },

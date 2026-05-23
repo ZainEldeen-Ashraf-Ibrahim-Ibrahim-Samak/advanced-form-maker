@@ -18,7 +18,7 @@ interface FieldFormDialogProps {
   onSave: (data: Record<string, unknown>) => Promise<void>;
 }
 
-const INPUT_TYPES: InputType[] = ["text", "number", "image", "file", "date", "dropdown"];
+const INPUT_TYPES: InputType[] = ["text", "number", "image", "file", "date", "dropdown", "camera"];
 
 export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldFormDialogProps) {
   const t = useTranslations("fields");

@@ -145,15 +145,28 @@ export function AiExtractionSummary({
                   : `Filled ${filledCount} of ${totalFieldsCount} fields`}
               </span>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-xs flex items-center gap-1 text-emerald-700 hover:text-emerald-800 hover:bg-emerald-500/10"
-                onClick={() => setShowDetails(!showDetails)}
-              >
-                {locale === "ar" ? "التفاصيل" : "Details"}
-                {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-xs flex items-center gap-1 text-emerald-700 hover:text-emerald-800 hover:bg-emerald-500/10"
+                  onClick={onContinueManually}
+                  title={locale === "ar" ? "مسح مستند آخر إذا كانت البيانات غير صحيحة" : "Re-scan if the data looks wrong"}
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  {t("rescan")}
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-xs flex items-center gap-1 text-emerald-700 hover:text-emerald-800 hover:bg-emerald-500/10"
+                  onClick={() => setShowDetails(!showDetails)}
+                >
+                  {locale === "ar" ? "التفاصيل" : "Details"}
+                  {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                </Button>
+              </div>
             </div>
 
             {showDetails && (

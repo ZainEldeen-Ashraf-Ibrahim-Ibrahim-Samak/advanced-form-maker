@@ -208,6 +208,7 @@
     "isRequired": "Required field",
     "sortOrder": "Sort Order",
     "allowMultiple": "Allow Multiple Values (Gallery/List)",
+    "cameraCapture": "Camera Capture",
     "contactRecordsTitle": "Default Contact Records",
     "addContactRecord": "Add Contact",
     "removeContactRecord": "Remove Contact",
@@ -247,6 +248,9 @@
     "contactRecordMinOne": "At least one contact record is required.",
     "contactChangesPending": "Unsaved changes",
     "contactChangesSaved": "All changes saved",
+    "contactFormLockToggle": "Lock contact form",
+    "contactFormUnlockToggle": "Unlock contact form",
+    "contactFormLockedBadge": "Locked",
     "dropdownOptions": "Dropdown Options",
     "dropdownOptionsEn": "Options (English)",
     "dropdownOptionsAr": "Options (Arabic)",
@@ -262,7 +266,8 @@
       "image": "Image Upload",
       "file": "File Upload",
       "date": "Date",
-      "dropdown": "Dropdown Select"
+      "dropdown": "Dropdown Select",
+      "camera": "Camera Capture"
     },
     "validation": {
       "minLength": "Min Length",
@@ -298,6 +303,12 @@
     "rewriteCommentPlaceholder": "Explain what needs to be corrected...",
     "subtitle": "Monitor and review all incoming client data submissions",
     "searchPlaceholder": "Search by client name...",
+    "aiAnalysis": "AI Analysis",
+    "aiAnalysisDesc": "Analyze the currently filtered list of submissions in real time.",
+    "analyzedCount": "Analyzed {count} submissions",
+    "analyzing": "AI is analyzing your filtered submissions...",
+    "tryAgain": "Try Again",
+    "noSubmissionsForAnalysis": "No submissions found for the current filters. Please adjust your filters and try again.",
     "previous": "Previous",
     "next": "Next",
     "rewriteCommentRequired": "A comment is required when requesting a rewrite",
@@ -407,7 +418,19 @@
     "toastContactFormUpdated": "Contact form was updated. Please review the latest fields.",
     "toastSubmissionViewed": "✓ Your submission has been viewed",
     "toastSubmissionNeedsRevision": "Your submission needs revision",
-    "toastResubmissionRequested": "A resubmission request was sent"
+    "toastResubmissionRequested": "A resubmission request was sent",
+    "openCamera": "Open Camera",
+    "tapToOpenCamera": "Tap to open camera and take a photo",
+    "takePhoto": "Take Photo",
+    "retakePhoto": "Retake",
+    "usePhoto": "Use Photo",
+    "switchCamera": "Switch Camera",
+    "flashOn": "Flash On",
+    "flashOff": "Flash Off",
+    "cameraNotSupported": "Camera is not supported on this browser.",
+    "cameraPermissionDenied": "Camera access denied. Please allow camera permission in your browser settings.",
+    "cameraNotFound": "No camera found on this device.",
+    "cameraError": "Could not open camera. Please try again."
   },
   "aiExtraction": {
     "uploadTitle": "AI Photo Auto-Fill",
@@ -433,7 +456,8 @@
     "fieldsFilled": "{count} fields filled",
     "fieldsNotFilled": "{count} fields remaining",
     "enableAiAutoFill": "Enable AI Auto-Fill",
-    "aiAutoFillDesc": "Automatically fill contact info and custom fields using uploaded document photos."
+    "aiAutoFillDesc": "Automatically fill contact info and custom fields using uploaded document photos.",
+    "rescan": "Re-scan"
   },
   "user": {
     "submission": {

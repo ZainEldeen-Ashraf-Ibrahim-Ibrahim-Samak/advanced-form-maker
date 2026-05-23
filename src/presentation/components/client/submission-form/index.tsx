@@ -47,6 +47,7 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
     submission,
     formData,
     contactFormFields,
+    contactFormLocked,
     contactRecords,
     updateContactRecord,
     setFieldValue,
@@ -105,7 +106,7 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
     resetState: resetAiState,
   } = useAiExtraction({
     fieldDefinitions: fields,
-    contactFormFields,
+    contactFormFields: contactFormLocked ? [] : contactFormFields,
     currentFieldValues,
     currentContactValues,
     onApplyField: (fieldId, val) => {
@@ -180,46 +181,47 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
     const errors: Record<string, boolean> = {};
     let isValid = true;
 
-    if (contactRecords.length < 1) {
-      errors.contactRecords = true;
-      isValid = false;
-    } else {
-      const primaryContact = contactRecords[0];
-      const hasMissingRequiredContactField = contactFormFields.some((field) => {
-        if (!field.required) return false;
-
-        const value =
-          field.key === "name"
-            ? primaryContact.name
-            : field.key === "email"
-              ? primaryContact.email
-              : field.key === "phone"
-                ? primaryContact.phone
-                : primaryContact.address;
-
-        return String(value ?? "").trim().length === 0;
-      });
-
-      if (hasMissingRequiredContactField) {
+    if (!contactFormLocked) {
+      if (contactRecords.length < 1) {
         errors.contactRecords = true;
         isValid = false;
       } else {
-        // Validate contact record regex formats
-        if (primaryContact.email && !EMAIL_REGEX.test(primaryContact.email)) {
+        const primaryContact = contactRecords[0];
+        const hasMissingRequiredContactField = contactFormFields.some((field) => {
+          if (!field.required) return false;
+
+          const value =
+            field.key === "name"
+              ? primaryContact.name
+              : field.key === "email"
+                ? primaryContact.email
+                : field.key === "phone"
+                  ? primaryContact.phone
+                  : primaryContact.address;
+
+          return String(value ?? "").trim().length === 0;
+        });
+
+        if (hasMissingRequiredContactField) {
           errors.contactRecords = true;
           isValid = false;
-        }
-        if (primaryContact.phone && !PHONE_REGEX.test(primaryContact.phone)) {
-          errors.contactRecords = true;
-          isValid = false;
-        }
-        if (primaryContact.name && !NAME_REGEX.test(primaryContact.name)) {
-          errors.contactRecords = true;
-          isValid = false;
-        }
-        if (primaryContact.address && !TEXT_REGEX.test(primaryContact.address)) {
-          errors.contactRecords = true;
-          isValid = false;
+        } else {
+          if (primaryContact.email && !EMAIL_REGEX.test(primaryContact.email)) {
+            errors.contactRecords = true;
+            isValid = false;
+          }
+          if (primaryContact.phone && !PHONE_REGEX.test(primaryContact.phone)) {
+            errors.contactRecords = true;
+            isValid = false;
+          }
+          if (primaryContact.name && !NAME_REGEX.test(primaryContact.name)) {
+            errors.contactRecords = true;
+            isValid = false;
+          }
+          if (primaryContact.address && !TEXT_REGEX.test(primaryContact.address)) {
+            errors.contactRecords = true;
+            isValid = false;
+          }
         }
       }
     }
@@ -384,22 +386,24 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
               </div>
             )}
 
-            <ContactRecords
-              formFields={contactFormFields}
-              records={contactRecords}
-              disabled={isViewOnly || isSubmitting}
-              showValidation={!!validationErrors.contactRecords}
-              autoFilledKeys={autoFilledKeys}
-              onUpdate={(id, patch) => {
-                updateContactRecord(id, patch);
-                Object.keys(patch).forEach((key) => {
-                  clearAutoFillContactIndicator(key);
-                });
-                if (validationErrors.contactRecords) {
-                  setValidationErrors((prev) => ({ ...prev, contactRecords: false }));
-                }
-              }}
-            />
+            {!contactFormLocked && (
+              <ContactRecords
+                formFields={contactFormFields}
+                records={contactRecords}
+                disabled={isViewOnly || isSubmitting}
+                showValidation={!!validationErrors.contactRecords}
+                autoFilledKeys={autoFilledKeys}
+                onUpdate={(id, patch) => {
+                  updateContactRecord(id, patch);
+                  Object.keys(patch).forEach((key) => {
+                    clearAutoFillContactIndicator(key);
+                  });
+                  if (validationErrors.contactRecords) {
+                    setValidationErrors((prev) => ({ ...prev, contactRecords: false }));
+                  }
+                }}
+              />
+            )}
 
             <div className="space-y-6">
               {fields.map((field) => {
