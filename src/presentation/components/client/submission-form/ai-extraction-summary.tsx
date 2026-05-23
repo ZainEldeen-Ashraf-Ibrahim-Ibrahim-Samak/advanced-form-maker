@@ -149,7 +149,7 @@ export function AiExtractionSummary({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 px-2 text-xs flex items-center gap-1 text-emerald-700 hover:text-emerald-800 hover:bg-emerald-500/10"
+                  className="h-8 px-3 text-xs flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-500/10 font-semibold border border-red-300 dark:border-red-800"
                   onClick={onContinueManually}
                   title={locale === "ar" ? "مسح مستند آخر إذا كانت البيانات غير صحيحة" : "Re-scan if the data looks wrong"}
                 >
