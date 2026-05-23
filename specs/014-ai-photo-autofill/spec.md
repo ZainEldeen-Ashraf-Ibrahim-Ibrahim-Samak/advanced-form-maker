@@ -5,11 +5,21 @@
 **Status**: Draft  
 **Input**: User description: "the new plan we will use ai when user fill the data the use can upload photo and ai take the data from photo and fill the info"
 
+## Clarifications
+
+### Session 2026-05-23
+
+- Q: Where should the AI auto-fill upload trigger appear in the form? → A: Single prominent button/section at the top of the form (above all fields) — one upload fills all matching fields.
+- Q: How should AI-extracted data be mapped to dynamic custom form fields? → A: Send the form's field definitions (labels, types, IDs) to the AI service alongside the image. The AI returns values keyed directly to field IDs.
+- Q: Should admins control AI auto-fill availability per form? → A: Yes, admin toggle per form template — enable/disable AI auto-fill per form.
+- Q: Should AI extraction also auto-fill the contact records section (name, email, phone, address)? → A: Yes, auto-fill both contact records and dynamic form fields.
+- Q: What should the maximum wait time (timeout) be for the AI service before showing a timeout error? → A: 30 seconds.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Upload Document Photo to Auto-Fill Form (Priority: P1)
 
-A user opens a submission form and sees an option to upload a photo of a document (such as an ID card, passport, driver's license, or any document containing relevant personal or business information). The user takes a photo or selects an existing image from their device. The system sends the image to an AI service which extracts structured data from the document. The extracted data is then automatically populated into the matching form fields. The user can review and edit any auto-filled values before submitting.
+A user opens a submission form that has AI auto-fill enabled by the admin. They see a prominent section at the top of the form with an option to upload a photo of a document (such as an ID card, passport, driver's license, or any document containing relevant personal or business information). The user takes a photo or selects an existing image from their device. The system sends the image to an AI service which extracts structured data from the document. The extracted data is then automatically populated into the matching form fields. The user can review and edit any auto-filled values before submitting.
 
 **Why this priority**: This is the core value proposition of the feature. Without AI-powered extraction and auto-fill, the feature has no purpose. It eliminates tedious manual data entry and reduces human error.
 
@@ -17,7 +27,7 @@ A user opens a submission form and sees an option to upload a photo of a documen
 
 **Acceptance Scenarios**:
 
-1. **Given** a user is on a new submission form with empty fields, **When** they upload a clear photo of a government-issued ID card, **Then** the system extracts the person's name, date of birth, and ID number and populates the corresponding form fields within 10 seconds.
+1. **Given** a user is on a new submission form with empty fields, **When** they upload a clear photo of a government-issued ID card, **Then** the system extracts the person's name, date of birth, and ID number and populates the corresponding form fields AND contact record fields (name, phone, etc.) within 10 seconds.
 2. **Given** a user uploads a document photo, **When** the AI extraction completes, **Then** each auto-filled field is visually highlighted to indicate it was populated by AI (distinct from manually entered data).
 3. **Given** a user uploads a document photo, **When** the AI extraction completes, **Then** the user can freely edit, clear, or override any auto-filled field value before submitting the form.
 4. **Given** a user has already manually entered some field values, **When** they upload a document photo, **Then** only empty fields are auto-filled by default, and a confirmation prompt appears before overwriting any fields that already contain data.
@@ -69,11 +79,11 @@ The system can extract data from documents written in both English and Arabic (m
 
 ### Functional Requirements
 
-- **FR-001**: System MUST provide a clearly visible "Upload Document Photo" action within the submission form, separate from existing media upload functionality.
+- **FR-001**: System MUST provide a clearly visible "Upload Document Photo" section at the top of the submission form, above all form fields, separate from existing per-field media upload functionality. A single upload from this section fills all matching fields simultaneously.
 - **FR-002**: System MUST accept common image formats (JPEG, PNG, WEBP, HEIC) for document photo uploads.
 - **FR-003**: System MUST validate uploaded images for minimum resolution and maximum file size before sending to AI processing.
 - **FR-004**: System MUST send the uploaded image to an AI-powered document analysis service for data extraction.
-- **FR-005**: System MUST map AI-extracted key-value data to the corresponding form fields based on field names, types, and labels.
+- **FR-005**: System MUST send the form's field definitions (field IDs, labels in both languages, and input types) to the AI service alongside the uploaded image, so the AI returns extracted values keyed directly to form field IDs for automatic population.
 - **FR-006**: System MUST visually distinguish AI-auto-filled fields from manually entered fields (e.g., with a badge, border color, or icon indicator).
 - **FR-007**: System MUST allow users to edit, clear, or override any AI-auto-filled field value at any time before submission.
 - **FR-008**: System MUST display a loading state with descriptive messaging while AI extraction is in progress.
@@ -84,19 +94,22 @@ The system can extract data from documents written in both English and Arabic (m
 - **FR-013**: System MUST display all AI-related UI text in both English and Arabic following the existing internationalization pattern.
 - **FR-014**: System MUST NOT send the uploaded document image to any third-party service without user awareness (the upload action itself constitutes consent).
 - **FR-015**: System MUST NOT persist the uploaded document photo beyond the extraction session unless the user explicitly attaches it to the form submission.
+- **FR-016**: System MUST provide admins with a toggle per form template to enable or disable the AI auto-fill feature. When disabled, the AI upload section is not shown to users on that form.
+- **FR-017**: System MUST auto-fill both the contact records section (name, email, phone, address) and the dynamic form fields from a single document photo upload when matching data is extracted.
+- **FR-018**: System MUST enforce a 30-second timeout for AI extraction requests. If the service does not respond within 30 seconds, the system displays a timeout error and allows the user to retry or continue manually.
 
 ### Key Entities
 
 - **Document Photo**: An image uploaded by the user for AI data extraction. Contains format, resolution, file size, and the raw image data. Distinct from regular media uploads.
 - **Extraction Result**: The structured output from AI analysis. Contains a set of field-value pairs, confidence scores per field, overall extraction status (success, partial, failure), and any error messages.
-- **Field Mapping**: The association between an extracted data key (from AI) and a form field definition. Enables matching extracted values like "full_name" to the corresponding form field.
+- **Field Mapping**: The association between an extracted data key (from AI) and a form field definition. The AI receives field definitions (IDs, labels, types) alongside the image and returns values keyed to field IDs, eliminating the need for a separate mapping step.
 - **Auto-Fill Indicator**: A visual marker on a form field indicating its value was populated by AI rather than manually entered. Includes the confidence level of the extraction.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: Users can auto-fill form fields from a document photo in under 15 seconds end-to-end (from upload to fields populated).
+- **SC-001**: Users can auto-fill form fields from a document photo in under 15 seconds end-to-end (from upload to fields populated) under normal conditions, with a hard timeout at 30 seconds.
 - **SC-002**: 80% or more of extractable fields from a clear, well-lit document photo are correctly populated on the first attempt.
 - **SC-003**: 100% of AI-auto-filled fields are editable by the user before form submission.
 - **SC-004**: Users who use the AI auto-fill feature complete form submissions at least 40% faster than users who enter data manually.
