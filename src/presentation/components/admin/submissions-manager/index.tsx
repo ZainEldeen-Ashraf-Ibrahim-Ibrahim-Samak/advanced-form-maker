@@ -1,27 +1,61 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useSubmissionsList } from "@/presentation/view-models/use-submissions-list";
 import type { Submission } from "@/domain/entities/submission";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { SubmissionsTable } from "@/presentation/components/admin/submissions-table";
-import { FileText, Clock, Eye, AlertCircle, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "next/navigation";
 import { useDashboardAnalytics } from "@/presentation/view-models/use-dashboard-analytics";
 import { CardManagerDialog } from "@/presentation/components/admin/card-manager-dialog";
+import { getCardIcon, getCardIconColor, getCardIconBg } from "@/lib/card-icons";
+import { Badge } from "@/components/ui/badge";
 
 interface FormOption {
   id: string;
   name: string;
 }
 
+function CardHeaderIcon({ logoUrl, iconName, slug }: { logoUrl?: string | null; iconName?: string; slug?: string }) {
+  const iconKey = logoUrl || iconName || null;
+  const Icon = logoUrl ? getCardIcon(logoUrl) : iconName ? getCardIcon(iconName) : getCardIcon(null);
+
+  const isCustomIcon = !!logoUrl;
+  const slugColor = isCustomIcon ? null : (
+    slug === "pending"       ? "text-amber-500"    :
+    slug === "draft"         ? "text-blue-500"     :
+    slug === "viewed"        ? "text-emerald-500"  :
+    slug === "needs_rewrite" ? "text-destructive"  :
+    slug === "total"         ? "text-violet-500"   : null
+  );
+
+  const slugBg = isCustomIcon ? null : (
+    slug === "pending"       ? "bg-amber-100 dark:bg-amber-950"    :
+    slug === "draft"         ? "bg-blue-100 dark:bg-blue-950"      :
+    slug === "viewed"        ? "bg-emerald-100 dark:bg-emerald-950" :
+    slug === "needs_rewrite" ? "bg-red-100 dark:bg-red-950"        :
+    slug === "total"         ? "bg-violet-100 dark:bg-violet-950"  : null
+  );
+
+  const colorClass = slugColor ?? getCardIconColor(iconKey, "text-muted-foreground");
+  const bgClass    = slugBg    ?? getCardIconBg(iconKey, "bg-muted");
+
+  return (
+    <div className={`p-2 rounded-lg ${bgClass} shrink-0`}>
+      <Icon className={`h-4 w-4 ${colorClass}`} />
+    </div>
+  );
+}
+
 export function SubmissionsManager() {
   const t = useTranslations("submissions");
   const td = useTranslations("dashboard");
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const expandId = searchParams.get("expand");
 
@@ -35,7 +69,32 @@ export function SubmissionsManager() {
   const [uniqueAdmins, setUniqueAdmins] = useState<string[]>([]);
   const [formOptions, setFormOptions] = useState<FormOption[]>([]);
   const [isCardManagerOpen, setIsCardManagerOpen] = useState(false);
-  const { cards, reorderCards, saveCards, suggestIcon, addStatCard, deleteStatCard } = useDashboardAnalytics();
+  const { cards, reorderCards, saveCards, suggestIcon, addStatCard, deleteStatCard, isLoadingCards } = useDashboardAnalytics();
+
+  const getLiveCount = (slug: string) => {
+    if (slug === "total") return counts.total;
+    if (slug === "pending") return counts.pending;
+    if (slug === "draft") return counts.draft;
+    if (slug === "viewed") return counts.viewed;
+    if (slug === "needs_rewrite") return counts.needs_rewrite;
+    return 0;
+  };
+
+  const resolveMetricValue = (raw: string | null | undefined, cardSlug: string): string | number => {
+    if (raw === null || raw === undefined || raw === "") return getLiveCount(cardSlug);
+    const tokenMap: Record<string, number> = {
+      "@total": counts.total,
+      "@pending": counts.pending,
+      "@draft": counts.draft,
+      "@viewed": counts.viewed,
+      "@needs_rewrite": counts.needs_rewrite,
+    };
+    if (tokenMap[raw.trim()] !== undefined) return tokenMap[raw.trim()];
+    return Object.entries(tokenMap).reduce(
+      (acc, [token, val]) => acc.replace(token, String(val)),
+      raw
+    );
+  };
 
   const formNameById = formOptions.reduce<Record<string, string>>((acc, form) => {
     acc[form.id] = form.name;
@@ -151,63 +210,69 @@ export function SubmissionsManager() {
         t={td}
       />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{td("totalSubmissions")}</CardTitle>
-            <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-950 shrink-0">
-              <FileText className="h-4 w-4 text-violet-500" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{td("pendingCount")}</CardTitle>
-            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-950 shrink-0">
-              <Clock className="h-4 w-4 text-amber-500" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.pending}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{td("draftCount")}</CardTitle>
-            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-950 shrink-0">
-              <FileText className="h-4 w-4 text-blue-500" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.draft}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{td("viewedCount")}</CardTitle>
-            <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950 shrink-0">
-              <Eye className="h-4 w-4 text-emerald-500" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.viewed}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{td("needsRewriteCount")}</CardTitle>
-            <div className="p-2 rounded-lg bg-red-100 dark:bg-red-950 shrink-0">
-              <AlertCircle className="h-4 w-4 text-destructive" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.needs_rewrite}</div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Unified Dynamic Cards Grid (Form Summaries + Stat Cards) */}
+      {!isLoadingCards && cards.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          {cards
+            .filter((c) => c.visible)
+            .map((card) => {
+              if (card.cardType === "stat") {
+                const title = locale === "ar"
+                  ? (card.displayNameAr ?? card.defaultLabelAr)
+                  : (card.displayNameEn ?? card.defaultLabelEn);
+                return (
+                  <Card key={card.slug} className="hover:shadow-md transition-shadow">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium truncate pr-2" title={title}>{title}</CardTitle>
+                      <CardHeaderIcon logoUrl={card.logoUrl} iconName={card.defaultIcon} slug={card.slug} />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {resolveMetricValue(card.metricValue, card.slug)}
+                      </div>
+                      {card.metricLabel && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {card.metricLabel}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              } else {
+                const title = locale === "ar"
+                  ? (card.displayNameAr ?? card.displayNameEn ?? card.name)
+                  : (card.displayNameEn ?? card.displayNameAr ?? card.name);
+                return (
+                  <Card key={card.formTemplateId} className={`hover:shadow-md transition-shadow ${card.isLocked ? "border-amber-200 dark:border-amber-800" : ""}`}>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2 truncate pr-2" title={title}>
+                        <span className="truncate">{title}</span>
+                        {card.isLocked && (
+                          <Badge variant="destructive" className="text-[10px] shrink-0">
+                            {locale === "ar" ? "مغلق" : "Locked"}
+                          </Badge>
+                        )}
+                      </CardTitle>
+                      <CardHeaderIcon logoUrl={card.logoUrl} />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {card.metricValue !== null && card.metricValue !== undefined
+                          ? card.metricValue
+                          : card.submissionCount}
+                      </div>
+                      {(card.metricLabel || card.metricValue !== null) && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {card.metricLabel ?? (locale === "ar" ? "الطلب" : "Submission")}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              }
+            })}
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row flex-wrap items-center justify-between gap-4 bg-muted/30 p-4 rounded-xl border">
         <div className="relative w-full sm:flex-1 sm:min-w-50 max-w-sm">
