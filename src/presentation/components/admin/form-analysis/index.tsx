@@ -8,7 +8,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Sparkles, TrendingUp, Lightbulb, Smile, AlertCircle, Loader2, Play, CheckCircle2, Download, File, FileText, FileSpreadsheet } from "lucide-react";
+import { Sparkles, TrendingUp, Lightbulb, Smile, AlertCircle, Loader2, Play, CheckCircle2, Download, File, FileText, FileSpreadsheet, Clock } from "lucide-react";
+import { formatCountdown, parseAiErrorMessage } from "@/lib/parse-ai-error";
 
 function ComputedStatsCard({ analysis, t }: { analysis: any; t: any }) {
   const formatDate = (d: any) => (d ? new Date(d).toLocaleDateString() : "");
@@ -74,7 +75,7 @@ interface FormAnalysisPanelProps {
 
 export function FormAnalysisPanel({ formId }: FormAnalysisPanelProps) {
   const t = useTranslations("formAnalysis");
-  const { analysis, isLoading, error, runAnalysis, toggleEnabled, exportAnalysis } = useFormAnalysis(formId);
+  const { analysis, isLoading, error, quotaCountdown, runAnalysis, toggleEnabled, exportAnalysis } = useFormAnalysis(formId);
 
   if (isLoading) {
     return (
@@ -216,13 +217,18 @@ export function FormAnalysisPanel({ formId }: FormAnalysisPanelProps) {
                 <Button
                   size="sm"
                   onClick={runAnalysis}
-                  disabled={status === "running"}
-                  className="w-full md:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all gap-2"
+                  disabled={status === "running" || quotaCountdown !== null}
+                  className="w-full md:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all gap-2 disabled:opacity-70"
                 >
                   {status === "running" ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
                       {t("runningStatus")}
+                    </>
+                  ) : quotaCountdown !== null ? (
+                    <>
+                      <Clock className="h-4 w-4" />
+                      {formatCountdown(quotaCountdown)}
                     </>
                   ) : (
                     <>

@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { env } from "@/env.mjs";
 import { logger } from "@/lib/dev-logger";
+import { parseGeminiError } from "@/lib/gemini-error";
 
 export interface AIFormAnalysisResult {
   summary: string;
@@ -127,20 +128,14 @@ export async function analyzeFormSubmissions(submissions: any[], locale: string 
         throw new Error("AI analysis timed out. Please try again with fewer submissions.");
       }
 
-      const status: number = error?.status ?? error?.response?.status ?? 0;
-      const msg: string = error?.message ?? "";
-
-      const isQuotaExceeded =
-        status === 429 ||
-        msg.includes("429") ||
-        msg.includes("RESOURCE_EXHAUSTED") ||
-        msg.includes("quota");
-
-      if (isQuotaExceeded) {
-        logger.error(`Gemini API quota exceeded (RESOURCE_EXHAUSTED) on model "${model}"`);
-        throw new Error("AI_QUOTA_EXCEEDED");
+      const geminiErr = parseGeminiError(error);
+      if (geminiErr.isQuotaError) {
+        logger.error(`Gemini API quota exceeded on model "${model}"`, { retryAfterSeconds: geminiErr.retryAfterSeconds });
+        throw new Error(geminiErr.cleanMessage);
       }
 
+      const status: number = error?.status ?? error?.response?.status ?? 0;
+      const msg: string = error?.message ?? "";
       const isOverloaded = status === 503 || msg.includes("503") || msg.includes("UNAVAILABLE");
 
       if (isOverloaded && attempt < MAX_RETRIES) {

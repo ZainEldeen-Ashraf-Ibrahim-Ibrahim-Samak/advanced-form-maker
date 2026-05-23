@@ -174,7 +174,8 @@
     "metricLabelPlaceholder": "Submissions",
     "newCardEnPlaceholder": "e.g. Approved",
     "newCardMetricLabelPlaceholder": "e.g. Submissions",
-    "newCardArPlaceholder": "e.g. Approved"
+    "newCardArPlaceholder": "e.g. Approved",
+    "iconSuggestionQuota": "AI quota exceeded. Retry in {time}."
   },
   "forms": {
     "title": "Form Templates",
@@ -464,7 +465,9 @@
     "fieldsNotFilled": "{count} fields remaining",
     "enableAiAutoFill": "Enable AI Auto-Fill",
     "aiAutoFillDesc": "Automatically fill contact info and custom fields using uploaded document photos.",
-    "rescan": "Re-scan"
+    "rescan": "Re-scan",
+    "quotaExceeded": "AI quota exceeded. Retry in {time}.",
+    "quotaRetryNow": "Quota reset — tap to retry"
   },
   "user": {
     "submission": {
@@ -703,6 +706,8 @@
     "noDateRange": "No submissions yet",
     "statsTopAnswersTimes": "times",
     "statsNoData": "No data available",
-    "quotaExceeded": "Gemini API free-tier quota exceeded. Please add billing to your Google AI account or wait until the quota resets, then retry."
+    "quotaExceeded": "Gemini API free-tier quota exceeded. Please add billing to your Google AI account or wait until the quota resets, then retry.",
+    "quotaRetryIn": "AI will be available again in {time}",
+    "quotaRetryNow": "Quota reset — you can retry now"
   }
 }

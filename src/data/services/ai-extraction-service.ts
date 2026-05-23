@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { env } from "@/env.mjs";
 import { devlogger } from "@/lib/devlogger";
+import { parseGeminiError } from "@/lib/gemini-error";
 import { ExtractionResult } from "@/domain/entities/ai-extraction";
 
 // Check if Gemini API key exists
@@ -193,6 +194,16 @@ Extract exactly as instructed. Do not include any explanation.`;
         contactData: { name: null, email: null, phone: null, address: null },
         fieldValues: {},
         errorMessage: "timeout",
+      };
+    }
+    const geminiErr = parseGeminiError(error);
+    if (geminiErr.isQuotaError) {
+      devlogger.error("Gemini API quota exceeded during extraction", { retryAfterSeconds: geminiErr.retryAfterSeconds });
+      return {
+        status: "failure",
+        contactData: { name: null, email: null, phone: null, address: null },
+        fieldValues: {},
+        errorMessage: geminiErr.cleanMessage,
       };
     }
     devlogger.error("Error during Gemini AI extraction", error);

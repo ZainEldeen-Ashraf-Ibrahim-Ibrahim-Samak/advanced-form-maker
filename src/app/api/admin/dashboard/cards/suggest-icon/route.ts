@@ -5,6 +5,7 @@ import { GoogleGenAI } from "@google/genai";
 import { env } from "@/env.mjs";
 import { z } from "zod";
 import { CARD_ICON_KEYS } from "@/lib/card-icons";
+import { parseGeminiError } from "@/lib/gemini-error";
 
 const bodySchema = z.object({
   titleAr: z.string().optional().default(""),
@@ -81,6 +82,10 @@ Rules:
 
     return successResponse({ icon });
   } catch (error: any) {
+    const geminiErr = parseGeminiError(error);
+    if (geminiErr.isQuotaError) {
+      return errorResponse(geminiErr.cleanMessage, 429, "AI_QUOTA_EXCEEDED");
+    }
     return errorResponse("Failed to generate icon suggestion", 500, "AI_FAILED");
   }
 }

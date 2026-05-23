@@ -174,7 +174,8 @@
     "metricLabelPlaceholder": "الطلبات",
     "newCardEnPlaceholder": "مثل: مقبول",
     "newCardMetricLabelPlaceholder": "مثل: الطلبات",
-    "newCardArPlaceholder": "مثال: معتمد"
+    "newCardArPlaceholder": "مثال: معتمد",
+    "iconSuggestionQuota": "تم تجاوز حصة الذكاء الاصطناعي. أعد المحاولة خلال {time}."
   },
   "forms": {
     "title": "قوالب النماذج",
@@ -463,7 +464,9 @@
     "fieldsNotFilled": "متبقي {count} حقول",
     "enableAiAutoFill": "تمكين الملء التلقائي بالذكاء الاصطناعي",
     "aiAutoFillDesc": "ملء حقول التواصل والبيانات المخصصة تلقائياً من صورة مستند يتم تحميلها.",
-    "rescan": "إعادة المسح"
+    "rescan": "إعادة المسح",
+    "quotaExceeded": "تم تجاوز حصة الذكاء الاصطناعي. أعد المحاولة خلال {time}.",
+    "quotaRetryNow": "تمت إعادة تعيين الحصة — اضغط لإعادة المحاولة"
   },
   "user": {
     "submission": {
@@ -702,6 +705,8 @@
     "noDateRange": "لا توجد طلبات بعد",
     "statsTopAnswersTimes": "مرات",
     "statsNoData": "لا توجد بيانات",
-    "quotaExceeded": "تم تجاوز الحصة المجانية لـ Gemini API. يرجى إضافة بيانات الفوترة لحساب Google AI الخاص بك أو الانتظار حتى تتجدد الحصة، ثم المحاولة مجدداً."
+    "quotaExceeded": "تم تجاوز الحصة المجانية لـ Gemini API. يرجى إضافة بيانات الفوترة لحساب Google AI الخاص بك أو الانتظار حتى تتجدد الحصة، ثم المحاولة مجدداً.",
+    "quotaRetryIn": "سيتوفر الذكاء الاصطناعي مجدداً خلال {time}",
+    "quotaRetryNow": "تمت إعادة تعيين الحصة — يمكنك المحاولة الآن"
   }
 }

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { FormAnalysis } from "@/domain/entities/form-analysis";
 import { toast } from "sonner";
 import { useTranslations, useLocale } from "next-intl";
+import { parseAiErrorMessage, formatCountdown } from "@/lib/parse-ai-error";
 
 export function useFormAnalysis(formId: string) {
   const t = useTranslations("formAnalysis");
@@ -9,7 +10,30 @@ export function useFormAnalysis(formId: string) {
   const [analysis, setAnalysis] = useState<FormAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [quotaCountdown, setQuotaCountdown] = useState<number | null>(null);
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const startQuotaCountdown = useCallback((seconds: number) => {
+    if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+    setQuotaCountdown(seconds);
+    countdownTimerRef.current = setInterval(() => {
+      setQuotaCountdown((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(countdownTimerRef.current!);
+          countdownTimerRef.current = null;
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+    };
+  }, []);
 
   const fetchAnalysis = useCallback(async (silent = false) => {
     if (!silent) setIsLoading(true);
@@ -57,11 +81,20 @@ export function useFormAnalysis(formId: string) {
             pollTimerRef.current = null;
           }
         } else if (current.analysisStatus === "failed") {
-          const friendlyMsg = current.errorMessage === "AI_QUOTA_EXCEEDED"
-            ? t("quotaExceeded")
-            : current.errorMessage
+          const quota = parseAiErrorMessage(current.errorMessage);
+          let friendlyMsg: string;
+          if (quota.isQuota) {
+            if (quota.retrySeconds !== null) {
+              startQuotaCountdown(quota.retrySeconds);
+              friendlyMsg = t("quotaRetryIn", { time: formatCountdown(quota.retrySeconds) });
+            } else {
+              friendlyMsg = t("quotaExceeded");
+            }
+          } else {
+            friendlyMsg = current.errorMessage
               ? `${t("failedStatus")}: ${current.errorMessage}`
               : t("failedStatus");
+          }
           toast.error(friendlyMsg);
           if (pollTimerRef.current) {
             clearInterval(pollTimerRef.current);
@@ -164,6 +197,7 @@ export function useFormAnalysis(formId: string) {
     analysis,
     isLoading,
     error,
+    quotaCountdown,
     runAnalysis,
     toggleEnabled,
     exportAnalysis,

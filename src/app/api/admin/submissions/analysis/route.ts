@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { errorResponse, successResponse, unauthorizedResponse } from "@/lib/api-response";
 import { logger } from "@/lib/dev-logger";
+import { parseAiErrorMessage } from "@/lib/parse-ai-error";
 import { SubmissionModel } from "@/data/models/submission.model";
 import { MongoFieldValueRepository } from "@/data/repositories/mongo-field-value-repository";
 import { analyzeFormSubmissions } from "@/data/services/ai-form-analysis-service";
@@ -115,6 +116,11 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     logger.error("AI submissions analysis failed", error);
-    return errorResponse(error.message || "Failed to analyze submissions", 500, "ANALYSIS_FAILED");
+    const msg = error.message || "Failed to analyze submissions";
+    const quota = parseAiErrorMessage(msg);
+    if (quota.isQuota) {
+      return errorResponse(msg, 429, "AI_QUOTA_EXCEEDED");
+    }
+    return errorResponse(msg, 500, "ANALYSIS_FAILED");
   }
 }
