@@ -128,7 +128,20 @@ export async function analyzeFormSubmissions(submissions: any[], locale: string 
       }
 
       const status: number = error?.status ?? error?.response?.status ?? 0;
-      const isOverloaded = status === 503 || error?.message?.includes("503") || error?.message?.includes("UNAVAILABLE");
+      const msg: string = error?.message ?? "";
+
+      const isQuotaExceeded =
+        status === 429 ||
+        msg.includes("429") ||
+        msg.includes("RESOURCE_EXHAUSTED") ||
+        msg.includes("quota");
+
+      if (isQuotaExceeded) {
+        logger.error(`Gemini API quota exceeded (RESOURCE_EXHAUSTED) on model "${model}"`);
+        throw new Error("AI_QUOTA_EXCEEDED");
+      }
+
+      const isOverloaded = status === 503 || msg.includes("503") || msg.includes("UNAVAILABLE");
 
       if (isOverloaded && attempt < MAX_RETRIES) {
         const delay = 1500 * (attempt + 1);

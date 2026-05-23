@@ -702,6 +702,7 @@
     "noAnalysisYet": "No AI analysis has been run yet",
     "noDateRange": "No submissions yet",
     "statsTopAnswersTimes": "times",
-    "statsNoData": "No data available"
+    "statsNoData": "No data available",
+    "quotaExceeded": "Gemini API free-tier quota exceeded. Please add billing to your Google AI account or wait until the quota resets, then retry."
   }
 }

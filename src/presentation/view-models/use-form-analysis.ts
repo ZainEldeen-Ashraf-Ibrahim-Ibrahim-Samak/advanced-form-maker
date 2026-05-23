@@ -57,7 +57,12 @@ export function useFormAnalysis(formId: string) {
             pollTimerRef.current = null;
           }
         } else if (current.analysisStatus === "failed") {
-          toast.error(`${t("failedStatus")}${current.errorMessage ? `: ${current.errorMessage}` : ""}`);
+          const friendlyMsg = current.errorMessage === "AI_QUOTA_EXCEEDED"
+            ? t("quotaExceeded")
+            : current.errorMessage
+              ? `${t("failedStatus")}: ${current.errorMessage}`
+              : t("failedStatus");
+          toast.error(friendlyMsg);
           if (pollTimerRef.current) {
             clearInterval(pollTimerRef.current);
             pollTimerRef.current = null;

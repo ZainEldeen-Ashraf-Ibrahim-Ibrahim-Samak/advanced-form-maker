@@ -177,6 +177,13 @@ export function FormAnalysisPanel({ formId }: FormAnalysisPanelProps) {
                       })}
                     </p>
                   )}
+                  {status === "failed" && analysis?.errorMessage && (
+                    <p className="text-xs text-destructive mt-1 max-w-sm">
+                      {analysis.errorMessage === "AI_QUOTA_EXCEEDED"
+                        ? t("quotaExceeded")
+                        : t("failedMessage", { message: analysis.errorMessage })}
+                    </p>
+                  )}
                 </div>
               </div>
               
