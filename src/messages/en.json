@@ -194,7 +194,8 @@
     "editForm": "Edit Form",
     "isContactForm": "This is the contact form",
     "isContactFormDesc": "Designate this form as the designated contact form.",
-    "contactFormLocked": "Locked"
+    "contactFormLocked": "Locked",
+    "openForm": "Open Form"
   },
   "fields": {
     "title": "Field Builder",

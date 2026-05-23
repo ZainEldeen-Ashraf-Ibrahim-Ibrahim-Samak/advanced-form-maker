@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, FileText, Trash2, Settings, Share2, Copy, QrCode, Download, Pencil } from "lucide-react";
+import { Plus, FileText, Trash2, Settings, Share2, Copy, QrCode, Download, Pencil, ExternalLink } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
@@ -280,6 +280,15 @@ export function FormManager() {
                   >
                     <Share2 className="h-4 w-4" />
                   </Button>
+                  <Link href={`/f/${form.id}`} target="_blank">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title={t("openForm")}
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </Link>
                   <AlertDialog>
                     <AlertDialogTrigger nativeButton={true} render={<Button variant="ghost" size="icon" className="ms-auto text-destructive" />}>
                       <Trash2 className="h-4 w-4" />

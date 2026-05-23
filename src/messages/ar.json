@@ -194,7 +194,8 @@
     "editForm": "تعديل النموذج",
     "isContactForm": "هذا هو نموذج الاتصال",
     "isContactFormDesc": "تحديد هذا النموذج كنموذج الاتصال المعين.",
-    "contactFormLocked": "مغلق"
+    "contactFormLocked": "مغلق",
+    "openForm": "فتح النموذج"
   },
   "fields": {
     "title": "منشئ الحقول",
