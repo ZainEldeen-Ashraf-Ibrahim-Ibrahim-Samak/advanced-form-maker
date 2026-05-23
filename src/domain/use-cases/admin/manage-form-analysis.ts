@@ -10,7 +10,35 @@ export class ManageFormAnalysisUseCase {
   private fieldValueRepo = new MongoFieldValueRepository();
 
   async getAnalysis(formId: string): Promise<FormAnalysis | null> {
-    return await this.analysisRepo.findByFormId(formId);
+    const analysis = await this.analysisRepo.findByFormId(formId);
+
+    // Backfill computed stats if they're missing (analysis pre-dates these fields,
+    // or analysis has never been run but submissions exist)
+    const needsStats =
+      !analysis?.submissionDateRange || analysis.submissionCount === 0;
+
+    if (needsStats) {
+      const submissions = await this.submissionRepo.findByFormId(formId);
+      if (submissions.length === 0) return analysis;
+
+      let earliest = submissions[0].submittedAt;
+      let latest = submissions[0].submittedAt;
+      for (const sub of submissions) {
+        if (sub.submittedAt < earliest) earliest = sub.submittedAt;
+        if (sub.submittedAt > latest) latest = sub.submittedAt;
+      }
+
+      const patch = {
+        submissionCount: submissions.length,
+        submissionDateRange: { earliest, latest },
+      };
+
+      // Persist the backfilled stats so future GETs don't recompute
+      const updated = await this.analysisRepo.upsert(formId, patch);
+      return updated;
+    }
+
+    return analysis;
   }
 
   async setEnabled(formId: string, enabled: boolean): Promise<FormAnalysis | null> {
@@ -41,6 +69,10 @@ export class ManageFormAnalysisUseCase {
         throw new Error("Cannot run analysis on an empty dataset (0 submissions)");
       }
 
+      // To collect top answers per field:
+      // Map<fieldNameSnapshot/fieldDefinitionId, Map<string, number>>
+      const valueCountsMap = new Map<string, Map<string, number>>();
+
       // 4. Load field values for each submission in parallel
       const detailedSubmissions = await Promise.all(
         submissions.map(async (sub) => {
@@ -50,6 +82,25 @@ export class ManageFormAnalysisUseCase {
           const fieldValues: Record<string, any> = {};
           for (const fv of values) {
             const fieldName = fv.fieldNameSnapshot || fv.fieldDefinitionId;
+            let valStr = "";
+            if (fv.mediaUrl) {
+              valStr = "[File/Image]";
+            } else if (fv.mediaItems && fv.mediaItems.length > 0) {
+              valStr = `[${fv.mediaItems.length} File(s)]`;
+            } else if (Array.isArray(fv.value)) {
+              valStr = fv.value.join(", ");
+            } else if (fv.value !== null && fv.value !== undefined) {
+              valStr = String(fv.value).trim();
+            }
+
+            if (valStr) {
+              if (!valueCountsMap.has(fieldName)) {
+                valueCountsMap.set(fieldName, new Map<string, number>());
+              }
+              const counts = valueCountsMap.get(fieldName)!;
+              counts.set(valStr, (counts.get(valStr) || 0) + 1);
+            }
+
             if (fv.mediaUrl) {
               fieldValues[fieldName] = { value: fv.mediaUrl };
             } else if (fv.mediaItems && fv.mediaItems.length > 0) {
@@ -73,6 +124,32 @@ export class ManageFormAnalysisUseCase {
         })
       );
 
+      // Compute date range
+      let earliest = submissions[0].submittedAt;
+      let latest = submissions[0].submittedAt;
+      for (const sub of submissions) {
+        const date = sub.submittedAt;
+        if (date < earliest) earliest = date;
+        if (date > latest) latest = date;
+      }
+      const submissionDateRange = { earliest, latest };
+
+      // Compute top answers
+      const topAnswers: Array<{ fieldLabel: string; topValue: string; count: number }> = [];
+      for (const [fieldLabel, counts] of valueCountsMap.entries()) {
+        const sorted = Array.from(counts.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3);
+        
+        for (const [topValue, count] of sorted) {
+          topAnswers.push({
+            fieldLabel,
+            topValue,
+            count,
+          });
+        }
+      }
+
       // 5. Call AI Service
       const aiResult = await analyzeFormSubmissions(detailedSubmissions, locale);
 
@@ -83,6 +160,8 @@ export class ManageFormAnalysisUseCase {
         findings: aiResult.findings,
         sentimentOverview: aiResult.sentimentOverview,
         submissionCount: submissions.length,
+        topAnswers,
+        submissionDateRange,
         analyzedAt: new Date(),
         analysisStatus: "done",
         errorMessage: null,

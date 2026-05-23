@@ -11,6 +11,9 @@ export interface DashboardCardWithData {
   sortOrder: number;
   submissionCount: number;
   isLocked: boolean;
+  displayName: string | null;
+  metricLabel: string | null;
+  metricValue: string | null;
 }
 
 export function useDashboardAnalytics() {
@@ -65,6 +68,9 @@ export function useDashboardAnalytics() {
         formTemplateId: c.formTemplateId,
         sortOrder: c.sortOrder,
         visible: c.visible,
+        displayName: c.displayName,
+        metricLabel: c.metricLabel,
+        metricValue: c.metricValue,
       }));
 
       const res = await fetch("/api/admin/dashboard/cards", {
@@ -102,6 +108,9 @@ export function useDashboardAnalytics() {
         formTemplateId: c.formTemplateId,
         sortOrder: c.sortOrder,
         visible: c.visible,
+        displayName: c.displayName,
+        metricLabel: c.metricLabel,
+        metricValue: c.metricValue,
       }));
 
       const res = await fetch("/api/admin/dashboard/cards", {

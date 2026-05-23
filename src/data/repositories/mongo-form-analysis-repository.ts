@@ -16,6 +16,19 @@ function toEntity(doc: any): FormAnalysis {
     sentimentOverview: doc.sentimentOverview ?? null,
     analyzedAt: doc.analyzedAt ? new Date(doc.analyzedAt) : null,
     submissionCount: typeof doc.submissionCount === "number" ? doc.submissionCount : 0,
+    topAnswers: Array.isArray(doc.topAnswers)
+      ? doc.topAnswers.map((item: any) => ({
+          fieldLabel: String(item.fieldLabel || ""),
+          topValue: String(item.topValue || ""),
+          count: typeof item.count === "number" ? item.count : 0,
+        }))
+      : null,
+    submissionDateRange: doc.submissionDateRange
+      ? {
+          earliest: new Date(doc.submissionDateRange.earliest),
+          latest: new Date(doc.submissionDateRange.latest),
+        }
+      : null,
     analysisStatus: doc.analysisStatus ?? "idle",
     errorMessage: doc.errorMessage ?? null,
     createdAt: doc.createdAt as Date,

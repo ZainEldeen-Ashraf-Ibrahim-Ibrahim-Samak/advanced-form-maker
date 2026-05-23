@@ -66,17 +66,23 @@ export async function analyzeFormSubmissions(submissions: any[], locale: string 
 
   const submissionsDataStr = JSON.stringify(sampledSubmissions, null, 2);
 
-  const prompt = `You are a professional business data analyst.
-Analyze the following list of form submissions and identify key trends, notable individual cases, user sentiments, and summarize the overall dataset.
-Ensure your analysis captures the essence of both Arabic and English text input where applicable.
+  const prompt = `You are analyzing form submission data for a marketing agency admin.
+  Return a JSON object with:
+  - summary (string): 2-3 sentence business overview
+  - patterns (string[]): up to 5 recurring submission patterns
+  - findings (string[]): up to 5 notable marketing findings (leads, interests, intent signals)
+  - sentimentOverview (string): overall tone and engagement quality
+  
+  Focus on lead generation signals, user intent, and marketing intelligence.
+  Ensure your analysis captures the essence of both Arabic and English text input where applicable.
+  
+  Language requirement:
+  You MUST generate all field values in the JSON output (including the "summary", "patterns", "findings", and "sentimentOverview") in ${locale === "ar" ? "Arabic (العربية)" : "English"}.
 
-Language requirement:
-You MUST generate all field values in the JSON output (including the "summary", "patterns", "findings", and "sentimentOverview") in ${locale === "ar" ? "Arabic (العربية)" : "English"}.
+  Form Submissions Data (JSON):
+  ${submissionsDataStr}
 
-Form Submissions Data (JSON):
-${submissionsDataStr}
-
-Please generate the structured analysis according to the schema.`;
+  Please generate the structured analysis according to the schema.`;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {

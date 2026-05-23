@@ -39,6 +39,7 @@ export function FormManager() {
   const [editFormDesc, setEditFormDesc] = useState("");
   const [editFormAiAutoFillEnabled, setEditFormAiAutoFillEnabled] = useState(false);
   const [editFormIsLocked, setEditFormIsLocked] = useState(false);
+  const [editFormIsContactForm, setEditFormIsContactForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   // Share Dialog State
@@ -70,6 +71,7 @@ export function FormManager() {
     setEditFormDesc(form.description || "");
     setEditFormAiAutoFillEnabled(form.aiAutoFillEnabled || false);
     setEditFormIsLocked(form.isLocked || false);
+    setEditFormIsContactForm(form.isContactForm || false);
     setIsEditOpen(true);
   }
 
@@ -81,7 +83,8 @@ export function FormManager() {
         name: editFormName.trim(),
         description: editFormDesc.trim(),
         aiAutoFillEnabled: editFormAiAutoFillEnabled,
-        isLocked: editFormIsLocked,
+        isLocked: editFormIsContactForm ? editFormIsLocked : false,
+        isContactForm: editFormIsContactForm,
       });
       setIsEditOpen(false);
       setEditingFormId(null);
@@ -172,7 +175,7 @@ export function FormManager() {
           <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger nativeButton={false} render={<Button />}>
+          <DialogTrigger nativeButton={true} render={<Button />}>
             <Plus className="me-2 h-4 w-4" />
             {t("createForm")}
           </DialogTrigger>
@@ -239,7 +242,7 @@ export function FormManager() {
                     ) : (
                       <Badge variant="secondary">{t("inactiveForm")}</Badge>
                     )}
-                    {form.isLocked && (
+                    {form.isContactForm && form.isLocked && (
                       <Badge variant="destructive">
                         {t("locked")}
                       </Badge>
@@ -281,7 +284,7 @@ export function FormManager() {
                     <Share2 className="h-4 w-4" />
                   </Button>
                   <AlertDialog>
-                    <AlertDialogTrigger nativeButton={false} render={<Button variant="ghost" size="icon" className="ms-auto text-destructive" />}>
+                    <AlertDialogTrigger nativeButton={true} render={<Button variant="ghost" size="icon" className="ms-auto text-destructive" />}>
                       <Trash2 className="h-4 w-4" />
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -346,31 +349,48 @@ export function FormManager() {
             </div>
             <div className="flex items-center justify-between rounded-lg border border-zinc-200 dark:border-zinc-800 p-3 shadow-sm bg-zinc-50/50 dark:bg-zinc-900/50">
               <div className="space-y-0.5 max-w-[80%]">
-                <Label htmlFor="edit-form-locked" className="text-sm font-semibold cursor-pointer">
-                  {t("lockForm")}
+                <Label htmlFor="edit-form-is-contact" className="text-sm font-semibold cursor-pointer">
+                  {t("isContactForm") || "This is the contact form"}
                 </Label>
                 <p className="text-[11px] text-muted-foreground leading-normal">
-                  {t("lockFormDesc")}
+                  {t("isContactFormDesc") || "Designate this form as the designated contact form."}
                 </p>
               </div>
               <Switch
-                id="edit-form-locked"
-                checked={editFormIsLocked}
-                onCheckedChange={async (checked) => {
-                  setEditFormIsLocked(checked);
-                  if (editingFormId) {
-                    try {
-                      // toggleLock(formId, currentState)
-                      // Current state before toggle is !checked.
-                      await toggleLock(editingFormId, !checked);
-                      toast.success(tc("success"));
-                    } catch (err) {
-                      toast.error(err instanceof Error ? err.message : tc("error"));
-                    }
-                  }
-                }}
+                id="edit-form-is-contact"
+                checked={editFormIsContactForm}
+                onCheckedChange={setEditFormIsContactForm}
               />
             </div>
+            {editFormIsContactForm && (
+              <div className="flex items-center justify-between rounded-lg border border-zinc-200 dark:border-zinc-800 p-3 shadow-sm bg-zinc-50/50 dark:bg-zinc-900/50">
+                <div className="space-y-0.5 max-w-[80%]">
+                  <Label htmlFor="edit-form-locked" className="text-sm font-semibold cursor-pointer">
+                    {t("lockForm")}
+                  </Label>
+                  <p className="text-[11px] text-muted-foreground leading-normal">
+                    {t("lockFormDesc")}
+                  </p>
+                </div>
+                <Switch
+                  id="edit-form-locked"
+                  checked={editFormIsLocked}
+                  onCheckedChange={async (checked) => {
+                    setEditFormIsLocked(checked);
+                    if (editingFormId) {
+                      try {
+                        // toggleLock(formId, currentState)
+                        // Current state before toggle is !checked.
+                        await toggleLock(editingFormId, !checked);
+                        toast.success(tc("success"));
+                      } catch (err) {
+                        toast.error(err instanceof Error ? err.message : tc("error"));
+                      }
+                    }
+                  }}
+                />
+              </div>
+            )}
             <Button
               onClick={handleUpdate}
               disabled={!editFormName.trim() || isEditing}

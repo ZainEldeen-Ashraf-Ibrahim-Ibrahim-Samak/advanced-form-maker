@@ -246,6 +246,7 @@ export function SubmissionsManager() {
           onDelete={deleteSubmission}
           onRefresh={() => fetchSubmissions(page, statusFilter, adminFilter, formFilter)}
           formNamesById={formNameById}
+          formName={formFilter !== "all" ? formNameById[formFilter] : undefined}
         />
       </div>
 

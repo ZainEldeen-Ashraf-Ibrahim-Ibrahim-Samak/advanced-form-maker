@@ -32,6 +32,9 @@ const updateCardSchema = z.object({
   formTemplateId: z.string(),
   visible: z.boolean().optional(),
   sortOrder: z.number().int().nonnegative().optional(),
+  displayName: z.string().nullable().optional(),
+  metricLabel: z.string().nullable().optional(),
+  metricValue: z.string().nullable().optional(),
 });
 
 const updateCardsSchema = z.array(updateCardSchema);

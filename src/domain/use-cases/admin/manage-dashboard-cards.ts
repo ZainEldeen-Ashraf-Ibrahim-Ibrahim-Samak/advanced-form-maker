@@ -10,6 +10,9 @@ export interface DashboardCardWithData {
   sortOrder: number;
   submissionCount: number;
   isLocked: boolean;
+  displayName: string | null;
+  metricLabel: string | null;
+  metricValue: string | null;
 }
 
 export class ManageDashboardCardsUseCase {
@@ -19,13 +22,29 @@ export class ManageDashboardCardsUseCase {
   ) {}
 
   async listCardsWithFormData(): Promise<DashboardCardWithData[]> {
-    const cards = await this.cardRepo.listAll();
-    const templates = await this.formRepo.findAll();
-    const templateMap = new Map(templates.map((t) => [t.id, t]));
+    const [cards, templates] = await Promise.all([
+      this.cardRepo.listAll(),
+      this.formRepo.findAll(),
+    ]);
+
+    const cardsByFormId = new Map(cards.map((c) => [c.formTemplateId, c]));
+
+    // Lazy-initialize: create a DashboardCard for any form that doesn't have one yet
+    const missingForms = templates.filter((t) => !cardsByFormId.has(t.id));
+    if (missingForms.length > 0) {
+      const newCards = await Promise.all(
+        missingForms.map((t) => this.cardRepo.createForForm(t.id))
+      );
+      newCards.forEach((c) => cardsByFormId.set(c.formTemplateId, c));
+    }
+
+    const allCards = [...cardsByFormId.values()].sort(
+      (a, b) => a.sortOrder - b.sortOrder
+    );
 
     const cardsWithData = await Promise.all(
-      cards.map(async (card) => {
-        const template = templateMap.get(card.formTemplateId);
+      allCards.map(async (card) => {
+        const template = templates.find((t) => t.id === card.formTemplateId);
         if (!template) return null;
 
         const submissionCount = await this.formRepo.countSubmissions(card.formTemplateId);
@@ -37,6 +56,9 @@ export class ManageDashboardCardsUseCase {
           sortOrder: card.sortOrder,
           submissionCount,
           isLocked: template.isLocked,
+          displayName: card.displayName,
+          metricLabel: card.metricLabel,
+          metricValue: card.metricValue,
         };
       })
     );

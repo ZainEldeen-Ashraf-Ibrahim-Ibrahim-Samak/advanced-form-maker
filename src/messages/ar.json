@@ -66,6 +66,7 @@
     "exportCSV": "CSV",
     "exportExcel": "Excel",
     "exportPDF": "PDF",
+    "exportJSON": "JSON",
     "exportedSuccess": "تم التصدير بنجاح",
     "loggedInAs": "مسجل الدخول باسم:",
     "whatsapp": "واتساب",
@@ -126,7 +127,13 @@
     "showAll": "إظهار الكل",
     "hideAll": "إخفاء الكل",
     "manage": "إدارة ←",
-    "submissionCount": "{count} {count, plural, =1 {طلب} other {طلبات}}"
+    "submissionCount": "{count} {count, plural, =1 {طلب} other {طلبات}}",
+    "manageCards": "إدارة بطاقات لوحة التحكم",
+    "editCardName": "اسم البطاقة",
+    "editMetricLabel": "تسمية المؤشر",
+    "editMetricValue": "قيمة المؤشر",
+    "saveLayout": "حفظ",
+    "cancelEdit": "إلغاء"
   },
   "forms": {
     "title": "قوالب النماذج",
@@ -149,7 +156,10 @@
     "locked": "مغلق",
     "lockForm": "قفل النموذج",
     "lockFormDesc": "منع عمليات تقديم الطلبات الجديدة مع إبقائها مرئية.",
-    "editForm": "تعديل النموذج"
+    "editForm": "تعديل النموذج",
+    "isContactForm": "هذا هو نموذج الاتصال",
+    "isContactFormDesc": "تحديد هذا النموذج كنموذج الاتصال المعين.",
+    "contactFormLocked": "مغلق"
   },
   "fields": {
     "title": "منشئ الحقول",
@@ -229,6 +239,7 @@
     }
   },
   "submissions": {
+    "indexHeader": "#",
     "exportTitle": "تصدير الطلبات",
     "filterByAdmin": "تم التحديث بواسطة",
     "allAdmins": "كل المشرفين",
@@ -616,6 +627,13 @@
     "noPatterns": "لم يتم تحديد أي أنماط أساسية بعد.",
     "noFindings": "لم يتم الكشف عن نتائج فردية ملحوظة بعد.",
     "noAnalysisDone": "لم يتم إجراء أي تحليل بعد",
-    "noAnalysisDoneDesc": "انقر فوق زر \"{runButton}\" أعلاه لتجميع وتحليل آراء واقتراحات الطلبات المقدمة."
+    "noAnalysisDoneDesc": "انقر فوق زر \"{runButton}\" أعلاه لتجميع وتحليل آراء واقتراحات الطلبات المقدمة.",
+    "statsTitle": "إحصائيات الطلبات",
+    "statsTotalLabel": "إجمالي الطلبات",
+    "statsDateRangeLabel": "الفترة الزمنية",
+    "statsTopAnswersLabel": "الإجابات الأكثر تكراراً",
+    "exportButton": "تصدير التحليل",
+    "noAnalysisYet": "لم يتم تشغيل تحليل الذكاء الاصطناعي بعد",
+    "noDateRange": "لا توجد طلبات بعد"
   }
 }

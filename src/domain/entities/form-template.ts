@@ -35,6 +35,7 @@ export interface FormTemplate {
   contactFormFields: ContactFormField[];
   isActive: boolean;
   isLocked: boolean;
+  isContactForm: boolean;
   aiAutoFillEnabled: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -43,9 +44,10 @@ export interface FormTemplate {
 export type CreateFormTemplateInput = Pick<FormTemplate, "name"> & {
   description?: string;
   aiAutoFillEnabled?: boolean;
+  isContactForm?: boolean;
 };
 
 export type UpdateFormTemplateInput = Partial<
-  Pick<FormTemplate, "name" | "description" | "isActive" | "isLocked" | "contactRecords" | "contactFormFields" | "aiAutoFillEnabled">
+  Pick<FormTemplate, "name" | "description" | "isActive" | "isLocked" | "contactRecords" | "contactFormFields" | "aiAutoFillEnabled" | "isContactForm">
 >;
 

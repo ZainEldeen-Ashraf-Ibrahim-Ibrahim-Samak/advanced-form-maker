@@ -14,14 +14,14 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
   return window.btoa(binary);
 }
 
-export function exportToCSV<T>(data: T[], filename: string, columns: { header: string; key: keyof T | ((row: T) => string) }[]) {
+export function exportToCSV<T>(data: T[], filename: string, columns: { header: string; key: keyof T | ((row: T, index: number) => any) }[]) {
   if (data.length === 0) return;
 
   const headers = columns.map((col) => `"${String(col.header || "").replace(/"/g, '""')}"`).join(",");
-  const rows = data.map((row) =>
+  const rows = data.map((row, idx) =>
     columns
       .map((col) => {
-        const val = typeof col.key === "function" ? col.key(row) : row[col.key];
+        const val = typeof col.key === "function" ? col.key(row, idx) : row[col.key];
         return `"${String(val || "").replace(/"/g, '""')}"`;
       })
       .join(",")
@@ -29,17 +29,17 @@ export function exportToCSV<T>(data: T[], filename: string, columns: { header: s
 
   const csv = [headers, ...rows].join("\n");
   const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
-  FileSaver.saveAs(blob, `${filename} data.csv`);
+  FileSaver.saveAs(blob, `${filename}.csv`);
 }
 
-export function exportToExcel<T>(data: T[], filename: string, columns: { header: string; key: keyof T | ((row: T) => string) }[]) {
+export function exportToExcel<T>(data: T[], filename: string, columns: { header: string; key: keyof T | ((row: T, index: number) => any) }[]) {
   if (data.length === 0) return;
 
-  const exportData = data.map((row) => {
+  const exportData = data.map((row, idx) => {
     const rowData: Record<string, string> = {};
     columns.forEach((col) => {
       const headerStr = String(col.header || "");
-      rowData[headerStr] = String(typeof col.key === "function" ? col.key(row) : row[col.key] || "");
+      rowData[headerStr] = String(typeof col.key === "function" ? col.key(row, idx) : row[col.key] || "");
     });
     return rowData;
   });
@@ -55,10 +55,10 @@ export function exportToExcel<T>(data: T[], filename: string, columns: { header:
 
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-  XLSX.writeFile(workbook, `${filename} data.xlsx`);
+  XLSX.writeFile(workbook, `${filename}.xlsx`);
 }
 
-export async function exportToPDF<T>(data: T[], filename: string, title: string, columns: { header: string; key: keyof T | ((row: T) => string) }[]) {
+export async function exportToPDF<T>(data: T[], filename: string, title: string, columns: { header: string; key: keyof T | ((row: T, index: number) => any) }[]) {
   if (data.length === 0) return;
 
   const doc = new jsPDF();
@@ -82,8 +82,8 @@ export async function exportToPDF<T>(data: T[], filename: string, title: string,
   doc.setFont(fontName);
   doc.text(title, 14, 15);
 
-  const body = data.map((row) =>
-    columns.map((col) => String(typeof col.key === "function" ? col.key(row) : row[col.key] || ""))
+  const body = data.map((row, idx) =>
+    columns.map((col) => String(typeof col.key === "function" ? col.key(row, idx) : row[col.key] || ""))
   );
 
   autoTable(doc, {
@@ -93,7 +93,31 @@ export async function exportToPDF<T>(data: T[], filename: string, title: string,
     styles: { font: fontName, fontStyle: "normal", fontSize: 10 },
   });
 
-  doc.save(`${title} data.pdf`);
+  doc.save(`${filename}.pdf`);
+}
+
+export function exportToJSON<T>(
+  data: T[],
+  filename: string,
+  columns?: { header: string; key: keyof T | ((row: T, index: number) => any) }[]
+) {
+  if (data.length === 0) return;
+
+  let exportData: any[] = data;
+  if (columns && columns.length > 0) {
+    exportData = data.map((row, idx) => {
+      const rowData: Record<string, any> = {};
+      columns.forEach((col) => {
+        const val = typeof col.key === "function" ? col.key(row, idx) : row[col.key];
+        rowData[col.header] = val;
+      });
+      return rowData;
+    });
+  }
+
+  const jsonStr = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8;" });
+  FileSaver.saveAs(blob, `${filename}.json`);
 }
 
 export async function exportBulkZip(formIds: string[], format: string) {

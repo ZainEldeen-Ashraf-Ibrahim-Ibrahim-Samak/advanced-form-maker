@@ -9,6 +9,8 @@ export interface IFormAnalysis extends Document {
   sentimentOverview: string | null;
   analyzedAt: Date | null;
   submissionCount: number;
+  topAnswers: Array<{ fieldLabel: string; topValue: string; count: number }> | null;
+  submissionDateRange: { earliest: Date; latest: Date } | null;
   analysisStatus: "idle" | "running" | "done" | "failed";
   errorMessage: string | null;
   createdAt: Date;
@@ -24,6 +26,14 @@ const FormAnalysisSchema = new Schema<IFormAnalysis>({
   sentimentOverview: { type: String, default: null },
   analyzedAt: { type: Date, default: null },
   submissionCount: { type: Number, default: 0 },
+  topAnswers: {
+    type: [{ fieldLabel: String, topValue: String, count: Number }],
+    default: null
+  },
+  submissionDateRange: {
+    type: { earliest: Date, latest: Date },
+    default: null
+  },
   analysisStatus: { type: String, enum: ["idle", "running", "done", "failed"], default: "idle" },
   errorMessage: { type: String, default: null },
 }, {

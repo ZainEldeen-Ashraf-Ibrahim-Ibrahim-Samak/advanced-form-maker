@@ -7,6 +7,7 @@ import { useDashboardAnalytics, DashboardCardWithData } from "@/presentation/vie
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { SubmissionsTable } from "@/presentation/components/admin/submissions-table";
 import { FileText, Clock, Eye, AlertCircle, ChevronLeft, ChevronRight, Cloud, HardDrive, GripVertical, EyeOff } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -16,7 +17,17 @@ import { useSensors, useSensor, PointerSensor, KeyboardSensor, DragEndEvent, Dnd
 import { useSortable, SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-function SortableCardRow({ card, onToggleVisibility }: { card: DashboardCardWithData; onToggleVisibility: (id: string) => void }) {
+function SortableCardRow({
+  card,
+  onToggleVisibility,
+  onUpdateField,
+  t,
+}: {
+  card: DashboardCardWithData;
+  onToggleVisibility: (id: string) => void;
+  onUpdateField: (id: string, field: "displayName" | "metricLabel" | "metricValue", value: string | null) => void;
+  t: any;
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: card.formTemplateId });
 
   const style = {
@@ -28,34 +39,72 @@ function SortableCardRow({ card, onToggleVisibility }: { card: DashboardCardWith
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center justify-between p-3 rounded-lg border bg-card text-card-foreground shadow-sm transition-shadow ${isDragging ? "shadow-md z-10" : ""} ${!card.visible ? "opacity-50" : ""}`}
+      className={`flex flex-col gap-3 p-3 rounded-lg border bg-card text-card-foreground shadow-sm transition-shadow ${isDragging ? "shadow-md z-10" : ""} ${!card.visible ? "opacity-50" : ""}`}
     >
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          className="cursor-grab active:cursor-grabbing touch-none text-muted-foreground hover:text-foreground p-1"
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical className="h-4 w-4" />
-        </button>
-        <div className="flex flex-col">
-          <span className="text-sm font-semibold">{card.name}</span>
-          {card.description && (
-            <span className="text-[10px] text-muted-foreground line-clamp-1">{card.description}</span>
-          )}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="cursor-grab active:cursor-grabbing touch-none text-muted-foreground hover:text-foreground p-1"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold">{card.displayName ?? card.name}</span>
+            {card.description && (
+              <span className="text-[10px] text-muted-foreground line-clamp-1">{card.description}</span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => onToggleVisibility(card.formTemplateId)}
+          >
+            {card.visible ? <Eye className="h-4 w-4 text-emerald-500" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+          </Button>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={() => onToggleVisibility(card.formTemplateId)}
-        >
-          {card.visible ? <Eye className="h-4 w-4 text-emerald-500" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
-        </Button>
-      </div>
+
+      {card.visible && (
+        <div className="grid grid-cols-3 gap-2 pt-2 border-t text-xs">
+          <div className="space-y-1">
+            <label className="text-[10px] text-muted-foreground font-semibold">{t("editCardName") || "Card Name"}</label>
+            <Input
+              size={undefined}
+              className="h-8 text-xs"
+              value={card.displayName ?? ""}
+              onChange={(e) => onUpdateField(card.formTemplateId, "displayName", e.target.value || null)}
+              placeholder={card.name}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] text-muted-foreground font-semibold">{t("editMetricLabel") || "Metric Label"}</label>
+            <Input
+              size={undefined}
+              className="h-8 text-xs"
+              value={card.metricLabel ?? ""}
+              onChange={(e) => onUpdateField(card.formTemplateId, "metricLabel", e.target.value || null)}
+              placeholder="Submissions"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] text-muted-foreground font-semibold">{t("editMetricValue") || "Metric Value"}</label>
+            <Input
+              size={undefined}
+              className="h-8 text-xs"
+              value={card.metricValue ?? ""}
+              onChange={(e) => onUpdateField(card.formTemplateId, "metricValue", e.target.value || null)}
+              placeholder={card.submissionCount.toString()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -65,8 +114,16 @@ export function AdminDashboard() {
   const tc = useTranslations("common");
   const locale = useLocale();
   const { submissions, total, totalPages, counts, isLoading, fetchSubmissions, deleteSubmission } = useSubmissionsList();
-  const { cloudinaryUsage, isLoadingUsage, cards, isLoadingCards, reorderCards, toggleCardVisibility } = useDashboardAnalytics();
+  const { cloudinaryUsage, isLoadingUsage, cards, isLoadingCards, reorderCards } = useDashboardAnalytics();
   
+  const formNamesById = cards.reduce<Record<string, string>>((acc, card) => {
+    acc[card.formTemplateId] = card.displayName ?? card.name;
+    return acc;
+  }, {});
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [draftCards, setDraftCards] = useState<DashboardCardWithData[]>([]);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -74,19 +131,45 @@ export function AdminDashboard() {
     })
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDraftDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = cards.findIndex((c) => c.formTemplateId === active.id);
-    const newIndex = cards.findIndex((c) => c.formTemplateId === over.id);
+    const oldIndex = draftCards.findIndex((c) => c.formTemplateId === active.id);
+    const newIndex = draftCards.findIndex((c) => c.formTemplateId === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
 
-    const reordered = [...cards];
+    const reordered = [...draftCards];
     const [moved] = reordered.splice(oldIndex, 1);
     reordered.splice(newIndex, 0, moved);
 
-    void reorderCards(reordered);
+    setDraftCards(reordered);
+  };
+
+  const toggleDraftVisibility = (formId: string) => {
+    setDraftCards((prev) =>
+      prev.map((c) => (c.formTemplateId === formId ? { ...c, visible: !c.visible } : c))
+    );
+  };
+
+  const updateDraftCardField = (
+    id: string,
+    field: "displayName" | "metricLabel" | "metricValue",
+    value: string | null
+  ) => {
+    setDraftCards((prev) =>
+      prev.map((c) => (c.formTemplateId === id ? { ...c, [field]: value === "" ? null : value } : c))
+    );
+  };
+
+  const handleSave = async () => {
+    await reorderCards(draftCards);
+    setIsEditDialogOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsEditDialogOpen(false);
+    setDraftCards([]);
   };
   
   const [statusFilter, setStatusFilter] = useState("all");
@@ -235,24 +318,45 @@ export function AdminDashboard() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">{t("manageCardsTitle") || "Form Summaries"}</h3>
-            <Dialog>
-              <DialogTrigger nativeButton={false} render={<Button variant="outline" size="sm">{t("saveOrder") || "Configure Layout"}</Button>} />
-              <DialogContent className="sm:max-w-md">
+            <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+              if (open) {
+                setDraftCards(cards.map((c) => ({ ...c })));
+                setIsEditDialogOpen(true);
+              } else {
+                setIsEditDialogOpen(false);
+              }
+            }}>
+              <DialogTrigger nativeButton={true} render={
+                <Button variant="outline" size="sm" onClick={() => {
+                  setDraftCards(cards.map((c) => ({ ...c })));
+                  setIsEditDialogOpen(true);
+                }}>
+                  {t("manageCards") || "Manage Cards"}
+                </Button>
+              } />
+              <DialogContent className="sm:max-w-xl max-h-[90vh] flex flex-col">
                 <DialogHeader>
                   <DialogTitle>{t("manageCardsTitle") || "Manage Dashboard Cards"}</DialogTitle>
                   <DialogDescription>{t("manageCardsDesc") || "Drag to reorder cards or toggle visibility."}</DialogDescription>
                 </DialogHeader>
-                <div className="py-4 max-h-[300px] overflow-y-auto space-y-2 pr-1">
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                    <SortableContext items={cards.map((c) => c.formTemplateId)} strategy={verticalListSortingStrategy}>
-                      {cards.map((card) => (
-                        <SortableCardRow key={card.formTemplateId} card={card} onToggleVisibility={toggleCardVisibility} />
+                <div className="py-4 flex-1 overflow-y-auto space-y-2 pr-1">
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDraftDragEnd}>
+                    <SortableContext items={draftCards.map((c) => c.formTemplateId)} strategy={verticalListSortingStrategy}>
+                      {draftCards.map((card) => (
+                        <SortableCardRow
+                          key={card.formTemplateId}
+                          card={card}
+                          onToggleVisibility={toggleDraftVisibility}
+                          onUpdateField={updateDraftCardField}
+                          t={t}
+                        />
                       ))}
                     </SortableContext>
                   </DndContext>
                 </div>
-                <DialogFooter>
-                  <DialogTrigger nativeButton={false} render={<Button variant="secondary" className="w-full">{tc("close") || "Close"}</Button>} />
+                <DialogFooter className="flex sm:justify-end gap-2">
+                  <Button variant="outline" onClick={handleCancel}>{t("cancelEdit") || "Cancel"}</Button>
+                  <Button onClick={handleSave}>{t("saveLayout") || "Save"}</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -265,7 +369,7 @@ export function AdminDashboard() {
                 <Card key={card.formTemplateId} className={`hover:shadow-md transition-shadow ${card.isLocked ? "border-amber-200 dark:border-amber-800" : ""}`}>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base flex items-center justify-between">
-                      <span className="truncate pr-2">{card.name}</span>
+                      <span className="truncate pr-2">{card.displayName ?? card.name}</span>
                       {card.isLocked && (
                         <Badge variant="destructive" className="text-[10px] shrink-0">
                           {locale === "ar" ? "مغلق" : "Locked"}
@@ -276,7 +380,14 @@ export function AdminDashboard() {
                   </CardHeader>
                   <CardContent className="flex justify-between items-center pt-2">
                     <span className="text-xs text-muted-foreground">
-                      {t("submissionCount", { count: card.submissionCount })}
+                      {card.metricLabel || card.metricValue !== null ? (
+                        <>
+                          <span className="font-semibold">{card.metricLabel ?? (locale === "ar" ? "الطلبات" : "Submissions")}</span>:{" "}
+                          <span>{card.metricValue !== null && card.metricValue !== undefined ? card.metricValue : card.submissionCount}</span>
+                        </>
+                      ) : (
+                        t("submissionCount", { count: card.submissionCount })
+                      )}
                     </span>
                     <Link href={`/admin/forms/${card.formTemplateId}`}>
                       <Button variant="ghost" size="sm">{t("manage")}</Button>
@@ -309,6 +420,8 @@ export function AdminDashboard() {
         isLoading={isLoading} 
         onDelete={deleteSubmission}
         onRefresh={() => fetchSubmissions(page, statusFilter)} 
+        formNamesById={formNamesById}
+        formName="all-forms"
       />
 
       {totalPages > 1 && (

@@ -11,6 +11,9 @@ function toEntity(doc: any): DashboardCard {
     formTemplateId: doc.formTemplateId?.toString() ?? "",
     visible: !!doc.visible,
     sortOrder: typeof doc.sortOrder === "number" ? doc.sortOrder : 0,
+    displayName: doc.displayName ?? null,
+    metricLabel: doc.metricLabel ?? null,
+    metricValue: doc.metricValue ?? null,
     createdAt: doc.createdAt as Date,
     updatedAt: doc.updatedAt as Date,
   };
@@ -37,6 +40,9 @@ export class MongoDashboardCardRepository implements DashboardCardRepository {
         const updateDoc: Record<string, any> = {};
         if (card.visible !== undefined) updateDoc.visible = card.visible;
         if (card.sortOrder !== undefined) updateDoc.sortOrder = card.sortOrder;
+        if (card.displayName !== undefined) updateDoc.displayName = card.displayName;
+        if (card.metricLabel !== undefined) updateDoc.metricLabel = card.metricLabel;
+        if (card.metricValue !== undefined) updateDoc.metricValue = card.metricValue;
         
         return {
           updateOne: {

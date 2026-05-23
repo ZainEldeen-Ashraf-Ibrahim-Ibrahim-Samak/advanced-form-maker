@@ -148,6 +148,7 @@ export const createFormTemplateSchema = z.object({
     .max(200, "Name must be 200 characters or fewer")
     .regex(SAFE_TEXT_REGEX, "Contains invalid characters"),
   description: z.string().regex(SAFE_TEXT_REGEX, "Contains invalid characters").optional().default(""),
+  isContactForm: z.boolean().optional(),
 });
 
 export const updateFormTemplateSchema = z.object({
@@ -158,6 +159,7 @@ export const updateFormTemplateSchema = z.object({
   contactFormFields: z.array(contactFormFieldSchema).min(1).optional(),
   aiAutoFillEnabled: z.boolean().optional(),
   isLocked: z.boolean().optional(),
+  isContactForm: z.boolean().optional(),
 });
 
 // ── Submission Schemas ─────────────────────────────────────────────

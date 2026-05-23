@@ -95,6 +95,8 @@ export function useFormAnalysis(formId: string) {
             sentimentOverview: null,
             analyzedAt: null,
             submissionCount: 0,
+            topAnswers: null,
+            submissionDateRange: null,
             analysisStatus: "running",
             errorMessage: null,
             createdAt: new Date(),
@@ -137,6 +139,14 @@ export function useFormAnalysis(formId: string) {
     }
   };
 
+  const exportAnalysis = async (format: "pdf" | "csv" | "xlsx" | "json") => {
+    try {
+      window.location.href = `/api/admin/forms/${formId}/analysis/export?format=${format}`;
+    } catch (err: any) {
+      toast.error(err.message || "Failed to export analysis");
+    }
+  };
+
   useEffect(() => {
     void fetchAnalysis().then((currentAnalysis) => {
       if (currentAnalysis?.analysisStatus === "running") {
@@ -151,6 +161,7 @@ export function useFormAnalysis(formId: string) {
     error,
     runAnalysis,
     toggleEnabled,
+    exportAnalysis,
     refreshAnalysis: fetchAnalysis,
   };
 }

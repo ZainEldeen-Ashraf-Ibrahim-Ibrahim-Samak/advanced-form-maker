@@ -4,6 +4,9 @@ export interface IDashboardCard extends Document {
   formTemplateId: mongoose.Types.ObjectId;
   visible: boolean;
   sortOrder: number;
+  displayName: string | null;
+  metricLabel: string | null;
+  metricValue: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +28,18 @@ const dashboardCardSchema = new Schema<IDashboardCard>(
       type: Number,
       default: 0,
       index: true,
+    },
+    displayName: {
+      type: String,
+      default: null,
+    },
+    metricLabel: {
+      type: String,
+      default: null,
+    },
+    metricValue: {
+      type: String,
+      default: null,
     },
   },
   {

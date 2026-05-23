@@ -14,7 +14,7 @@ import { formatDate, buildSubmissionUrl } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
 import type { Submission } from "@/domain/entities/submission";
-import { exportToCSV, exportToExcel, exportToPDF } from "@/lib/export";
+import { exportToCSV, exportToExcel, exportToPDF, exportToJSON } from "@/lib/export";
 
 interface SubmissionsTableProps {
   submissions: Submission[];
@@ -22,9 +22,10 @@ interface SubmissionsTableProps {
   onDelete: (id: string) => Promise<void>;
   onRefresh: () => void;
   formNamesById?: Record<string, string>;
+  formName?: string;
 }
 
-export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, formNamesById = {} }: SubmissionsTableProps) {
+export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, formNamesById = {}, formName }: SubmissionsTableProps) {
   const t = useTranslations("submissions");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -127,6 +128,10 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
 
   const getExportColumns = () => [
     {
+      header: t("indexHeader") || "#",
+      key: (_: Submission, idx: number) => idx + 1,
+    },
+    {
       header: t("formName"),
       key: (row: Submission) => formNamesById[row.formTemplateId] || "—",
     },
@@ -155,9 +160,9 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
     { header: tc("status"), key: (row: Submission) => t(`statuses.${row.status}`) },
     { header: t("submittedAt"), key: (row: Submission) => formatDate(row.submittedAt) },
   ];
-
-  const handleExport = async (format: "csv" | "excel" | "pdf", data: Submission[], filenamePrefix: string) => {
-    const filename = `${filenamePrefix}-${new Date().toISOString().split("T")[0]}`;
+ 
+  const handleExport = async (format: "csv" | "excel" | "pdf" | "json", data: Submission[], filenamePrefix: string) => {
+    const filename = filenamePrefix === "all-submissions" ? `${formName || "submissions"} data` : filenamePrefix;
     const columns = getExportColumns();
     
     try {
@@ -167,6 +172,8 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
         exportToExcel(data, filename, columns);
       } else if (format === "pdf") {
         await exportToPDF(data, filename, t("exportTitle") || "Submissions Export", columns);
+      } else if (format === "json") {
+        exportToJSON(data, filename, columns);
       }
       toast.success(tc("exportedSuccess") || "Exported successfully");
     } catch (err) {
@@ -181,7 +188,10 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
           <TableHeader>
             <TableRow>
               <TableHead className="w-12">
-                <Skeleton className="h-4 w-4 rounded" />
+                <Checkbox disabled className="opacity-50" />
+              </TableHead>
+              <TableHead className="w-12 text-center">
+                <Skeleton className="h-4 w-4 mx-auto rounded" />
               </TableHead>
               <TableHead className="whitespace-nowrap"><Skeleton className="h-4 w-24" /></TableHead>
               <TableHead className="hidden md:table-cell whitespace-nowrap"><Skeleton className="h-4 w-24" /></TableHead>
@@ -197,7 +207,10 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
              {[1, 2, 3, 4, 5].map((i) => (
                 <TableRow key={i}>
                   <TableCell>
-                    <Skeleton className="h-4 w-4 rounded" />
+                    <Checkbox disabled className="opacity-50" />
+                  </TableCell>
+                  <TableCell className="w-12 text-center">
+                    <Skeleton className="h-4 w-4 mx-auto rounded" />
                   </TableCell>
                   <TableCell className="w-full sm:w-auto">
                     <Skeleton className="h-4 w-32" />
@@ -296,27 +309,47 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
           </div>
         </div>
       )}
-      <div className={`flex items-center justify-end mb-4 ${selectedIds.length > 0 ? "hidden" : ""}`}>
-        <DropdownMenu>
-          <DropdownMenuTrigger nativeButton={true} render={<Button variant="outline" size="sm" />}>
-            <Download className="me-2 h-4 w-4" />
-            {tc("exportAll")}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleExport("csv", submissions, "all-submissions")}>
-              <FileText className="me-2 h-4 w-4" />
-              {tc("exportCSV")}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExport("excel", submissions, "all-submissions")}>
-              <FileSpreadsheet className="me-2 h-4 w-4" />
-              {tc("exportExcel")}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExport("pdf", submissions, "all-submissions")}>
-              <File className="me-2 h-4 w-4" />
-              {tc("exportPDF")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div className={`flex items-center justify-end gap-2 mb-4 ${selectedIds.length > 0 ? "hidden" : ""}`}>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => handleExport("pdf", submissions, "all-submissions")}
+          disabled={submissions.length === 0}
+          title={submissions.length === 0 ? t("noSubmissionsToExport") || "No submissions to export" : ""}
+        >
+          <File className="me-2 h-4 w-4" />
+          {tc("exportPDF") || "PDF"}
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => handleExport("csv", submissions, "all-submissions")}
+          disabled={submissions.length === 0}
+          title={submissions.length === 0 ? t("noSubmissionsToExport") || "No submissions to export" : ""}
+        >
+          <FileText className="me-2 h-4 w-4" />
+          {tc("exportCSV") || "CSV"}
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => handleExport("excel", submissions, "all-submissions")}
+          disabled={submissions.length === 0}
+          title={submissions.length === 0 ? t("noSubmissionsToExport") || "No submissions to export" : ""}
+        >
+          <FileSpreadsheet className="me-2 h-4 w-4" />
+          {tc("exportExcel") || "Excel"}
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => handleExport("json", submissions, "all-submissions")}
+          disabled={submissions.length === 0}
+          title={submissions.length === 0 ? t("noSubmissionsToExport") || "No submissions to export" : ""}
+        >
+          <Download className="me-2 h-4 w-4" />
+          {tc("exportJSON") || "JSON"}
+        </Button>
       </div>
       <div className={`rounded-md border ${selectedIds.length > 0 ? "rounded-t-none border-t-0" : ""}`}>
         <Table>
@@ -329,6 +362,7 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
                   aria-label="Select all"
                 />
               </TableHead>
+              <TableHead className="w-12 text-center">{t("indexHeader") || "#"}</TableHead>
               <TableHead className="whitespace-nowrap">{t("clientName")}</TableHead>
               <TableHead className="hidden md:table-cell whitespace-nowrap">{t("formName")}</TableHead>
               <TableHead className="hidden md:table-cell whitespace-nowrap">{t("contactEmail")}</TableHead>
@@ -340,7 +374,7 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
             </TableRow>
           </TableHeader>
           <TableBody>
-            {submissions.map((sub) => {
+            {submissions.map((sub, idx) => {
               const latestUpdater = getLatestUpdater(sub);
               const contactSummary = getContactSummary(sub);
               const isSelected = selectedIds.includes(sub.id);
@@ -358,8 +392,11 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
                       aria-label={`Select ${sub.clientName || 'submission'}`}
                     />
                   </TableCell>
+                  <TableCell className="w-12 text-center text-muted-foreground font-medium">
+                    {idx + 1}
+                  </TableCell>
                   <TableCell className="font-medium group-hover:text-primary transition-colors wrap-break-word">
-                    <div>{sub.clientName || t("unnamedSubmission")}</div>
+                    <div>{sub.clientName || `${formatDate(sub.submittedAt)} - ${t("unnamedSubmission")} ${idx + 1}`}</div>
                     <div className="mt-1 text-xs text-muted-foreground font-normal md:hidden">
                       {t("formName")}: {formName}
                     </div>

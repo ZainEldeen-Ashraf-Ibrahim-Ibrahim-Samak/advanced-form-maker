@@ -3,6 +3,9 @@ export interface DashboardCard {
   formTemplateId: string;
   visible: boolean;
   sortOrder: number;
+  displayName: string | null;
+  metricLabel: string | null;
+  metricValue: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,4 +20,7 @@ export interface UpdateDashboardCardInput {
   formTemplateId: string;
   visible?: boolean;
   sortOrder?: number;
+  displayName?: string | null;
+  metricLabel?: string | null;
+  metricValue?: string | null;
 }

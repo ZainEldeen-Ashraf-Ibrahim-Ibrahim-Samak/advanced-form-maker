@@ -66,6 +66,7 @@
     "exportCSV": "CSV",
     "exportExcel": "Excel",
     "exportPDF": "PDF",
+    "exportJSON": "JSON",
     "exportedSuccess": "Exported successfully",
     "loggedInAs": "Logged in as:",
     "whatsapp": "WhatsApp",
@@ -126,7 +127,13 @@
     "showAll": "Show All",
     "hideAll": "Hide All",
     "manage": "Manage →",
-    "submissionCount": "{count} {count, plural, =1 {submission} other {submissions}}"
+    "submissionCount": "{count} {count, plural, =1 {submission} other {submissions}}",
+    "manageCards": "Manage Cards",
+    "editCardName": "Card Name",
+    "editMetricLabel": "Metric Label",
+    "editMetricValue": "Metric Value",
+    "saveLayout": "Save",
+    "cancelEdit": "Cancel"
   },
   "forms": {
     "title": "Form Templates",
@@ -149,7 +156,10 @@
     "locked": "Locked",
     "lockForm": "Lock Form",
     "lockFormDesc": "Prevent new submissions while keeping the form visible.",
-    "editForm": "Edit Form"
+    "editForm": "Edit Form",
+    "isContactForm": "This is the contact form",
+    "isContactFormDesc": "Designate this form as the designated contact form.",
+    "contactFormLocked": "Locked"
   },
   "fields": {
     "title": "Field Builder",
@@ -229,6 +239,7 @@
     }
   },
   "submissions": {
+    "indexHeader": "#",
     "exportTitle": "Submissions Export",
     "filterByAdmin": "Updating Admin",
     "allAdmins": "All Admins",
@@ -616,6 +627,13 @@
     "noPatterns": "No core patterns identified yet.",
     "noFindings": "No notable individual findings detected yet.",
     "noAnalysisDone": "No Analysis Done",
-    "noAnalysisDoneDesc": "Click the \"{runButton}\" button above to stream and compile submission feedback into structured business insights."
+    "noAnalysisDoneDesc": "Click the \"{runButton}\" button above to stream and compile submission feedback into structured business insights.",
+    "statsTitle": "Submission Statistics",
+    "statsTotalLabel": "Total Submissions",
+    "statsDateRangeLabel": "Date Range",
+    "statsTopAnswersLabel": "Top Answers",
+    "exportButton": "Export Analysis",
+    "noAnalysisYet": "No AI analysis has been run yet",
+    "noDateRange": "No submissions yet"
   }
 }
