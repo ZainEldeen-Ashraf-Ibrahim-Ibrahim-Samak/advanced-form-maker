@@ -53,7 +53,7 @@ Add `branding` subdocument.
 **Mongoose model** (`src/data/models/settings.model.ts`):
 ```
 branding: {
-  siteName:    { type: String, default: "SCCT DAMAGES", maxlength: 100 }
+  siteName:    { type: String, default: "ADVANCED FORM MAKER", maxlength: 100 }
   siteLogoUrl: { type: String, default: "" }
 }
 ```

@@ -18,8 +18,8 @@
 
 **Purpose**: Add all new translation keys to both locale files — required by both user stories before any UI work can be verified.
 
-- [ ] T001 [P] Add new i18n keys to `src/messages/en.json`: `forms.collaborate`, `forms.collaborateTitle`, `forms.collaborateClose`, `dashboard.copyLink`, `dashboard.qrCode`
-- [ ] T002 [P] Add Arabic equivalents to `src/messages/ar.json`: `forms.collaborate`, `forms.collaborateTitle`, `forms.collaborateClose`, `dashboard.copyLink`, `dashboard.qrCode`
+- [x] T001 [P] Add new i18n keys to `src/messages/en.json`: `forms.collaborate`, `forms.collaborateTitle`, `forms.collaborateClose`, `dashboard.copyLink`, `dashboard.qrCode`
+- [x] T002 [P] Add Arabic equivalents to `src/messages/ar.json`: `forms.collaborate`, `forms.collaborateTitle`, `forms.collaborateClose`, `dashboard.copyLink`, `dashboard.qrCode`
 
 **Checkpoint**: Both locale files updated. `npm run i18n:lint` should pass (no missing keys for the new keys yet, since consumers don't exist yet — this just seeds them).
 
@@ -29,7 +29,7 @@
 
 **Purpose**: Extract the share dialog logic into a reusable component needed by both US1 (dashboard) and US2 (forms manager). **No user story work can begin until this phase is complete.**
 
-- [ ] T003 Create `src/presentation/components/admin/form-share-dialog/index.tsx` — extract the share dialog JSX from `src/presentation/components/admin/form-manager/index.tsx`; accept props `{ open: boolean; onOpenChange: (open: boolean) => void; formId: string; formName?: string }`; internally derive `shareUrl` using `useLocale()` + `window.location.origin`; include QR code render (200×200, level "H"), copy-link input, Download PNG button, and close button; all strings via `useTranslations("sharing")` and `useTranslations("common")` keys
+- [x] T003 Create `src/presentation/components/admin/form-share-dialog/index.tsx` — extract the share dialog JSX from `src/presentation/components/admin/form-manager/index.tsx`; accept props `{ open: boolean; onOpenChange: (open: boolean) => void; formId: string; formName?: string }`; internally derive `shareUrl` using `useLocale()` + `window.location.origin`; include QR code render (200×200, level "H"), copy-link input, Download PNG button, and close button; all strings via `useTranslations("sharing")` and `useTranslations("common")` keys
 
 **Checkpoint**: `<FormShareDialog>` renders in isolation with correct QR code and copy-link behavior. The existing `FormManager` share dialog is not yet replaced.
 
@@ -43,7 +43,7 @@
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] Update `src/presentation/components/admin/dashboard/index.tsx`:
+- [x] T004 [US1] Update `src/presentation/components/admin/dashboard/index.tsx`:
   - Add state: `qrDialogFormId: string | null`, `qrDialogOpen: boolean`
   - In the `cardType === "form"` card branch, add below the metric value: a "Copy Link" `<Button variant="ghost" size="icon">` (use `Copy` icon from lucide-react) that calls `navigator.clipboard.writeText(url)` + `toast.success(t("dashboard.copyLink"))`, and a "QR Code" `<Button variant="ghost" size="icon">` (use `QrCode` icon) that sets `qrDialogFormId` + opens the dialog
   - Import and render `<FormShareDialog open={qrDialogOpen} onOpenChange={setQrDialogOpen} formId={qrDialogFormId ?? ""} />` once at the end of the component (outside the card loop)
@@ -61,7 +61,7 @@
 
 ### Implementation for User Story 2
 
-- [ ] T005 [P] [US2] Update `src/presentation/components/admin/form-manager/index.tsx`:
+- [x] T005 [P] [US2] Update `src/presentation/components/admin/form-manager/index.tsx`:
   - Remove the inline share dialog JSX (the `<Dialog open={isShareOpen}>` block and all associated state: `shareFormId`, `isShareOpen`, `shareUrl`, `isShareLoading`, `qrRef`)
   - Import `<FormShareDialog>` from `@/presentation/components/admin/form-share-dialog`
   - Add state: `shareDialogFormId: string | null`, `shareDialogOpen: boolean`
@@ -69,7 +69,7 @@
   - Render `<FormShareDialog open={shareDialogOpen} onOpenChange={setShareDialogOpen} formId={shareDialogFormId ?? ""} />` at the bottom
   - Verify existing Share button still works identically
 
-- [ ] T006 [P] [US2] Create `src/presentation/components/admin/form-submissions-panel/index.tsx`:
+- [x] T006 [P] [US2] Create `src/presentation/components/admin/form-submissions-panel/index.tsx`:
   - Use `<Sheet>` (side="right") from shadcn/ui with a wide width (e.g., `className="w-full sm:max-w-3xl"` on `SheetContent`)
   - Props: `{ open: boolean; onOpenChange: (open: boolean) => void; formId: string; formName: string }`
   - Internal state: `page: number` (default 1), `statusFilter: string` (default "all")
@@ -77,7 +77,7 @@
   - Reset `page` to 1 when `statusFilter` changes or when `formId` changes
   - Render: `<SheetHeader>` with title `t("forms.collaborateTitle", { name: formName })`, a `<Select>` status filter (reuse `dashboard.*` translation keys for status labels), `<SubmissionsTable>` passing `submissions`, `isLoading`, `onDelete={deleteSubmission}`, `onRefresh={() => fetchSubmissions(page, statusFilter, "all", formId)}`, `formNamesById={{ [formId]: formName }}`, `formName={formName}`, plus pagination controls (ChevronLeft/ChevronRight buttons, page/totalPages display) matching the pattern in `AdminDashboard`; empty-state `<div>` with `t("forms.noSubmissions")` (use existing key if present, else add) when `submissions.length === 0 && !isLoading`
 
-- [ ] T007 [US2] Update `src/presentation/components/admin/form-manager/index.tsx` (depends on T006):
+- [x] T007 [US2] Update `src/presentation/components/admin/form-manager/index.tsx` (depends on T006):
   - Add state: `collaborateFormId: string | null`, `collaborateFormName: string`, `isCollaborateOpen: boolean`
   - Import `<FormSubmissionsPanel>` from `@/presentation/components/admin/form-submissions-panel`
   - Import `Users` icon from `lucide-react`
@@ -92,10 +92,10 @@
 
 **Purpose**: Validate i18n completeness, check that the `forms.noSubmissions` key exists (add if missing), and do a final smoke test.
 
-- [ ] T008 Check `src/messages/en.json` and `src/messages/ar.json` for `forms.noSubmissions` — add to both if not present (EN: "No submissions yet for this form", AR: "لا توجد طلبات لهذا النموذج بعد")
-- [ ] T009 Run `npm run i18n:sync` from repo root — fix any reported missing keys
-- [ ] T010 Run `npm run i18n:lint` from repo root — must exit with zero warnings/errors
-- [ ] T011 Manual smoke test per `specs/017-form-links-submissions-panel/quickstart.md`: dashboard copy link, dashboard QR dialog, dashboard QR download, forms page collaborate panel, status filter, pagination, empty state, close behavior
+- [x] T008 Check `src/messages/en.json` and `src/messages/ar.json` for `forms.noSubmissions` — add to both if not present (EN: "No submissions yet for this form", AR: "لا توجد طلبات لهذا النموذج بعد")
+- [x] T009 Run `npm run i18n:sync` from repo root — fix any reported missing keys
+- [x] T010 Run `npm run i18n:lint` from repo root — must exit with zero warnings/errors
+- [x] T011 Manual smoke test per `specs/017-form-links-submissions-panel/quickstart.md`: dashboard copy link, dashboard QR dialog, dashboard QR download, forms page collaborate panel, status filter, pagination, empty state, close behavior
 
 ---
 

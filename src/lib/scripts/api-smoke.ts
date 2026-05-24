@@ -16,7 +16,7 @@ type TestCase = {
 type JsonObject = Record<string, unknown>;
 
 function getBaseUrl(): string {
-  const base = env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const base = env.NEXT_PUBLIC_APP_URL ?? "";
   return base.replace(/\/$/, "");
 }
 

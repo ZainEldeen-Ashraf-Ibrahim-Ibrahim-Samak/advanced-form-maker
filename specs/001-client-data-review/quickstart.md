@@ -64,7 +64,7 @@ npm run seed:admin
 ```
 
 This creates a default admin user:
-- **Email**: `admin@scct.local`
+- **Email**: `admin@local.com`
 - **Password**: `changeme` (change immediately after first login)
 
 ## 5. Run Development Server

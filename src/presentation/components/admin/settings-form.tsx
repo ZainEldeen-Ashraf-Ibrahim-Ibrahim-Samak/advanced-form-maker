@@ -39,7 +39,7 @@ export function SettingsForm() {
         method: "POST",
         body: formData,
       });
-      
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || t("restoreFailed"));
 
@@ -58,7 +58,7 @@ export function SettingsForm() {
     if (settings) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalState(settings);
-      setSiteName(settings.branding?.siteName || "SCCT DAMAGES");
+      setSiteName(settings.branding?.siteName || "ADVANCED FORM MAKER");
       setSiteLogoUrl(settings.branding?.siteLogoUrl || "");
     }
   }, [settings]);
@@ -159,7 +159,7 @@ export function SettingsForm() {
               />
               <p className="text-xs text-zinc-500">{t("draftRetentionHint")}</p>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="cloudinary_storage_threshold">{t("cloudinaryThresholdTitle")}</Label>
               <Input
@@ -218,12 +218,12 @@ export function SettingsForm() {
                 type="text"
                 maxLength={100}
                 required
-                placeholder="e.g. SCCT DAMAGES"
+                placeholder="e.g. ADVANCED FORM MAKER"
                 value={siteName}
                 onChange={(e) => setSiteName(e.target.value)}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label>{t("siteLogoLabel")}</Label>
               <MediaUpload
@@ -257,7 +257,7 @@ export function SettingsForm() {
           <Button variant="secondary" disabled={isBackingUp} onClick={triggerBackup}>
             {isBackingUp ? t("backingUp") : t("backupNow")}
           </Button>
-          
+
           <Button variant="outline" onClick={() => window.location.href = "/api/admin/system/backup"}>
             {t("downloadBackup")}
           </Button>
@@ -266,9 +266,9 @@ export function SettingsForm() {
             <Button variant="destructive" disabled={isRestoring}>
               {isRestoring ? t("restoring") : t("uploadRestore")}
             </Button>
-            <input 
+            <input
               title="Upload & Restore"
-              type="file" 
+              type="file"
               accept=".json,application/json"
               onChange={handleRestore}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -276,7 +276,7 @@ export function SettingsForm() {
             />
           </div>
         </div>
-        
+
         {settings?.backup.lastRunAt && (
           <span className="text-xs text-zinc-400">
             {t("lastRun", { date: new Date(settings.backup.lastRunAt).toLocaleString() })}

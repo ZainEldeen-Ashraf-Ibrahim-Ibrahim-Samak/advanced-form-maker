@@ -8,7 +8,7 @@ cloudinary.config({
   secure: true
 });
 
-const PRESET_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'scct-submissions';
+const PRESET_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'submissions';
 
 // Re-implementing the core logic from production code (ensureUploadPresetExists)
 async function ensureUploadPresetExists(presetName) {

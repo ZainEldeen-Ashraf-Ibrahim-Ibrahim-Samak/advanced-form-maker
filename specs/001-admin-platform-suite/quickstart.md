@@ -92,7 +92,7 @@ if (form.isLocked) {
 export async function getSiteBranding() {
   const settings = await useCase.getSettings();
   return {
-    siteName: settings?.branding?.siteName || "SCCT DAMAGES",
+    siteName: settings?.branding?.siteName || "ADVANCED FORM MAKER",
     siteLogoUrl: settings?.branding?.siteLogoUrl || "",
   };
 }

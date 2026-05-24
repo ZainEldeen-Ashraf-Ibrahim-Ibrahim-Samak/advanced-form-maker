@@ -1,6 +1,6 @@
 import { ManageSettingsUseCase } from "@/domain/use-cases/admin/manage-settings";
 
-export const SITE_NAME = "SCCT DAMAGES";
+export const SITE_NAME = "ADVANCED FORM MAKER";
 export const SITE_ADMIN_NAME = `${SITE_NAME} Admin`;
 export const SITE_FAVICON_PATH = "/favicon.ico";
 

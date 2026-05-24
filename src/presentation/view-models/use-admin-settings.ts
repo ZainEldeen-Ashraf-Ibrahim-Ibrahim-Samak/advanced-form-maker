@@ -42,7 +42,7 @@ export function useAdminSettings() {
           draft_retention_days: data.data.draft_retention_days ?? null,
           cloudinary_storage_threshold: data.data.cloudinary_storage_threshold ?? null,
           storage_cleanup_target: data.data.storage_cleanup_target ?? null,
-          branding: data.data.branding || { siteName: "SCCT DAMAGES", siteLogoUrl: "" },
+          branding: data.data.branding || { siteName: "ADVANCED FORM MAKER", siteLogoUrl: "" },
         });
       }
     } catch (e: unknown) {

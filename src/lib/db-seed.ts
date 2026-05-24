@@ -19,7 +19,7 @@ export async function seedAdminUser() {
     const hashedPassword = await bcrypt.hash(defaultPassword, 12);
 
     const adminUser = await UserModel.create({
-      email: "admin@scct.local",
+      email: "admin@local.com",
       name: "System Admin",
       password: hashedPassword,
       role: "admin",

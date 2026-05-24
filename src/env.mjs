@@ -25,6 +25,8 @@ export const env = createEnv({
     NEXT_PUBLIC_CLOUDINARY_API_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: z.string().min(1).optional(),
     NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+    NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: z.string().optional(),
+    NEXT_PUBLIC_GOOGLE_HTML_VERIFICATION: z.string().optional(),
   },
   // If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
   runtimeEnv: {
@@ -45,6 +47,8 @@ export const env = createEnv({
     NEXT_PUBLIC_CLOUDINARY_API_KEY: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
     NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    NEXT_PUBLIC_GOOGLE_HTML_VERIFICATION: process.env.NEXT_PUBLIC_GOOGLE_HTML_VERIFICATION,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
   },
   skipValidation:

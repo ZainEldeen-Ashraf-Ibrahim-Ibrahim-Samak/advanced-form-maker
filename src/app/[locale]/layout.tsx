@@ -7,6 +7,7 @@ import { AuthProvider } from "@/presentation/providers/auth-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { getSiteBranding } from "@/components/shared/site-name";
 import "@/app/globals.css";
+import { env } from "@/env.mjs";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +29,7 @@ export async function generateMetadata({
   const branding = await getSiteBranding();
 
   return {
-    metadataBase: new URL("https://scct-damages.vercel.app/"),
+    metadataBase: env.NEXT_PUBLIC_APP_URL ? new URL(env.NEXT_PUBLIC_APP_URL) : undefined,
     title: t("title", { siteName: branding.siteName }),
     description: t("description"),
     keywords: ["SCCT", "Damages", "Data Collection", "Bilingual", "Dashboard"],
@@ -52,14 +53,14 @@ export async function generateMetadata({
     openGraph: {
       title: t("ogTitle", { siteName: branding.siteName }),
       description: t("ogDescription"),
-      url: "https://scct-damages.vercel.app/",
+      url: env.NEXT_PUBLIC_APP_URL,
       siteName: branding.siteName,
       locale: locale === "ar" ? "ar_EG" : "en_US",
       type: "website",
     },
-    verification: {
-      google: "K2hBH3SrfPai7vh5FKzjqFugBv_kw7QmvPr-HxqVOGQ",
-    },
+    verification: env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+      ? { google: env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+      : undefined,
     alternates: {
       canonical: "/",
       languages: {

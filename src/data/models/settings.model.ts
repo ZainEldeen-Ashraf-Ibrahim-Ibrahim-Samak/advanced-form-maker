@@ -37,7 +37,7 @@ const SettingsConfigurationSchema = new Schema<ISettingsConfiguration>({
   cloudinary_storage_threshold: { type: Number, default: null, min: 1, max: 100 },
   storage_cleanup_target: { type: String, enum: ["drafts", "unused_media", null], default: null },
   branding: {
-    siteName: { type: String, default: "SCCT DAMAGES", maxlength: 100 },
+    siteName: { type: String, default: "ADVANCED FORM MAKER", maxlength: 100 },
     siteLogoUrl: { type: String, default: "", maxlength: 500 },
   },
   updatedAt: { type: Date, default: Date.now },

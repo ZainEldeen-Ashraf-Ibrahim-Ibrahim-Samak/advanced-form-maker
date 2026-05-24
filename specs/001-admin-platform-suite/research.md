@@ -67,7 +67,7 @@
 
 **Rationale**:
 - `SettingsConfigurationModel` already exists as a singleton-style settings document. Adding a `branding` subdocument (`siteName: String`, `siteLogoUrl: String`) is the least disruptive change.
-- Current `src/components/shared/site-name.tsx` exports hardcoded constants (`SITE_NAME = "SCCT DAMAGES"`). These constants are used in `generateMetadata()` calls across multiple pages. Making `site-name.tsx` a proper async server component that fetches from DB via the settings use-case allows dynamic values without prop-drilling.
+- Current `src/components/shared/site-name.tsx` exports hardcoded constants (`SITE_NAME = "ADVANCED FORM MAKER"`). These constants are used in `generateMetadata()` calls across multiple pages. Making `site-name.tsx` a proper async server component that fetches from DB via the settings use-case allows dynamic values without prop-drilling.
 - Pages that use `SITE_ADMIN_NAME` in `generateMetadata` will call a new `getSiteBranding()` helper that returns the DB value (with a hardcoded fallback).
 - Logo upload: use existing Cloudinary upload flow (`/api/cloudinary/sign` + `next-cloudinary`) to get a `siteLogoUrl`. Store only the URL, not the binary. The `<head>` favicon link is set via `generateMetadata` returning `icons: { icon: siteLogoUrl }`.
 - New `PATCH /api/admin/settings/branding` route validates `siteName` (non-empty, ≤100 chars) and `siteLogoUrl` (valid URL or relative path from Cloudinary).

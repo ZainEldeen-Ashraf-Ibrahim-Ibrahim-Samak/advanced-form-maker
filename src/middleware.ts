@@ -17,14 +17,8 @@ declare global {
 const intlMiddleware = createMiddleware(routing);
 
 const defaultAllowedApiOrigins = [
-  "https://scct-damages.vercel.app",
-  "capacitor://localhost",
-  "ionic://localhost",
-  "http://localhost",
-  "http://localhost:3000",
-  "https://localhost",
-  "https://localhost:3000",
-];
+  (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, ""),
+].filter(Boolean);
 
 const parseOrigins = (raw: string | undefined) => 
   (raw ?? "").split(",").map(s => s.trim()).filter(Boolean);

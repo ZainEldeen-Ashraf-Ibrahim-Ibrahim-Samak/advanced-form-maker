@@ -48,7 +48,7 @@ export function formatFileSize(bytes: number): string {
  * Build the full submission URL from an access token.
  */
 export function buildSubmissionUrl(accessToken: string): string {
-  const baseUrl = env.NEXT_PUBLIC_APP_URL || env.AUTH_URL || "http://localhost:3000";
+  const baseUrl = env.NEXT_PUBLIC_APP_URL || "";
   return `${baseUrl}/submit/${accessToken}`;
 }
 

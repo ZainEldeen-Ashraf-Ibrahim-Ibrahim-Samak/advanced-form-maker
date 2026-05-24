@@ -4,12 +4,8 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const defaultAppWebviewOrigins = [
-  "https://scct-damages.vercel.app",
-  "capacitor://localhost",
-  "ionic://localhost",
-  "http://localhost:*",
-  "https://localhost:*",
-];
+  (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, ""),
+].filter(Boolean);
 
 const appWebviewOrigins = (process.env.APP_WEBVIEW_ALLOWED_ORIGINS ?? "")
   .split(",")
@@ -37,6 +33,14 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "10mb",
     },
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/google:hash.html",
+        destination: "/api/google-verification?hash=:hash",
+      },
+    ];
   },
   async headers() {
     return [

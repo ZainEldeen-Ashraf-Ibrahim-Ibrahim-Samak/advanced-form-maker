@@ -275,7 +275,7 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
 
 
   const { draft, updateDraft, clearDraft, isLoaded: draftLoaded } = useDraftAutosave<DraftState>(
-    `scct_draft_${tokenOrId}`,
+    `draft_${tokenOrId}`,
     { clientName: "", contactRecords: [createEmptyContactRecord()], formData: {} }
   );
 

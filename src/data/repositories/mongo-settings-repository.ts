@@ -61,7 +61,7 @@ export class MongoSettingsRepository {
       if (!settings) {
         const newSettings = new SettingsConfigurationModel({
           branding: {
-            siteName: brandingUpdates.siteName ?? "SCCT DAMAGES",
+            siteName: brandingUpdates.siteName ?? "ADVANCED FORM MAKER",
             siteLogoUrl: brandingUpdates.siteLogoUrl ?? "",
           },
           updatedBy: updaterId,
@@ -70,7 +70,7 @@ export class MongoSettingsRepository {
       }
 
       settings.branding = {
-        siteName: brandingUpdates.siteName !== undefined ? brandingUpdates.siteName : (settings.branding?.siteName ?? "SCCT DAMAGES"),
+        siteName: brandingUpdates.siteName !== undefined ? brandingUpdates.siteName : (settings.branding?.siteName ?? "ADVANCED FORM MAKER"),
         siteLogoUrl: brandingUpdates.siteLogoUrl !== undefined ? brandingUpdates.siteLogoUrl : (settings.branding?.siteLogoUrl ?? ""),
       };
       settings.updatedBy = updaterId;

@@ -32,7 +32,7 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    
+
     if (email && !EMAIL_REGEX.test(email)) {
       setError(t("loginError"));
       return;
@@ -72,7 +72,7 @@ export default function LoginPage() {
 
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center space-y-2">
-          {/* SCCT Logo for branding (visible on login screen) */}
+          {/* Logo for branding (visible on login screen) */}
           <div className="flex justify-center mb-2">
             {/* If you want to hide the logo, comment out the next line. */}
             <Logo />
@@ -89,7 +89,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@scct.local"
+                placeholder="admin@local.com"
                 required
                 autoComplete="email"
                 disabled={isLoading}
