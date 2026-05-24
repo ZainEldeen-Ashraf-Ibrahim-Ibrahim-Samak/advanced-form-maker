@@ -134,38 +134,42 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
   };
 
   const getExportColumns = () => [
-    {
-      header: t("indexHeader") || "#",
-      key: (_: Submission, idx: number) => idx + 1,
-    },
-    {
-      header: t("formName"),
-      key: (row: Submission) => formNamesById[row.formTemplateId] || "—",
-    },
     { header: t("clientName"), key: "clientName" as const },
     { 
       header: t("contactEmail"), 
       key: (row: Submission) => {
-        const contact = getContactSummary(row);
-        return contact.email || "—";
+        const record = row.contactRecords.find(r => (r.email ?? "").trim().length > 0);
+        return record?.email || "—";
       }
     },
     { 
       header: t("contactPhone"), 
       key: (row: Submission) => {
-        const contact = getContactSummary(row);
-        return contact.phone || "—";
+        const record = row.contactRecords.find(r => (r.phone ?? "").trim().length > 0);
+        return record?.phone || (row.clientContact ?? "") || "—";
       }
     },
     { 
       header: t("contactAddress"), 
       key: (row: Submission) => {
-        const contact = getContactSummary(row);
-        return contact.address || "—";
+        const record = row.contactRecords.find(r => (r.contact ?? "").trim().length > 0);
+        return record?.contact || "—";
       }
     },
-    { header: tc("status"), key: (row: Submission) => t(`statuses.${row.status}`) },
-    { header: t("submittedAt"), key: (row: Submission) => formatDate(row.submittedAt) },
+    {
+      header: t("contactRole"),
+      key: (row: Submission) => {
+        const record = row.contactRecords.find(r => (r.role ?? "").trim().length > 0);
+        return record?.role || "—";
+      }
+    },
+    {
+      header: t("contactNotes"),
+      key: (row: Submission) => {
+        const record = row.contactRecords.find(r => (r.notes ?? "").trim().length > 0);
+        return record?.notes || "—";
+      }
+    },
   ];
  
   const handleExport = async (format: "csv" | "excel" | "pdf" | "json", data: Submission[], filenamePrefix: string) => {

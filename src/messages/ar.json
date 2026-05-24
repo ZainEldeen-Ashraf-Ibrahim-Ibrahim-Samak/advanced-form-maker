@@ -308,6 +308,8 @@
     "contactEmail": "البريد الإلكتروني",
     "contactPhone": "الهاتف",
     "contactAddress": "العنوان",
+    "contactRole": "الصفة",
+    "contactNotes": "ملاحظات",
     "submittedAt": "تاريخ الإرسال",
     "lastResubmittedAt": "آخر إعادة إرسال",
     "viewDetail": "عرض التفاصيل",
