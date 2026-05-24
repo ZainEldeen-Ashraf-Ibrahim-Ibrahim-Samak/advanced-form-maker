@@ -327,7 +327,7 @@ export function AdminDashboard() {
         </Select>
       </div>
 
-      <SubmissionsTable 
+      <SubmissionsTable
         submissions={submissions}
         isLoading={isLoading}
         onDelete={deleteSubmission}
@@ -335,6 +335,7 @@ export function AdminDashboard() {
         formNamesById={formNamesById}
         formName="all-forms"
         contactFormLockedByFormId={contactFormLockedByFormId}
+        exportStatusFilter={statusFilter}
       />
 
       {totalPages > 1 && (

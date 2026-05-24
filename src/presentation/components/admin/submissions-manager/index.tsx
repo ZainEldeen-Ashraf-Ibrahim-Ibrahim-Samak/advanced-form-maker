@@ -371,6 +371,8 @@ export function SubmissionsManager() {
           formNamesById={formNameById}
           formName={formFilter !== "all" ? formNameById[formFilter] : undefined}
           contactFormLockedByFormId={contactFormLockedByFormId}
+          exportFormId={formFilter !== "all" ? formFilter : undefined}
+          exportStatusFilter={statusFilter !== "all" ? statusFilter : undefined}
         />
       </div>
 

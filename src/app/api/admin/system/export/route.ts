@@ -82,13 +82,31 @@ export async function GET(req: Request) {
       );
     }
 
-    // Query filter (e.g. filter submissions by formId if provided)
+    const status = searchParams.get("status");
+    const idsParam = searchParams.get("ids");
+
+    // Query filter (e.g. filter submissions by formId / status / specific IDs if provided)
     const queryFilter: Record<string, any> = {};
-    if (targetModelName === "Submission" && formId) {
-      try {
-        queryFilter.formTemplateId = new mongoose.Types.ObjectId(formId);
-      } catch (e) {
-        queryFilter.formTemplateId = formId;
+    if (targetModelName === "Submission") {
+      if (formId) {
+        try {
+          queryFilter.formTemplateId = new mongoose.Types.ObjectId(formId);
+        } catch (e) {
+          queryFilter.formTemplateId = formId;
+        }
+      }
+      if (status && status !== "all") {
+        queryFilter.status = status;
+      }
+      if (idsParam) {
+        const ids = idsParam.split(",").map((id) => id.trim()).filter(Boolean);
+        if (ids.length > 0) {
+          try {
+            queryFilter._id = { $in: ids.map((id) => new mongoose.Types.ObjectId(id)) };
+          } catch (e) {
+            queryFilter._id = { $in: ids };
+          }
+        }
       }
     }
 

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Bell } from "lucide-react";
-import { AdminNotification } from "@/lib/events/publisher";
+import type { AdminNotification } from "@/lib/events/publisher";
 import Link from "next/link";
 import { logger } from "@/lib/dev-logger";
 

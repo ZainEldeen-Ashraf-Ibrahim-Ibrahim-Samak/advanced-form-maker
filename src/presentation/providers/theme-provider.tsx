@@ -8,13 +8,16 @@ if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
   console.error = (...args: unknown[]) => {
     if (
       typeof args[0] === "string" &&
-      args[0].includes("Encountered a script tag while rendering React component")
+      (args[0].includes("Encountered a script tag while rendering React component") ||
+       args[0].includes("fdprocessedid") ||
+       args.some(arg => typeof arg === "string" && arg.includes("fdprocessedid")))
     ) {
       return;
     }
     originalError.apply(console, args);
   };
 }
+
 
 export function ThemeProvider({ children, ...props }: React.ComponentProps<typeof NextThemesProvider>) {
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;

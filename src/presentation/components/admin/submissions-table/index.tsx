@@ -14,7 +14,7 @@ import { formatDate, buildSubmissionUrl } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
 import type { Submission } from "@/domain/entities/submission";
-import { exportToCSV, exportToExcel, exportToPDF, exportToJSON } from "@/lib/export";
+import { exportToPDF, exportToJSON } from "@/lib/export";
 
 interface SubmissionsTableProps {
   submissions: Submission[];
@@ -24,9 +24,11 @@ interface SubmissionsTableProps {
   formNamesById?: Record<string, string>;
   formName?: string;
   contactFormLockedByFormId?: Record<string, boolean>;
+  exportFormId?: string;
+  exportStatusFilter?: string;
 }
 
-export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, formNamesById = {}, formName, contactFormLockedByFormId = {} }: SubmissionsTableProps) {
+export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, formNamesById = {}, formName, contactFormLockedByFormId = {}, exportFormId, exportStatusFilter }: SubmissionsTableProps) {
   const t = useTranslations("submissions");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -169,19 +171,44 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
   const handleExport = async (format: "csv" | "excel" | "pdf" | "json", data: Submission[], filenamePrefix: string) => {
     const filename = filenamePrefix === "all-submissions" ? `${formName || "submissions"} data` : filenamePrefix;
     const columns = getExportColumns();
-    
+
+    // CSV and Excel export through the server-side endpoint so field values are included
+    if (format === "csv" || format === "excel") {
+      try {
+        const serverFormat = format === "excel" ? "xlsx" : "csv";
+        const params = new URLSearchParams({ collection: "submissions", format: serverFormat });
+
+        const isSubset = data.length < submissions.length;
+        if (isSubset) {
+          // Selected rows or single-row export — scope by specific IDs
+          params.set("ids", data.map((s) => s.id).join(","));
+        } else {
+          // "Export All" — scope by active filters so the server fetches all matching records
+          if (exportFormId && exportFormId !== "all") params.set("formId", exportFormId);
+          if (exportStatusFilter && exportStatusFilter !== "all") params.set("status", exportStatusFilter);
+        }
+
+        const a = document.createElement("a");
+        a.href = `/api/admin/system/export?${params.toString()}`;
+        a.download = "";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        toast.success(tc("exportedSuccess") || "Exported successfully");
+      } catch {
+        toast.error(tc("exportFailed") || tc("error"));
+      }
+      return;
+    }
+
     try {
-      if (format === "csv") {
-        exportToCSV(data, filename, columns);
-      } else if (format === "excel") {
-        exportToExcel(data, filename, columns);
-      } else if (format === "pdf") {
+      if (format === "pdf") {
         await exportToPDF(data, filename, t("exportTitle") || "Submissions Export", columns);
       } else if (format === "json") {
         exportToJSON(data, filename, columns);
       }
       toast.success(tc("exportedSuccess") || "Exported successfully");
-    } catch (err) {
+    } catch {
       toast.error(tc("exportFailed") || tc("error"));
     }
   };
