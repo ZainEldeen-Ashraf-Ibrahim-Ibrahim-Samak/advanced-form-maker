@@ -175,7 +175,10 @@
     "newCardEnPlaceholder": "e.g. Approved",
     "newCardMetricLabelPlaceholder": "e.g. Submissions",
     "newCardArPlaceholder": "e.g. Approved",
-    "iconSuggestionQuota": "AI quota exceeded. Retry in {time}."
+    "iconSuggestionQuota": "AI quota exceeded. Retry in {time}.",
+    "copyLink": "Copy Link",
+    "qrCode": "QR Code",
+    "addNewForm": "Add new {name}"
   },
   "forms": {
     "title": "Form Templates",
@@ -202,7 +205,11 @@
     "isContactForm": "This is the contact form",
     "isContactFormDesc": "Designate this form as the designated contact form.",
     "contactFormLocked": "Locked",
-    "openForm": "Open Form"
+    "openForm": "Open Form",
+    "collaborate": "Collaborate",
+    "collaborateTitle": "Submissions: {name}",
+    "collaborateClose": "Close",
+    "noSubmissions": "No submissions yet for this form"
   },
   "fields": {
     "title": "Field Builder",

@@ -8,10 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { SubmissionsTable } from "@/presentation/components/admin/submissions-table";
-import { ChevronLeft, ChevronRight, Cloud, HardDrive } from "lucide-react";
+import { ChevronLeft, ChevronRight, Cloud, HardDrive, Copy, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CardManagerDialog } from "@/presentation/components/admin/card-manager-dialog";
 import { getCardIcon, getCardIconColor, getCardIconBg } from "@/lib/card-icons";
+import { toast } from "sonner";
+import { Link } from "@/i18n/navigation";
 
 function CardHeaderIcon({ logoUrl, iconName, slug }: { logoUrl?: string | null; iconName?: string; slug?: string }) {
   // Determine icon component
@@ -186,30 +188,59 @@ export function AdminDashboard() {
                   ? (card.displayNameAr ?? card.displayNameEn ?? card.name)
                   : (card.displayNameEn ?? card.displayNameAr ?? card.name);
                 return (
-                  <Card key={card.formTemplateId} className={`hover:shadow-md transition-shadow ${card.isLocked ? "border-amber-200 dark:border-amber-800" : ""}`}>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium flex items-center gap-2 truncate pr-2">
-                        <span className="truncate">{title}</span>
-                        {card.isLocked && (
-                          <Badge variant="destructive" className="text-[10px] shrink-0">
-                            {t("lockedBadge")}
-                          </Badge>
+                  <Card key={card.formTemplateId} className={`hover:shadow-md transition-shadow flex flex-col justify-between ${card.isLocked ? "border-amber-200 dark:border-amber-800" : ""}`}>
+                    <div>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium flex items-center gap-2 truncate pr-2">
+                          <span className="truncate">{title}</span>
+                          {card.isLocked && (
+                            <Badge variant="destructive" className="text-[10px] shrink-0">
+                              {t("lockedBadge")}
+                            </Badge>
+                          )}
+                        </CardTitle>
+                        <CardHeaderIcon logoUrl={card.logoUrl} />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <div className="text-2xl font-bold">
+                            {card.metricValue !== null && card.metricValue !== undefined
+                              ? card.metricValue
+                              : card.submissionCount}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              onClick={() => {
+                                const origin = typeof window !== "undefined" ? window.location.origin : "";
+                                const url = `${origin}/${locale}/f/${card.formTemplateId}`;
+                                navigator.clipboard.writeText(url);
+                                toast.success(t("copyLink"));
+                              }}
+                              title={t("copyLink")}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        {(card.metricLabel || card.metricValue !== null) && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {card.metricLabel ?? t("submissionsLabel")}
+                          </p>
                         )}
-                      </CardTitle>
-                      <CardHeaderIcon logoUrl={card.logoUrl} />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        {card.metricValue !== null && card.metricValue !== undefined
-                          ? card.metricValue
-                          : card.submissionCount}
-                      </div>
-                      {(card.metricLabel || card.metricValue !== null) && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {card.metricLabel ?? t("submissionsLabel")}
-                        </p>
-                      )}
-                    </CardContent>
+                      </CardContent>
+                    </div>
+
+                    <div className="px-6 pb-4 pt-0">
+                      <Link href={`/f/${card.formTemplateId}`} target="_blank" className="w-full">
+                        <Button variant="outline" className="w-full text-xs gap-1.5 h-9" disabled={card.isLocked}>
+                          <Plus className="h-3.5 w-3.5" />
+                          {t("addNewForm", { name: title })}
+                        </Button>
+                      </Link>
+                    </div>
                   </Card>
                 );
               }

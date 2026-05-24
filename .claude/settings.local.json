@@ -14,7 +14,8 @@
       "Bash(node -e \"const en = require\\('./src/messages/en.json'\\); const keys = Object.keys\\(en.formAnalysis\\); console.log\\(keys.join\\('\\\\n'\\)\\);\")",
       "Bash(node -e \"const en = require\\('./src/messages/en.json'\\); console.log\\('dashboard.lockedBadge:', en.dashboard?.lockedBadge\\); console.log\\('fields.contactFormLockedBadge:', en.fields?.contactFormLockedBadge\\);\")",
       "Bash(xargs grep -l \"analysis\\\\|gemini\\\\|AI\\\\|ai\")",
-      "Bash(node -e \"const en = require\\('./src/messages/en.json'\\); console.log\\('quotaExceeded:', en.formAnalysis.quotaExceeded\\); console.log\\('rateLimitError:', en.formAnalysis.rateLimitError\\);\")"
+      "Bash(node -e \"const en = require\\('./src/messages/en.json'\\); console.log\\('quotaExceeded:', en.formAnalysis.quotaExceeded\\); console.log\\('rateLimitError:', en.formAnalysis.rateLimitError\\);\")",
+      "Bash(Sort-Object)"
     ]
   }
 }

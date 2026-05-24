@@ -175,7 +175,10 @@
     "newCardEnPlaceholder": "مثل: مقبول",
     "newCardMetricLabelPlaceholder": "مثل: الطلبات",
     "newCardArPlaceholder": "مثال: معتمد",
-    "iconSuggestionQuota": "تم تجاوز حصة الذكاء الاصطناعي. أعد المحاولة خلال {time}."
+    "iconSuggestionQuota": "تم تجاوز حصة الذكاء الاصطناعي. أعد المحاولة خلال {time}.",
+    "copyLink": "نسخ الرابط",
+    "qrCode": "رمز QR",
+    "addNewForm": "إضافة {name} جديد"
   },
   "forms": {
     "title": "قوالب النماذج",
@@ -202,7 +205,11 @@
     "isContactForm": "هذا هو نموذج الاتصال",
     "isContactFormDesc": "تحديد هذا النموذج كنموذج الاتصال المعين.",
     "contactFormLocked": "مغلق",
-    "openForm": "فتح النموذج"
+    "openForm": "فتح النموذج",
+    "collaborate": "تعاون",
+    "collaborateTitle": "الطلبات: {name}",
+    "collaborateClose": "إغلاق",
+    "noSubmissions": "لا توجد طلبات لهذا النموذج بعد"
   },
   "fields": {
     "title": "منشئ الحقول",
@@ -283,7 +290,8 @@
       "max": "الحد الأقصى للقيمة",
       "maxFileSize": "الحد الأقصى لحجم الملف (ميغابايت)",
       "allowedTypes": "أنواع الملفات المسموحة"
-    }
+    },
+    "cameraCapture": "التقاط بالكاميرا"
   },
   "submissions": {
     "indexHeader": "#",
