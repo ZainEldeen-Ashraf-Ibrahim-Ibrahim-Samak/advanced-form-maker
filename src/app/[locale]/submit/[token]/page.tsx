@@ -1,7 +1,7 @@
 import { SubmissionForm } from "@/presentation/components/client/submission-form";
 import { ClientNotifications } from "@/presentation/components/client/notifications";
 import type { Metadata } from "next";
-import { SITE_NAME } from "@/components/shared/site-name";
+import { getSiteBranding } from "@/components/shared/site-name";
 
 import { getTranslations } from "next-intl/server";
 
@@ -12,8 +12,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "client" });
+  const branding = await getSiteBranding();
   return {
-    title: `${t("formTitle")} — ${SITE_NAME}`,
+    title: `${t("formTitle")} — ${branding.siteName}`,
   };
 }
 

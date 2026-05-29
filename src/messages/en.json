@@ -308,6 +308,8 @@
     "contactEmail": "Email",
     "contactPhone": "Phone",
     "contactAddress": "Address",
+    "contactRole": "Role",
+    "contactNotes": "Notes",
     "submittedAt": "Submitted",
     "lastResubmittedAt": "Last Resubmitted",
     "viewDetail": "View Details",
