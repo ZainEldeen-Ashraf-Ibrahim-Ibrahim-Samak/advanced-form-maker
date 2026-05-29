@@ -77,11 +77,15 @@ src/features/form-maker/
 
 **Ports (host injects these):**
 - `FormStorageAdapter` — `getForm`, `listForms`, `saveForm`, `deleteForm` (default: Mongo via Mongoose).
+- `SubmissionStorageAdapter` — `saveSubmission`, `listSubmissions` (default: Mongo; feature owns this — decision §11.4).
 - `MediaUploadAdapter` — upload image, return URL (default: Cloudinary).
 - `AuthAdapter` — `getCurrentUser()` / permission check (default: NextAuth).
 - `I18nAdapter` — translate(key) (default: next-intl).
+- `AiProvider` — `extractFromImage(fields, imageBase64, locale) → AutoFillResult` (decision §11.3).
+  **The host plugs in its own AI system here.** A `@google/genai` adapter ships as the reference impl.
 
-This lets the host swap in its own DB/auth/storage without touching feature code.
+This lets the host swap in its own AI/DB/auth/storage without touching feature code. (Target host is
+Next.js/Node — decision §11.1; single-owner scoping via `ownerId`, no `tenantId` in v1 — decision §11.2.)
 
 ---
 
@@ -154,8 +158,10 @@ Extends the existing `/api/ai/extract` flow:
 3. **Guardrails** (reuse from `ai/extract/route.ts`): Redis rate limit (5/min/IP), ≤10MB,
    `parseSecureJson`, zod validation.
 4. **AiAutoFillService** builds a prompt from the form's field list (names EN/AR, types, dropdown
-   options) and asks `@google/genai` to return **structured JSON keyed by `fieldId`** with a
-   confidence per field. Enforce JSON schema; coerce/validate with zod.
+   options) and calls the injected **`AiProvider`** (the host's own AI system — decision §11.3) to
+   return **structured JSON keyed by `fieldId`** with a confidence per field. The service is
+   provider-agnostic; it only depends on the `AiProvider` port. Enforce JSON schema; coerce/validate
+   with zod regardless of which provider answered. (`@google/genai` adapter = reference impl.)
 5. **Map → review** — return `AutoFillResult`; render `AutoFillReviewPanel` where the user accepts
    per field (low‑confidence flagged). Nothing is submitted automatically.
 6. **Apply** accepted values into the renderer's form state; user finishes and submits as normal.
@@ -208,9 +214,12 @@ constrain output to the allowed options; respect target `locale`.
 | `GET` | `/api/form-maker/forms/[id]` | get definition |
 | `PUT` | `/api/form-maker/forms/[id]` | update / version |
 | `DELETE` | `/api/form-maker/forms/[id]` | delete |
-| `POST` | `/api/form-maker/auto-fill` | AI image → field values |
+| `POST` | `/api/form-maker/auto-fill` | AI image → field values (via `AiProvider` port) |
+| `POST` | `/api/form-maker/forms/[id]/submissions` | create submission (feature owns storage — §11.4) |
+| `GET` | `/api/form-maker/forms/[id]/submissions` | list submissions for a form |
 
 Reuse `api-security`, `api-response`, `redis` rate limiting, zod validation throughout.
+All routes are Next.js/Node handlers (decision §11.1), scoped by `ownerId` (single-owner — §11.2).
 
 ---
 
@@ -227,11 +236,19 @@ Reuse `api-security`, `api-response`, `redis` rate limiting, zod validation thro
 
 ---
 
-## 11. Open questions
-1. Primary embedding target — Next.js host (package) or arbitrary stack (iframe)?
-2. Multi‑tenant from day one, or single‑owner first?
-3. AI provider locked to `@google/genai`, or abstract behind an `AiProvider` port for swappability?
-4. Does the host store submissions, or does this feature own that too?
+## 11. Decisions (locked)
+1. **Embedding target — Next.js / Node.js host (package).** Ship as an importable module
+   (`<FormBuilder/>`, `<FormRenderer/>`, mountable Next.js route handlers running on Node).
+   No iframe/web-component wrapper in v1. → drives §6 option (1).
+2. **Single-owner first.** Forms belong to one owner; no `tenantId` in v1. Keep `ownerId` in the
+   schema so multi-tenant can be layered on later without a migration. → simplifies §5.
+3. **Use the host's existing AI system via an `AiProvider` port.** Don't hardcode `@google/genai`.
+   Define an `AiProvider` interface (`extractFromImage(fields, imageBase64, locale) → AutoFillResult`)
+   and implement an adapter that calls the user's own AI service. The current `@google/genai` flow
+   becomes just one possible adapter / reference impl. → updates §3 ports and §7.
+4. **Feature owns submission storage** (same as this app today). Reuse the existing submission
+   model/repository pattern; expose submissions via API. A host `onSubmit` override can come later
+   but is not required for v1. → adds submissions to the data layer and API surface.
 
 ---
 
