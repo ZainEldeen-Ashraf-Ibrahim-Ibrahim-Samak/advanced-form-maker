@@ -89,7 +89,7 @@ export async function extractDocumentData(
 
   // 4. Construct prompt
   const prompt = `You are a professional document information extraction system.
-Analyze the provided document image (such as an ID card, passport, driving license, or utility bill) and extract information into the specified JSON format.
+Analyze the provided document file or image (such as an ID card photo, PDF, CSV, spreadsheet, or Word document) and extract information into the specified JSON format.
 
 Bilingual & Multi-Language Instructions:
 - Explicitly detect and handle Arabic text (RTL), English text (LTR), and mixed-language documents.

@@ -61,8 +61,9 @@ export function AiExtractionSummary({
     switch (error) {
       case "fileTooLarge":
         return t("fileTooLarge");
+      case "invalidFile":
       case "invalidImage":
-        return t("invalidImage");
+        return t("invalidFile");
       case "notADocument":
         return t("notADocument");
       case "timeout":
@@ -76,8 +77,8 @@ export function AiExtractionSummary({
   const getErrorGuidance = () => {
     if (error === "notADocument" || error === "extractionFailed") {
       return locale === "ar"
-        ? "تلميح: حاول التقاط صورة واضحة ومستقيمة للمستند مع إضاءة جيدة وتجنب الانعكاسات."
-        : "Tip: Try retaking with a flat, clear photo of the document in good lighting, avoiding glare.";
+        ? "تلميح: حاول رفع ملف أو صورة أوضح مع نص مقروء وإضاءة جيدة وتجنب الانعكاسات."
+        : "Tip: Try uploading a clearer file or photo with readable text, good lighting, and minimal glare.";
     }
     if (error === "timeout") {
       return locale === "ar"

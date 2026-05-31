@@ -4,6 +4,30 @@ import { Camera, UploadCloud, Sparkles, Loader2, X, FlipHorizontal, Zap, ZapOff 
 import { ExtractionStage } from "@/presentation/view-models/use-ai-extraction";
 import { Button } from "@/components/ui/button";
 
+const acceptedAiUploadTypes = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "application/pdf",
+  "text/csv",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".heic",
+  ".pdf",
+  ".csv",
+  ".xls",
+  ".xlsx",
+  ".doc",
+  ".docx",
+].join(",");
+
 type FacingMode = "user" | "environment";
 type FlashMode = "off" | "on";
 type CamState = "closed" | "opening" | "previewing" | "captured";
@@ -186,7 +210,7 @@ export function AiPhotoUpload({
 
   const getStageLabel = () => {
     switch (stage) {
-      case "uploading": return locale === "ar" ? "جاري رفع الصورة..." : "Uploading image...";
+      case "uploading": return locale === "ar" ? "جاري رفع الملف..." : "Uploading file...";
       case "analyzing": return t("analyzing");
       case "extracting": return locale === "ar" ? "جاري استخراج البيانات..." : "Extracting data...";
       default: return t("analyzing");
@@ -316,7 +340,7 @@ export function AiPhotoUpload({
         ref={fileInputRef}
         type="file"
         className="hidden"
-        accept="image/jpeg,image/png,image/webp,image/heic"
+        accept={acceptedAiUploadTypes}
         onChange={handleFileChange}
         disabled={disabled || isExtracting}
       />

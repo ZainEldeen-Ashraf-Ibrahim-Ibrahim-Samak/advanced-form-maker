@@ -2,7 +2,18 @@ import { z } from "zod";
 
 export const extractionRequestSchema = z.object({
   imageBase64: z.string().min(1),
-  imageMimeType: z.enum(["image/jpeg", "image/png", "image/webp", "image/heic"]),
+  imageMimeType: z.enum([
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/heic",
+    "application/pdf",
+    "text/csv",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ]),
   fieldDefinitions: z.array(
     z.object({
       id: z.string().min(1),

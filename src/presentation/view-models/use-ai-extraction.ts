@@ -3,6 +3,46 @@ import { ExtractionResult } from "@/domain/entities/ai-extraction";
 
 export type ExtractionStage = "idle" | "uploading" | "analyzing" | "extracting" | "success" | "error";
 
+const supportedImageMimeTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+]);
+
+const supportedDocumentMimeTypes = new Set([
+  "application/pdf",
+  "text/csv",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
+
+const hasSupportedExtension = (fileName: string, extensions: string[]) =>
+  extensions.some((extension) => fileName.endsWith(extension));
+
+const getAiExtractionFileKind = (file: File): "image" | "document" | null => {
+  const mimeType = file.type.toLowerCase();
+  const fileName = file.name.toLowerCase();
+
+  if (
+    supportedImageMimeTypes.has(mimeType) ||
+    hasSupportedExtension(fileName, [".jpg", ".jpeg", ".png", ".webp", ".heic"])
+  ) {
+    return "image";
+  }
+
+  if (
+    supportedDocumentMimeTypes.has(mimeType) ||
+    hasSupportedExtension(fileName, [".pdf", ".csv", ".xls", ".xlsx", ".doc", ".docx"])
+  ) {
+    return "document";
+  }
+
+  return null;
+};
+
 interface UseAiExtractionParams {
   fieldDefinitions: any[];
   contactFormFields: any[];
@@ -64,7 +104,7 @@ export function useAiExtraction({
     });
   };
 
-  // Image quality resolution pre-validation
+  // Image resolution pre-validation
   const validateImageResolution = (file: File): Promise<{ width: number; height: number }> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -72,7 +112,7 @@ export function useAiExtraction({
         resolve({ width: img.width, height: img.height });
       };
       img.onerror = () => {
-        reject(new Error("invalidImage"));
+        reject(new Error("invalidFile"));
       };
       img.src = URL.createObjectURL(file);
     });
@@ -147,27 +187,28 @@ export function useAiExtraction({
         throw new Error("fileTooLarge");
       }
 
-      // Accepted mime types check
-      const acceptedMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/heic"];
-      if (!acceptedMimeTypes.includes(file.type)) {
-        throw new Error("invalidImage");
+      const fileKind = getAiExtractionFileKind(file);
+      if (!fileKind) {
+        throw new Error("invalidFile");
       }
 
-      // 2. Pre-validate image resolution
-      try {
-        const { width, height } = await validateImageResolution(file);
-        if (width < 640 || height < 480) {
-          setError(locale === "ar" ? "دقة الصورة منخفضة جداً. يجب أن تكون الصورة على الأقل 640×480 بكسل." : "Resolution too low. Image must be at least 640x480 pixels.");
-          setStage("error");
-          setIsExtracting(false);
-          return;
-        }
+      if (fileKind === "image") {
+        // 2. Pre-validate image resolution
+        try {
+          const { width, height } = await validateImageResolution(file);
+          if (width < 640 || height < 480) {
+            setError(locale === "ar" ? "دقة الصورة منخفضة جداً. يجب أن تكون الصورة على الأقل 640×480 بكسل." : "Resolution too low. Image must be at least 640x480 pixels.");
+            setStage("error");
+            setIsExtracting(false);
+            return;
+          }
 
-        if (width < 1024 || height < 768) {
-          setWarning(locale === "ar" ? "دقة الصورة أقل من الموصى بها (1024×768). قد تكون دقة الاستخراج أقل." : "Image resolution is below recommended 1024x768. Text extraction might be less accurate.");
+          if (width < 1024 || height < 768) {
+            setWarning(locale === "ar" ? "دقة الصورة أقل من الموصى بها (1024×768). قد تكون دقة الاستخراج أقل." : "Image resolution is below recommended 1024x768. Text extraction might be less accurate.");
+          }
+        } catch (err) {
+          throw new Error("invalidFile");
         }
-      } catch (err) {
-        throw new Error("invalidImage");
       }
 
       // 3. Stage update

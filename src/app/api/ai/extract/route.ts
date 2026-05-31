@@ -52,13 +52,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Validate image size (≤ 10MB raw)
+    // 4. Validate file size (≤ 10MB raw)
     const { imageBase64 } = validation.data;
     const rawSizeInBytes = (imageBase64.length * 3) / 4;
     const maxSizeBytes = 10 * 1024 * 1024; // 10MB
 
     if (rawSizeInBytes > maxSizeBytes) {
-      return errorResponse("Image exceeds maximum size of 10MB", 413);
+      return errorResponse("File exceeds maximum size of 10MB", 413);
     }
 
     // 5. Trigger Use Case
