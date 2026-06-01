@@ -91,7 +91,7 @@ export function SettingsForm() {
   const backupDestinations: SettingsState["backup"]["destination"][] = ["local", "cloud", "both"];
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-8 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm">
+    <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-8 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 sm:rounded-xl shadow-sm">
       <div>
         <h2 className="text-xl font-bold tracking-tight">{t("title")}</h2>
         <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-1">
@@ -123,7 +123,7 @@ export function SettingsForm() {
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 border-b border-zinc-200 dark:border-zinc-800 pb-2">
             {t("backupDestinationTitle")}
           </h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {backupDestinations.map((dest) => (
               <Button
                 key={dest}
@@ -248,22 +248,22 @@ export function SettingsForm() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-6 border-t border-zinc-200 dark:border-zinc-800">
-        <div className="flex gap-4">
-          <Button disabled={isSaving} onClick={() => saveSettings(localState)}>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-6 border-t border-zinc-200 dark:border-zinc-800">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full md:w-auto">
+          <Button disabled={isSaving} onClick={() => saveSettings(localState)} className="w-full sm:w-auto">
             {isSaving ? t("saving") : t("saveButton")}
           </Button>
 
-          <Button variant="secondary" disabled={isBackingUp} onClick={triggerBackup}>
+          <Button variant="secondary" disabled={isBackingUp} onClick={triggerBackup} className="w-full sm:w-auto">
             {isBackingUp ? t("backingUp") : t("backupNow")}
           </Button>
 
-          <Button variant="outline" onClick={() => window.location.href = "/api/admin/system/backup"}>
+          <Button variant="outline" onClick={() => window.location.href = "/api/admin/system/backup"} className="w-full sm:w-auto">
             {t("downloadBackup")}
           </Button>
 
-          <div className="relative">
-            <Button variant="destructive" disabled={isRestoring}>
+          <div className="relative w-full sm:w-auto">
+            <Button variant="destructive" disabled={isRestoring} className="w-full">
               {isRestoring ? t("restoring") : t("uploadRestore")}
             </Button>
             <input
@@ -278,7 +278,7 @@ export function SettingsForm() {
         </div>
 
         {settings?.backup.lastRunAt && (
-          <span className="text-xs text-zinc-400">
+          <span className="text-xs text-zinc-400 text-center md:text-right w-full md:w-auto">
             {t("lastRun", { date: new Date(settings.backup.lastRunAt).toLocaleString() })}
           </span>
         )}
