@@ -39,8 +39,13 @@ export function MediaSelectorDialog({
     }
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) setSelected(currentUrl || null);
+    onOpenChange(nextOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-3xl h-[80vh] flex flex-col gap-0 p-0">
         <DialogHeader className="px-6 py-4 border-b shrink-0">
           <DialogTitle>{title ?? "Choose from Media Library"}</DialogTitle>
