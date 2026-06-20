@@ -4,6 +4,60 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* =========================================================
+   BRAND PRIMITIVES — change these two variables to retheme
+   the entire product without touching any other token.
+   ========================================================= */
+:root {
+  --brand-hue: 168;        /* jewel emerald-teal */
+  --brand-chroma: 0.105;   /* jewel saturation  */
+  --warm-hue: 75;          /* amber / sand accent */
+  --warm-chroma: 0.035;    /* warm surface saturation */
+}
+
+/* =========================================================
+   ALTERNATE THEME CLASSES
+   Apply one of these classes to <html> to instantly switch
+   the brand color while all other tokens follow.
+   =========================================================
+   Usage:
+     <html class="theme-amber">   → warm amber brand
+     <html class="theme-sapphire"> → deep sapphire brand
+     <html class="theme-wine">    → rich burgundy brand
+     (default = emerald, no class needed)
+   ========================================================= */
+.theme-amber {
+  --brand-hue: 60;
+  --brand-chroma: 0.12;
+  --warm-hue: 30;
+  --warm-chroma: 0.04;
+}
+
+.theme-sapphire {
+  --brand-hue: 250;
+  --brand-chroma: 0.1;
+  --warm-hue: 220;
+  --warm-chroma: 0.02;
+}
+
+.theme-wine {
+  --brand-hue: 10;
+  --brand-chroma: 0.1;
+  --warm-hue: 40;
+  --warm-chroma: 0.03;
+}
+
+.theme-gold {
+  --brand-hue: 50;
+  --brand-chroma: 0.115;
+  --warm-hue: 70;
+  --warm-chroma: 0.04;
+}
+
+/* =========================================================
+   TAILWIND @theme BRIDGE
+   Maps semantic CSS tokens → Tailwind color utilities.
+   ========================================================= */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -48,79 +102,129 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* =========================================================
+   LIGHT MODE — Jewel Emerald + Warm Amber
+   ========================================================= */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Radius */
+  --radius: 0.5rem;
+
+  /* Backgrounds: warm sand-cream, tinted toward brand */
+  --background:  oklch(0.982 0.008 var(--warm-hue));
+  --card:        oklch(0.997 0.004 var(--warm-hue));
+  --popover:     oklch(0.997 0.004 var(--warm-hue));
+
+  /* Foregrounds: deep brand-tinted near-black */
+  --foreground:         oklch(0.145 0.015 var(--brand-hue));
+  --card-foreground:    oklch(0.145 0.015 var(--brand-hue));
+  --popover-foreground: oklch(0.145 0.015 var(--brand-hue));
+
+  /* Primary — deep jewel color (brand) */
+  --primary:            oklch(0.31 var(--brand-chroma) var(--brand-hue));
+  --primary-foreground: oklch(0.978 0.005 var(--warm-hue));
+
+  /* Secondary — warm sand surface */
+  --secondary:            oklch(0.91 var(--warm-chroma) var(--warm-hue));
+  --secondary-foreground: oklch(0.22 0.022 var(--brand-hue));
+
+  /* Muted — lighter warm surface */
+  --muted:            oklch(0.938 0.01 var(--warm-hue));
+  --muted-foreground: oklch(0.51 0.022 var(--brand-hue));
+
+  /* Accent — warm gold surface for hover/active states */
+  --accent:            oklch(0.88 0.04 var(--warm-hue));
+  --accent-foreground: oklch(0.21 0.022 var(--brand-hue));
+
+  /* Semantic */
+  --destructive: oklch(0.565 0.22 27.3);
+
+  /* Structure */
+  --border: oklch(0.872 0.018 var(--warm-hue));
+  --input:  oklch(0.872 0.018 var(--warm-hue));
+  --ring:   oklch(0.44  0.08  var(--brand-hue));
+
+  /* Charts — diverse jewel palette */
+  --chart-1: oklch(0.31 0.105 168);   /* emerald */
+  --chart-2: oklch(0.68 0.14  78);    /* amber   */
+  --chart-3: oklch(0.48 0.11  210);   /* sapphire */
+  --chart-4: oklch(0.54 0.11  28);    /* terracotta */
+  --chart-5: oklch(0.38 0.09  300);   /* plum    */
+
+  /* Sidebar — deep jewel panel */
+  --sidebar:                   oklch(0.235 0.072 var(--brand-hue));
+  --sidebar-foreground:        oklch(0.938 0.01  var(--warm-hue));
+  --sidebar-primary:           oklch(0.62  0.095 var(--brand-hue));
+  --sidebar-primary-foreground:oklch(0.12  0.015 var(--brand-hue));
+  --sidebar-accent:            oklch(0.315 0.078 var(--brand-hue));
+  --sidebar-accent-foreground: oklch(0.938 0.01  var(--warm-hue));
+  --sidebar-border:            oklch(0.315 0.076 var(--brand-hue));
+  --sidebar-ring:              oklch(0.55  0.085 var(--brand-hue));
 }
 
+/* =========================================================
+   DARK MODE — Brand-tinted deep surfaces
+   ========================================================= */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  /* Backgrounds: brand-tinted dark surfaces, 3-step elevation */
+  --background:  oklch(0.12  0.018 var(--brand-hue));  /* deepest */
+  --card:        oklch(0.17  0.022 var(--brand-hue));  /* elevated */
+  --popover:     oklch(0.195 0.024 var(--brand-hue));  /* floating */
+
+  /* Foregrounds: warm light text */
+  --foreground:         oklch(0.945 0.009 var(--warm-hue));
+  --card-foreground:    oklch(0.945 0.009 var(--warm-hue));
+  --popover-foreground: oklch(0.945 0.009 var(--warm-hue));
+
+  /* Primary — lighter jewel in dark (retain vibrancy) */
+  --primary:            oklch(0.655 0.108 var(--brand-hue));
+  --primary-foreground: oklch(0.12  0.018 var(--brand-hue));
+
+  /* Secondary — dark brand-tinted surface */
+  --secondary:            oklch(0.215 0.026 var(--brand-hue));
+  --secondary-foreground: oklch(0.92  0.01  var(--warm-hue));
+
+  /* Muted */
+  --muted:            oklch(0.215 0.026 var(--brand-hue));
+  --muted-foreground: oklch(0.615 0.038 var(--brand-hue));
+
+  /* Accent */
+  --accent:            oklch(0.24 0.03 var(--brand-hue));
+  --accent-foreground: oklch(0.92 0.01 var(--warm-hue));
+
+  /* Semantic */
+  --destructive: oklch(0.68 0.195 22.2);
+
+  /* Structure */
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --input:  oklch(1 0 0 / 15%);
+  --ring:   oklch(0.55 0.09 var(--brand-hue));
+
+  /* Charts — slightly lighter for dark bg */
+  --chart-1: oklch(0.62 0.095 168);
+  --chart-2: oklch(0.72 0.14  78);
+  --chart-3: oklch(0.58 0.10  210);
+  --chart-4: oklch(0.65 0.11  28);
+  --chart-5: oklch(0.55 0.09  300);
+
+  /* Sidebar — even deeper than bg in dark */
+  --sidebar:                   oklch(0.155 0.022 var(--brand-hue));
+  --sidebar-foreground:        oklch(0.925 0.009 var(--warm-hue));
+  --sidebar-primary:           oklch(0.62  0.095 var(--brand-hue));
+  --sidebar-primary-foreground:oklch(0.12  0.018 var(--brand-hue));
+  --sidebar-accent:            oklch(0.225 0.028 var(--brand-hue));
+  --sidebar-accent-foreground: oklch(0.925 0.009 var(--warm-hue));
+  --sidebar-border:            oklch(1 0 0 / 12%);
+  --sidebar-ring:              oklch(0.5  0.08  var(--brand-hue));
 }
 
+/* =========================================================
+   BASE STYLES
+   ========================================================= */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   html,
   body {
     min-height: 100%;
@@ -128,10 +232,23 @@
     text-size-adjust: 100%;
     overflow-x: hidden;
   }
+
   body {
     @apply bg-background text-foreground;
+    /* Smooth theme transitions */
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
+
   html {
     @apply font-sans;
+  }
+
+  /* Smooth sidebar and card transitions on theme switch */
+  aside,
+  [data-sidebar],
+  .card,
+  [class*="bg-card"],
+  [class*="bg-sidebar"] {
+    transition: background-color 0.2s ease, border-color 0.2s ease;
   }
 }
