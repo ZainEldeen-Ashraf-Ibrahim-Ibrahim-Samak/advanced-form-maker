@@ -4,6 +4,7 @@ import { errorResponse, successResponse, unauthorizedResponse } from "@/lib/api-
 import { logger } from "@/lib/dev-logger";
 import { parseSecureJson } from "@/lib/api-security";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 
 const useCase = new ManageSettingsUseCase();
 
@@ -36,6 +37,8 @@ export async function PATCH(request: Request) {
 
     const updaterId = session.user.id || "admin";
     const updatedSettings = await useCase.updateBranding(updaterId, bodyResult.data);
+
+    revalidatePath("/", "layout");
 
     return successResponse({
       siteName: updatedSettings.branding?.siteName,
