@@ -47,7 +47,7 @@ export async function generateMetadata({
     creator: "SCCT Team",
     publisher: "SCCT Team",
     icons: {
-      icon: branding.siteLogoUrl || "/favicon.ico",
+      icon: branding.siteFaviconUrl || branding.siteLogoUrl || "/favicon.ico",
     },
     robots: {
       index: true,

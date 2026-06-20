@@ -8,19 +8,21 @@ export function SiteName({ className = "" }: { className?: string }) {
   return <span className={className}>{SITE_NAME}</span>;
 }
 
-export async function getSiteBranding(): Promise<{ siteName: string; siteLogoUrl: string }> {
+export async function getSiteBranding(): Promise<{ siteName: string; siteLogoUrl: string; siteFaviconUrl: string }> {
   try {
     const useCase = new ManageSettingsUseCase();
     const settings = await useCase.getSettings();
     return {
       siteName: settings?.branding?.siteName || SITE_NAME,
       siteLogoUrl: settings?.branding?.siteLogoUrl || "",
+      siteFaviconUrl: settings?.branding?.siteFaviconUrl || "",
     };
   } catch (error) {
     console.error("Failed to get site branding:", error);
     return {
       siteName: SITE_NAME,
       siteLogoUrl: "",
+      siteFaviconUrl: "",
     };
   }
 }

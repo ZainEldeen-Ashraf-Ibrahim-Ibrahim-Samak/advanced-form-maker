@@ -17,6 +17,7 @@ export interface ISettingsConfiguration extends Document {
   branding?: {
     siteName: string;
     siteLogoUrl: string;
+    siteFaviconUrl?: string;
   };
   updatedAt: Date;
   updatedBy: string;
@@ -39,6 +40,7 @@ const SettingsConfigurationSchema = new Schema<ISettingsConfiguration>({
   branding: {
     siteName: { type: String, default: "ADVANCED FORM MAKER", maxlength: 100 },
     siteLogoUrl: { type: String, default: "", maxlength: 500 },
+    siteFaviconUrl: { type: String, default: "", maxlength: 500 },
   },
   updatedAt: { type: Date, default: Date.now },
   updatedBy: { type: String, required: true },

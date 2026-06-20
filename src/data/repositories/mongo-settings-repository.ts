@@ -53,7 +53,7 @@ export class MongoSettingsRepository {
 
   async updateBranding(
     updaterId: string,
-    brandingUpdates: { siteName?: string; siteLogoUrl?: string }
+    brandingUpdates: { siteName?: string; siteLogoUrl?: string; siteFaviconUrl?: string }
   ): Promise<ISettingsConfiguration> {
     try {
       await connectToDatabase();
@@ -63,6 +63,7 @@ export class MongoSettingsRepository {
           branding: {
             siteName: brandingUpdates.siteName ?? "ADVANCED FORM MAKER",
             siteLogoUrl: brandingUpdates.siteLogoUrl ?? "",
+            siteFaviconUrl: brandingUpdates.siteFaviconUrl ?? "",
           },
           updatedBy: updaterId,
         });
@@ -72,6 +73,7 @@ export class MongoSettingsRepository {
       settings.branding = {
         siteName: brandingUpdates.siteName !== undefined ? brandingUpdates.siteName : (settings.branding?.siteName ?? "ADVANCED FORM MAKER"),
         siteLogoUrl: brandingUpdates.siteLogoUrl !== undefined ? brandingUpdates.siteLogoUrl : (settings.branding?.siteLogoUrl ?? ""),
+        siteFaviconUrl: brandingUpdates.siteFaviconUrl !== undefined ? brandingUpdates.siteFaviconUrl : (settings.branding?.siteFaviconUrl ?? ""),
       };
       settings.updatedBy = updaterId;
       return await settings.save();

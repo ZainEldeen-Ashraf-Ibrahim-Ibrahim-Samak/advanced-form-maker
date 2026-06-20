@@ -7,12 +7,15 @@ import { z } from "zod";
 
 const useCase = new ManageSettingsUseCase();
 
+const urlField = z.union([z.string().url("Invalid URL format"), z.literal("")]).optional();
 const patchSchema = z.object({
   siteName: z.string().min(1, "Site name cannot be empty").max(100, "Site name is too long").optional(),
-  siteLogoUrl: z.union([z.string().url("Invalid URL format"), z.literal("")]).optional(),
-}).refine(data => data.siteName !== undefined || data.siteLogoUrl !== undefined, {
-  message: "At least one of siteName or siteLogoUrl must be provided",
-});
+  siteLogoUrl: urlField,
+  siteFaviconUrl: urlField,
+}).refine(
+  (data) => data.siteName !== undefined || data.siteLogoUrl !== undefined || data.siteFaviconUrl !== undefined,
+  { message: "At least one branding field must be provided" },
+);
 
 export async function PATCH(request: Request) {
   try {
@@ -37,6 +40,7 @@ export async function PATCH(request: Request) {
     return successResponse({
       siteName: updatedSettings.branding?.siteName,
       siteLogoUrl: updatedSettings.branding?.siteLogoUrl,
+      siteFaviconUrl: updatedSettings.branding?.siteFaviconUrl,
     });
   } catch (error: unknown) {
     logger.error("Failed to update branding settings", error);

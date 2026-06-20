@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { MediaUpload } from "@/presentation/components/client/submission-form/media-upload";
+import { MediaSelectorDialog } from "@/presentation/components/admin/media-selector-dialog";
+import { Images, X } from "lucide-react";
+import Image from "next/image";
 
 export function SettingsForm() {
   const t = useTranslations("adminSettings");
@@ -16,6 +18,9 @@ export function SettingsForm() {
   const [localState, setLocalState] = useState<SettingsState | null>(null);
   const [siteName, setSiteName] = useState("");
   const [siteLogoUrl, setSiteLogoUrl] = useState("");
+  const [siteFaviconUrl, setSiteFaviconUrl] = useState("");
+  const [logoSelectorOpen, setLogoSelectorOpen] = useState(false);
+  const [faviconSelectorOpen, setFaviconSelectorOpen] = useState(false);
 
   const [isRestoring, setIsRestoring] = useState(false);
 
@@ -60,6 +65,7 @@ export function SettingsForm() {
       setLocalState(settings);
       setSiteName(settings.branding?.siteName || "ADVANCED FORM MAKER");
       setSiteLogoUrl(settings.branding?.siteLogoUrl || "");
+      setSiteFaviconUrl(settings.branding?.siteFaviconUrl || "");
     }
   }, [settings]);
 
@@ -210,42 +216,160 @@ export function SettingsForm() {
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 pb-2">
             {t("brandingTitle")}
           </h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="site_name">{t("siteNameLabel")}</Label>
-              <Input
-                id="site_name"
-                type="text"
-                maxLength={100}
-                required
-                placeholder="e.g. ADVANCED FORM MAKER"
-                value={siteName}
-                onChange={(e) => setSiteName(e.target.value)}
-              />
+
+          {/* Site Name */}
+          <div className="space-y-2">
+            <Label htmlFor="site_name">{t("siteNameLabel")}</Label>
+            <Input
+              id="site_name"
+              type="text"
+              maxLength={100}
+              required
+              placeholder="e.g. ADVANCED FORM MAKER"
+              value={siteName}
+              onChange={(e) => setSiteName(e.target.value)}
+            />
+          </div>
+
+          {/* Site Logo + Site Favicon side by side */}
+          <div className="grid gap-6 sm:grid-cols-2">
+
+            {/* Site Logo */}
+            <div className="space-y-3">
+              <Label>{t("siteLogoLabel")}</Label>
+
+              {/* Preview */}
+              {siteLogoUrl ? (
+                <div className="relative h-24 w-full rounded-lg border bg-muted flex items-center justify-center overflow-hidden">
+                  <Image
+                    src={siteLogoUrl}
+                    alt="Site logo"
+                    fill
+                    className="object-contain p-2"
+                    sizes="200px"
+                    unoptimized
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setSiteLogoUrl("")}
+                    className="absolute top-1.5 end-1.5 rounded-full bg-background/80 p-1 shadow hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                    aria-label="Remove logo"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <div className="h-24 w-full rounded-lg border-2 border-dashed border-muted-foreground/20 flex items-center justify-center text-xs text-muted-foreground">
+                  No logo set
+                </div>
+              )}
+
+              {/* Actions + URL input */}
+              <div className="space-y-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLogoSelectorOpen(true)}
+                  disabled={isSavingBranding}
+                >
+                  <Images className="h-4 w-4 me-1.5" />
+                  Choose from Media
+                </Button>
+                <Input
+                  type="url"
+                  placeholder="Or paste an image URL…"
+                  value={siteLogoUrl}
+                  onChange={(e) => setSiteLogoUrl(e.target.value)}
+                  disabled={isSavingBranding}
+                  className="text-xs"
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>{t("siteLogoLabel")}</Label>
-              <MediaUpload
-                type="image"
-                currentUrl={siteLogoUrl || null}
-                onUpload={(url) => setSiteLogoUrl(url)}
-                onRemove={() => setSiteLogoUrl("")}
-                maxFileSize={2}
-                disabled={isSavingBranding}
-              />
+            {/* Site Favicon */}
+            <div className="space-y-3">
+              <div className="space-y-0.5">
+                <Label>Site Icon (Favicon)</Label>
+                <p className="text-xs text-muted-foreground">Shown in the browser tab. Use a square image.</p>
+              </div>
+
+              {/* Preview */}
+              {siteFaviconUrl ? (
+                <div className="relative h-24 w-full rounded-lg border bg-muted flex items-center justify-center overflow-hidden">
+                  <Image
+                    src={siteFaviconUrl}
+                    alt="Site favicon"
+                    fill
+                    className="object-contain p-4"
+                    sizes="200px"
+                    unoptimized
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setSiteFaviconUrl("")}
+                    className="absolute top-1.5 end-1.5 rounded-full bg-background/80 p-1 shadow hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                    aria-label="Remove favicon"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <div className="h-24 w-full rounded-lg border-2 border-dashed border-muted-foreground/20 flex items-center justify-center text-xs text-muted-foreground">
+                  No icon set (uses logo or default)
+                </div>
+              )}
+
+              {/* Actions + URL input */}
+              <div className="space-y-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFaviconSelectorOpen(true)}
+                  disabled={isSavingBranding}
+                >
+                  <Images className="h-4 w-4 me-1.5" />
+                  Choose from Media
+                </Button>
+                <Input
+                  type="url"
+                  placeholder="Or paste an image URL…"
+                  value={siteFaviconUrl}
+                  onChange={(e) => setSiteFaviconUrl(e.target.value)}
+                  disabled={isSavingBranding}
+                  className="text-xs"
+                />
+              </div>
             </div>
           </div>
+
           <div className="pt-2">
             <Button
               type="button"
               disabled={isSavingBranding || !siteName.trim()}
-              onClick={() => saveBranding({ siteName, siteLogoUrl })}
+              onClick={() => saveBranding({ siteName, siteLogoUrl, siteFaviconUrl })}
             >
               {isSavingBranding ? t("saving") : t("saveButton")}
             </Button>
           </div>
         </div>
+
+        {/* Media selector dialogs */}
+        <MediaSelectorDialog
+          open={logoSelectorOpen}
+          onOpenChange={setLogoSelectorOpen}
+          onSelect={(url) => setSiteLogoUrl(url)}
+          currentUrl={siteLogoUrl}
+          title="Choose Site Logo"
+        />
+        <MediaSelectorDialog
+          open={faviconSelectorOpen}
+          onOpenChange={setFaviconSelectorOpen}
+          onSelect={(url) => setSiteFaviconUrl(url)}
+          currentUrl={siteFaviconUrl}
+          title="Choose Site Icon (Favicon)"
+        />
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-6 border-t border-zinc-200 dark:border-zinc-800">
