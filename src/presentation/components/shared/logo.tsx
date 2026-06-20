@@ -20,7 +20,7 @@ export function Logo({
         className="object-contain shrink-0"
         unoptimized={!!logoUrl}
       />
-      <span className="text-xl font-bold text-primary tracking-tight">{siteName}</span>
+      <span className="text-xl font-bold tracking-tight">{siteName}</span>
     </Link>
   );
 }

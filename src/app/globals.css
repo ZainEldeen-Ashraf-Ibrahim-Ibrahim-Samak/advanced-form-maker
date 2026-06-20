@@ -9,49 +9,47 @@
    the entire product without touching any other token.
    ========================================================= */
 :root {
-  --brand-hue: 168;        /* jewel emerald-teal */
-  --brand-chroma: 0.105;   /* jewel saturation  */
-  --warm-hue: 75;          /* amber / sand accent */
-  --warm-chroma: 0.035;    /* warm surface saturation */
+  --brand-hue: 243;         /* deep navy / indigo */
+  --brand-chroma: 0.155;    /* vivid indigo saturation */
+  --warm-hue: 35;           /* amber accent */
+  --warm-chroma: 0.042;     /* amber warmth */
 }
 
 /* =========================================================
    ALTERNATE THEME CLASSES
-   Apply one of these classes to <html> to instantly switch
-   the brand color while all other tokens follow.
    =========================================================
    Usage:
-     <html class="theme-amber">   → warm amber brand
+     <html class="theme-emerald">  → jewel emerald brand
      <html class="theme-sapphire"> → deep sapphire brand
-     <html class="theme-wine">    → rich burgundy brand
-     (default = emerald, no class needed)
+     <html class="theme-wine">     → rich burgundy brand
+     (default = navy/indigo, no class needed)
    ========================================================= */
-.theme-amber {
-  --brand-hue: 60;
-  --brand-chroma: 0.12;
-  --warm-hue: 30;
-  --warm-chroma: 0.04;
+.theme-emerald {
+  --brand-hue: 168;
+  --brand-chroma: 0.105;
+  --warm-hue: 75;
+  --warm-chroma: 0.035;
 }
 
 .theme-sapphire {
-  --brand-hue: 250;
-  --brand-chroma: 0.1;
-  --warm-hue: 220;
-  --warm-chroma: 0.02;
+  --brand-hue: 220;
+  --brand-chroma: 0.130;
+  --warm-hue: 195;
+  --warm-chroma: 0.020;
 }
 
 .theme-wine {
   --brand-hue: 10;
-  --brand-chroma: 0.1;
+  --brand-chroma: 0.100;
   --warm-hue: 40;
-  --warm-chroma: 0.03;
+  --warm-chroma: 0.030;
 }
 
 .theme-gold {
   --brand-hue: 50;
   --brand-chroma: 0.115;
   --warm-hue: 70;
-  --warm-chroma: 0.04;
+  --warm-chroma: 0.040;
 }
 
 /* =========================================================
@@ -61,9 +59,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-body);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -103,93 +101,92 @@
 }
 
 /* =========================================================
-   LIGHT MODE — Jewel Emerald + Warm Amber
+   LIGHT MODE — Deep Navy + Warm Amber
    ========================================================= */
 :root {
-  /* Radius */
-  --radius: 0.5rem;
+  --radius: 0.625rem;
 
-  /* Backgrounds: warm sand-cream, tinted toward brand */
-  --background:  oklch(0.982 0.008 var(--warm-hue));
-  --card:        oklch(0.997 0.004 var(--warm-hue));
-  --popover:     oklch(0.997 0.004 var(--warm-hue));
+  /* Backgrounds: cool indigo-white surfaces */
+  --background:  oklch(0.975 0.008 var(--brand-hue));
+  --card:        oklch(0.999 0.002 var(--brand-hue));
+  --popover:     oklch(0.999 0.002 var(--brand-hue));
 
-  /* Foregrounds: deep brand-tinted near-black */
-  --foreground:         oklch(0.145 0.015 var(--brand-hue));
-  --card-foreground:    oklch(0.145 0.015 var(--brand-hue));
-  --popover-foreground: oklch(0.145 0.015 var(--brand-hue));
+  /* Foregrounds: deep navy-tinted near-black */
+  --foreground:         oklch(0.148 0.016 var(--brand-hue));
+  --card-foreground:    oklch(0.148 0.016 var(--brand-hue));
+  --popover-foreground: oklch(0.148 0.016 var(--brand-hue));
 
-  /* Primary — deep jewel color (brand) */
-  --primary:            oklch(0.31 var(--brand-chroma) var(--brand-hue));
-  --primary-foreground: oklch(0.978 0.005 var(--warm-hue));
+  /* Primary — deep navy */
+  --primary:            oklch(0.268 var(--brand-chroma) var(--brand-hue));
+  --primary-foreground: oklch(0.976 0.005 var(--brand-hue));
 
-  /* Secondary — warm sand surface */
-  --secondary:            oklch(0.91 var(--warm-chroma) var(--warm-hue));
-  --secondary-foreground: oklch(0.22 0.022 var(--brand-hue));
+  /* Secondary — light indigo tint surface */
+  --secondary:            oklch(0.906 0.025 var(--brand-hue));
+  --secondary-foreground: oklch(0.220 0.022 var(--brand-hue));
 
-  /* Muted — lighter warm surface */
-  --muted:            oklch(0.938 0.01 var(--warm-hue));
-  --muted-foreground: oklch(0.51 0.022 var(--brand-hue));
+  /* Muted — softer indigo surface */
+  --muted:            oklch(0.933 0.012 var(--brand-hue));
+  --muted-foreground: oklch(0.510 0.022 var(--brand-hue));
 
-  /* Accent — warm gold surface for hover/active states */
-  --accent:            oklch(0.88 0.04 var(--warm-hue));
-  --accent-foreground: oklch(0.21 0.022 var(--brand-hue));
+  /* Accent — warm amber surface for hover/active */
+  --accent:            oklch(0.878 0.060 var(--warm-hue));
+  --accent-foreground: oklch(0.220 0.022 var(--brand-hue));
 
   /* Semantic */
   --destructive: oklch(0.565 0.22 27.3);
 
   /* Structure */
-  --border: oklch(0.872 0.018 var(--warm-hue));
-  --input:  oklch(0.872 0.018 var(--warm-hue));
-  --ring:   oklch(0.44  0.08  var(--brand-hue));
+  --border: oklch(0.876 0.018 var(--brand-hue));
+  --input:  oklch(0.876 0.018 var(--brand-hue));
+  --ring:   oklch(0.440 0.100 var(--brand-hue));
 
-  /* Charts — diverse jewel palette */
-  --chart-1: oklch(0.31 0.105 168);   /* emerald */
-  --chart-2: oklch(0.68 0.14  78);    /* amber   */
-  --chart-3: oklch(0.48 0.11  210);   /* sapphire */
-  --chart-4: oklch(0.54 0.11  28);    /* terracotta */
-  --chart-5: oklch(0.38 0.09  300);   /* plum    */
+  /* Charts — vivid palette */
+  --chart-1: oklch(0.38 0.155 243);   /* navy    */
+  --chart-2: oklch(0.74 0.155 65);    /* amber   */
+  --chart-3: oklch(0.52 0.140 165);   /* emerald */
+  --chart-4: oklch(0.60 0.160 15);    /* rose    */
+  --chart-5: oklch(0.52 0.135 300);   /* violet  */
 
-  /* Sidebar — deep jewel panel */
-  --sidebar:                   oklch(0.235 0.072 var(--brand-hue));
-  --sidebar-foreground:        oklch(0.938 0.01  var(--warm-hue));
-  --sidebar-primary:           oklch(0.62  0.095 var(--brand-hue));
-  --sidebar-primary-foreground:oklch(0.12  0.015 var(--brand-hue));
-  --sidebar-accent:            oklch(0.315 0.078 var(--brand-hue));
-  --sidebar-accent-foreground: oklch(0.938 0.01  var(--warm-hue));
-  --sidebar-border:            oklch(0.315 0.076 var(--brand-hue));
-  --sidebar-ring:              oklch(0.55  0.085 var(--brand-hue));
+  /* Sidebar — deep navy panel with amber active accent */
+  --sidebar:                    oklch(0.198 0.130 var(--brand-hue));
+  --sidebar-foreground:         oklch(0.938 0.008 var(--brand-hue));
+  --sidebar-primary:            oklch(0.740 0.120 var(--warm-hue));
+  --sidebar-primary-foreground: oklch(0.200 0.035 var(--warm-hue));
+  --sidebar-accent:             oklch(0.285 0.095 var(--brand-hue));
+  --sidebar-accent-foreground:  oklch(0.938 0.008 var(--brand-hue));
+  --sidebar-border:             oklch(0.285 0.095 var(--brand-hue));
+  --sidebar-ring:               oklch(0.550 0.100 var(--brand-hue));
 }
 
 /* =========================================================
    DARK MODE — Brand-tinted deep surfaces
    ========================================================= */
 .dark {
-  /* Backgrounds: brand-tinted dark surfaces, 3-step elevation */
-  --background:  oklch(0.12  0.018 var(--brand-hue));  /* deepest */
-  --card:        oklch(0.17  0.022 var(--brand-hue));  /* elevated */
-  --popover:     oklch(0.195 0.024 var(--brand-hue));  /* floating */
+  /* Backgrounds: navy-tinted dark surfaces */
+  --background:  oklch(0.118 0.020 var(--brand-hue));
+  --card:        oklch(0.165 0.024 var(--brand-hue));
+  --popover:     oklch(0.190 0.026 var(--brand-hue));
 
-  /* Foregrounds: warm light text */
-  --foreground:         oklch(0.945 0.009 var(--warm-hue));
-  --card-foreground:    oklch(0.945 0.009 var(--warm-hue));
-  --popover-foreground: oklch(0.945 0.009 var(--warm-hue));
+  /* Foregrounds: cool light text */
+  --foreground:         oklch(0.945 0.008 var(--brand-hue));
+  --card-foreground:    oklch(0.945 0.008 var(--brand-hue));
+  --popover-foreground: oklch(0.945 0.008 var(--brand-hue));
 
-  /* Primary — lighter jewel in dark (retain vibrancy) */
-  --primary:            oklch(0.655 0.108 var(--brand-hue));
-  --primary-foreground: oklch(0.12  0.018 var(--brand-hue));
+  /* Primary — lighter indigo in dark */
+  --primary:            oklch(0.675 0.130 var(--brand-hue));
+  --primary-foreground: oklch(0.118 0.020 var(--brand-hue));
 
-  /* Secondary — dark brand-tinted surface */
-  --secondary:            oklch(0.215 0.026 var(--brand-hue));
-  --secondary-foreground: oklch(0.92  0.01  var(--warm-hue));
+  /* Secondary */
+  --secondary:            oklch(0.212 0.028 var(--brand-hue));
+  --secondary-foreground: oklch(0.920 0.008 var(--brand-hue));
 
   /* Muted */
-  --muted:            oklch(0.215 0.026 var(--brand-hue));
-  --muted-foreground: oklch(0.615 0.038 var(--brand-hue));
+  --muted:            oklch(0.212 0.028 var(--brand-hue));
+  --muted-foreground: oklch(0.615 0.040 var(--brand-hue));
 
   /* Accent */
-  --accent:            oklch(0.24 0.03 var(--brand-hue));
-  --accent-foreground: oklch(0.92 0.01 var(--warm-hue));
+  --accent:            oklch(0.238 0.032 var(--brand-hue));
+  --accent-foreground: oklch(0.920 0.008 var(--brand-hue));
 
   /* Semantic */
   --destructive: oklch(0.68 0.195 22.2);
@@ -197,24 +194,24 @@
   /* Structure */
   --border: oklch(1 0 0 / 10%);
   --input:  oklch(1 0 0 / 15%);
-  --ring:   oklch(0.55 0.09 var(--brand-hue));
+  --ring:   oklch(0.550 0.100 var(--brand-hue));
 
-  /* Charts — slightly lighter for dark bg */
-  --chart-1: oklch(0.62 0.095 168);
-  --chart-2: oklch(0.72 0.14  78);
-  --chart-3: oklch(0.58 0.10  210);
-  --chart-4: oklch(0.65 0.11  28);
-  --chart-5: oklch(0.55 0.09  300);
+  /* Charts */
+  --chart-1: oklch(0.62 0.130 243);
+  --chart-2: oklch(0.76 0.155 65);
+  --chart-3: oklch(0.60 0.120 165);
+  --chart-4: oklch(0.66 0.135 15);
+  --chart-5: oklch(0.58 0.115 300);
 
-  /* Sidebar — even deeper than bg in dark */
-  --sidebar:                   oklch(0.155 0.022 var(--brand-hue));
-  --sidebar-foreground:        oklch(0.925 0.009 var(--warm-hue));
-  --sidebar-primary:           oklch(0.62  0.095 var(--brand-hue));
-  --sidebar-primary-foreground:oklch(0.12  0.018 var(--brand-hue));
-  --sidebar-accent:            oklch(0.225 0.028 var(--brand-hue));
-  --sidebar-accent-foreground: oklch(0.925 0.009 var(--warm-hue));
-  --sidebar-border:            oklch(1 0 0 / 12%);
-  --sidebar-ring:              oklch(0.5  0.08  var(--brand-hue));
+  /* Sidebar — deeper than background */
+  --sidebar:                    oklch(0.152 0.022 var(--brand-hue));
+  --sidebar-foreground:         oklch(0.925 0.008 var(--brand-hue));
+  --sidebar-primary:            oklch(0.720 0.115 var(--warm-hue));
+  --sidebar-primary-foreground: oklch(0.180 0.030 var(--warm-hue));
+  --sidebar-accent:             oklch(0.220 0.028 var(--brand-hue));
+  --sidebar-accent-foreground:  oklch(0.925 0.008 var(--brand-hue));
+  --sidebar-border:             oklch(1 0 0 / 12%);
+  --sidebar-ring:               oklch(0.500 0.080 var(--brand-hue));
 }
 
 /* =========================================================
@@ -235,15 +232,21 @@
 
   body {
     @apply bg-background text-foreground;
-    /* Smooth theme transitions */
     transition: background-color 0.2s ease, color 0.2s ease;
+    font-variant-numeric: tabular-nums;
+    font-kerning: normal;
   }
 
   html {
     @apply font-sans;
   }
 
-  /* Smooth sidebar and card transitions on theme switch */
+  h1, h2, h3, h4 {
+    font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+    letter-spacing: -0.025em;
+  }
+
+  /* Smooth transitions on theme switch */
   aside,
   [data-sidebar],
   .card,

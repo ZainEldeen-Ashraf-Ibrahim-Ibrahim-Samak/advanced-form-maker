@@ -36,22 +36,26 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col border-e bg-card relative">
-        <div className="p-6">
-          <Logo 
-            className="mb-2 hover:opacity-80 transition-opacity" 
-            logoUrl={branding.siteLogoUrl} 
-            siteName={branding.siteName} 
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-64 flex-col bg-sidebar text-sidebar-foreground shrink-0">
+        {/* Brand area */}
+        <div className="px-5 py-6 border-b border-sidebar-border">
+          <Logo
+            className="mb-3 hover:opacity-85 transition-opacity text-sidebar-foreground"
+            logoUrl={branding.siteLogoUrl}
+            siteName={branding.siteName}
           />
-          <p className="text-sm text-muted-foreground truncate" title={session.user.name || ""}>
-            {session.user.name}
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" />
+            <p className="text-xs text-sidebar-foreground/60 truncate" title={session.user.name || ""}>
+              {session.user.name}
+            </p>
+          </div>
         </div>
 
         <SidebarNav userRole={userRole} />
 
-        <div className="p-4 border-t">
+        <div className="px-4 py-4 border-t border-sidebar-border mt-auto">
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
             <ThemeToggle />
@@ -60,26 +64,26 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
       </aside>
 
       {/* Mobile header */}
-      <div className="flex flex-1 flex-col">
-        <header className="flex md:hidden items-center justify-between border-b px-4 py-3">
+      <div className="flex flex-1 flex-col min-w-0">
+        <header className="flex md:hidden items-center justify-between bg-sidebar text-sidebar-foreground px-4 py-3 shrink-0">
           <div className="flex items-center gap-2">
             <Sheet>
               <SheetTrigger
                 nativeButton={true}
                 render={
-                  <Button variant="ghost" size="icon-sm" aria-label="Open menu" />
+                  <Button variant="ghost" size="icon-sm" aria-label="Open menu" className="text-sidebar-foreground hover:bg-sidebar-accent" />
                 }
               >
                 <Menu className="h-5 w-5" />
               </SheetTrigger>
-              <SheetContent side={locale === "ar" ? "right" : "left"} className="w-72 p-0 flex flex-col">
-                <div className="p-6 border-b">
-                  <Logo 
-                    className="mb-2" 
-                    logoUrl={branding.siteLogoUrl} 
-                    siteName={branding.siteName} 
+              <SheetContent side={locale === "ar" ? "right" : "left"} className="w-72 p-0 flex flex-col bg-sidebar text-sidebar-foreground border-sidebar-border">
+                <div className="px-5 py-6 border-b border-sidebar-border">
+                  <Logo
+                    className="mb-2 text-sidebar-foreground"
+                    logoUrl={branding.siteLogoUrl}
+                    siteName={branding.siteName}
                   />
-                  <p className="text-sm text-muted-foreground truncate" title={session.user.name || ""}>
+                  <p className="text-xs text-sidebar-foreground/60 truncate" title={session.user.name || ""}>
                     {session.user.name}
                   </p>
                 </div>
@@ -88,10 +92,10 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
                 </div>
               </SheetContent>
             </Sheet>
-            <Logo 
-              className="scale-90 transform origin-left rtl:origin-right" 
-              logoUrl={branding.siteLogoUrl} 
-              siteName={branding.siteName} 
+            <Logo
+              className="scale-90 transform origin-left rtl:origin-right text-sidebar-foreground"
+              logoUrl={branding.siteLogoUrl}
+              siteName={branding.siteName}
             />
           </div>
           <div className="flex items-center gap-1">
@@ -102,7 +106,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 overflow-auto">
           <LiveNotifications />
           {children}
         </main>

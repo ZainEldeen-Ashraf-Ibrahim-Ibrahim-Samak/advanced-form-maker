@@ -17,7 +17,10 @@
       "Bash(node -e \"const en = require\\('./src/messages/en.json'\\); console.log\\('quotaExceeded:', en.formAnalysis.quotaExceeded\\); console.log\\('rateLimitError:', en.formAnalysis.rateLimitError\\);\")",
       "Bash(Sort-Object)",
       "PowerShell(Resolve-DnsName *)",
-      "PowerShell(Test-NetConnection *)"
+      "PowerShell(Test-NetConnection *)",
+      "Bash(node *)",
+      "PowerShell(cd \"C:\\\\Users\\\\ALFA2023\\\\Desktop\\\\advanced-form-maker\"; $content = Get-Content \"node_modules\\\\next\\\\dist\\\\compiled\\\\@next\\\\font\\\\dist\\\\google\\\\index.js\" -Raw; $matches = [regex]::Matches\\($content, 'exports\\\\.\\(\\\\w+\\)'\\); $names = $matches | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique; $names | Where-Object { $_ -match 'Bri|Fig|Nun|Pop|Red|Jost|Schibsted|Raleway' })",
+      "PowerShell(cd \"C:\\\\Users\\\\ALFA2023\\\\Desktop\\\\advanced-form-maker\"; $content = Get-Content \"node_modules\\\\next\\\\dist\\\\compiled\\\\@next\\\\font\\\\dist\\\\google\\\\index.js\" -Raw; $content.Length; $content.Substring\\(0, 500\\))"
     ]
   }
 }
