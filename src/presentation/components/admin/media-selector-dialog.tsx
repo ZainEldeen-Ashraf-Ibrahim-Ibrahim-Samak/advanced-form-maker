@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useMediaManager, MediaResource } from "@/presentation/view-models/use-media-manager";
@@ -8,6 +8,8 @@ import { Loader2, Check, ImageIcon, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+
+
 
 interface MediaSelectorDialogProps {
   open: boolean;
@@ -28,10 +30,6 @@ export function MediaSelectorDialog({
   const { resources, isLoading, isPaginating, hasMore, loadMore, refresh } = useMediaManager();
   const [selected, setSelected] = useState<string | null>(currentUrl || null);
 
-  useEffect(() => {
-    if (open) setSelected(currentUrl || null);
-  }, [open, currentUrl]);
-
   const imageResources = resources.filter((r: MediaResource) => r.resource_type === "image");
 
   const handleConfirm = () => {
@@ -45,7 +43,7 @@ export function MediaSelectorDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl h-[80vh] flex flex-col gap-0 p-0">
         <DialogHeader className="px-6 py-4 border-b shrink-0">
-          <DialogTitle>{title ?? t("selectorTitle") ?? "Choose from Media Library"}</DialogTitle>
+          <DialogTitle>{title ?? "Choose from Media Library"}</DialogTitle>
         </DialogHeader>
 
         {/* Toolbar */}

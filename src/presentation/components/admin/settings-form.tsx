@@ -355,21 +355,25 @@ export function SettingsForm() {
           </div>
         </div>
 
-        {/* Media selector dialogs */}
-        <MediaSelectorDialog
-          open={logoSelectorOpen}
-          onOpenChange={setLogoSelectorOpen}
-          onSelect={(url) => setSiteLogoUrl(url)}
-          currentUrl={siteLogoUrl}
-          title="Choose Site Logo"
-        />
-        <MediaSelectorDialog
-          open={faviconSelectorOpen}
-          onOpenChange={setFaviconSelectorOpen}
-          onSelect={(url) => setSiteFaviconUrl(url)}
-          currentUrl={siteFaviconUrl}
-          title="Choose Site Icon (Favicon)"
-        />
+        {/* Media selector dialogs — mounted only when open so state resets each session */}
+        {logoSelectorOpen && (
+          <MediaSelectorDialog
+            open={logoSelectorOpen}
+            onOpenChange={setLogoSelectorOpen}
+            onSelect={(url) => setSiteLogoUrl(url)}
+            currentUrl={siteLogoUrl}
+            title="Choose Site Logo"
+          />
+        )}
+        {faviconSelectorOpen && (
+          <MediaSelectorDialog
+            open={faviconSelectorOpen}
+            onOpenChange={setFaviconSelectorOpen}
+            onSelect={(url) => setSiteFaviconUrl(url)}
+            currentUrl={siteFaviconUrl}
+            title="Choose Site Icon (Favicon)"
+          />
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-6 border-t border-zinc-200 dark:border-zinc-800">
