@@ -243,7 +243,7 @@ export function SettingsForm() {
                 <div className="relative h-24 w-full rounded-lg border bg-muted flex items-center justify-center overflow-hidden">
                   <Image
                     src={siteLogoUrl}
-                    alt="Site logo"
+                    alt={t("siteLogoLabel")}
                     fill
                     className="object-contain p-2"
                     sizes="200px"
@@ -253,14 +253,14 @@ export function SettingsForm() {
                     type="button"
                     onClick={() => setSiteLogoUrl("")}
                     className="absolute top-1.5 end-1.5 rounded-full bg-background/80 p-1 shadow hover:bg-destructive hover:text-destructive-foreground transition-colors"
-                    aria-label="Remove logo"
+                    aria-label={t("siteLogoLabel")}
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
               ) : (
                 <div className="h-24 w-full rounded-lg border-2 border-dashed border-muted-foreground/20 flex items-center justify-center text-xs text-muted-foreground">
-                  No logo set
+                  {t("noLogoSet")}
                 </div>
               )}
 
@@ -274,11 +274,11 @@ export function SettingsForm() {
                   disabled={isSavingBranding}
                 >
                   <Images className="h-4 w-4 me-1.5" />
-                  Choose from Media
+                  {t("chooseFromMedia")}
                 </Button>
                 <Input
                   type="url"
-                  placeholder="Or paste an image URL…"
+                  placeholder={t("pasteUrlPlaceholder")}
                   value={siteLogoUrl}
                   onChange={(e) => setSiteLogoUrl(e.target.value)}
                   disabled={isSavingBranding}
@@ -290,8 +290,8 @@ export function SettingsForm() {
             {/* Site Favicon */}
             <div className="space-y-3">
               <div className="space-y-0.5">
-                <Label>Site Icon (Favicon)</Label>
-                <p className="text-xs text-muted-foreground">Shown in the browser tab. Use a square image.</p>
+                <Label>{t("siteFaviconLabel")}</Label>
+                <p className="text-xs text-muted-foreground">{t("siteFaviconHint")}</p>
               </div>
 
               {/* Preview */}
@@ -299,7 +299,7 @@ export function SettingsForm() {
                 <div className="relative h-24 w-full rounded-lg border bg-muted flex items-center justify-center overflow-hidden">
                   <Image
                     src={siteFaviconUrl}
-                    alt="Site favicon"
+                    alt={t("siteFaviconLabel")}
                     fill
                     className="object-contain p-4"
                     sizes="200px"
@@ -309,14 +309,14 @@ export function SettingsForm() {
                     type="button"
                     onClick={() => setSiteFaviconUrl("")}
                     className="absolute top-1.5 end-1.5 rounded-full bg-background/80 p-1 shadow hover:bg-destructive hover:text-destructive-foreground transition-colors"
-                    aria-label="Remove favicon"
+                    aria-label={t("siteFaviconLabel")}
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
               ) : (
                 <div className="h-24 w-full rounded-lg border-2 border-dashed border-muted-foreground/20 flex items-center justify-center text-xs text-muted-foreground">
-                  No icon set (uses logo or default)
+                  {t("noIconSet")}
                 </div>
               )}
 
@@ -330,11 +330,11 @@ export function SettingsForm() {
                   disabled={isSavingBranding}
                 >
                   <Images className="h-4 w-4 me-1.5" />
-                  Choose from Media
+                  {t("chooseFromMedia")}
                 </Button>
                 <Input
                   type="url"
-                  placeholder="Or paste an image URL…"
+                  placeholder={t("pasteUrlPlaceholder")}
                   value={siteFaviconUrl}
                   onChange={(e) => setSiteFaviconUrl(e.target.value)}
                   disabled={isSavingBranding}
@@ -362,7 +362,7 @@ export function SettingsForm() {
             onOpenChange={setLogoSelectorOpen}
             onSelect={(url) => setSiteLogoUrl(url)}
             currentUrl={siteLogoUrl}
-            title="Choose Site Logo"
+            title={t("chooseSiteLogo")}
           />
         )}
         {faviconSelectorOpen && (
@@ -371,7 +371,7 @@ export function SettingsForm() {
             onOpenChange={setFaviconSelectorOpen}
             onSelect={(url) => setSiteFaviconUrl(url)}
             currentUrl={siteFaviconUrl}
-            title="Choose Site Icon (Favicon)"
+            title={t("chooseSiteFavicon")}
           />
         )}
       </div>

@@ -49,7 +49,7 @@ export function MediaSelectorDialog({
         {/* Toolbar */}
         <div className="flex items-center justify-between px-6 py-3 border-b shrink-0 bg-muted/30">
           <p className="text-sm text-muted-foreground">
-            {isLoading ? "Loading…" : `${imageResources.length} images`}
+            {isLoading ? t("loading") : t("selectorImageCount", { count: imageResources.length })}
           </p>
           <Button variant="ghost" size="sm" onClick={refresh} disabled={isLoading}>
             <RefreshCw className={cn("h-4 w-4 me-1.5", isLoading && "animate-spin")} />
@@ -122,14 +122,14 @@ export function MediaSelectorDialog({
               {selected.split("/").pop()}
             </p>
           ) : (
-            <p className="text-xs text-muted-foreground">No image selected</p>
+            <p className="text-xs text-muted-foreground">{t("selectorNoneSelected")}</p>
           )}
           <div className="flex gap-2 shrink-0">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t("selectorCancel")}
             </Button>
             <Button disabled={!selected} onClick={handleConfirm}>
-              Use this image
+              {t("selectorUseImage")}
             </Button>
           </div>
         </div>

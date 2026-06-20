@@ -119,7 +119,7 @@ export function LoginForm({ logoUrl, siteName }: LoginFormProps) {
             }}
           >
             <ShieldCheck className="h-3.5 w-3.5" />
-            Admin Portal
+            {t("adminPortalBadge")}
           </div>
 
           <h1

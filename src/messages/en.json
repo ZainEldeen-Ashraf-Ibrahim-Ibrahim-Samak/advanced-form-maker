@@ -85,7 +85,8 @@
     "userAccessDenied": "Access denied. Please contact an admin to allow you to join.",
     "logoutConfirm": "Are you sure you want to log out?",
     "accessDenied": "Access Restricted",
-    "requestAccess": "Please make a request to the admin to allow you to join."
+    "requestAccess": "Please make a request to the admin to allow you to join.",
+    "adminPortalBadge": "Admin Portal"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -573,7 +574,11 @@
     "selected": "Selected",
     "cancel": "Cancel Selection",
     "selectAll": "Select All",
-    "unselectAll": "Unselect All"
+    "unselectAll": "Unselect All",
+    "selectorUseImage": "Use this image",
+    "selectorCancel": "Cancel",
+    "selectorNoneSelected": "No image selected",
+    "selectorImageCount": "{count} images"
   },
   "team": {
     "title": "Team Management",
@@ -644,7 +649,15 @@
     "dataRetentionTitle": "Data Retention Policies",
     "brandingTitle": "Site Branding & Identity",
     "siteNameLabel": "Site Display Name",
-    "siteLogoLabel": "Site Logo (Cloudinary URL)",
+    "siteLogoLabel": "Site Logo",
+    "siteFaviconLabel": "Site Icon (Favicon)",
+    "siteFaviconHint": "Shown in the browser tab. Use a square image.",
+    "chooseFromMedia": "Choose from Media",
+    "pasteUrlPlaceholder": "Or paste an image URL…",
+    "noLogoSet": "No logo set",
+    "noIconSet": "No icon set (uses logo or default)",
+    "chooseSiteLogo": "Choose Site Logo",
+    "chooseSiteFavicon": "Choose Site Icon (Favicon)",
     "logoPreview": "Logo Preview",
     "uploadLogoButton": "Upload Custom Logo",
     "brandingSaveSuccess": "Branding identity updated successfully",

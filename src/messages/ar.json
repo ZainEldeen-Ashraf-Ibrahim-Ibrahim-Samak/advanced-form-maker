@@ -84,6 +84,7 @@
     "loginError": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
     "userAccessDenied": "تم رفض الوصول. يرجى الاتصال بالمسؤول للسماح لك بالدخول.",
     "logoutConfirm": "هل أنت متأكد من تسجيل الخروج؟",
+    "adminPortalBadge": "بوابة الإدارة",
     "accessDenied": "تم رفض الوصول",
     "requestAccess": "يرجى تقديم طلب للمسؤول للسماح لك بالانضمام."
   },
@@ -573,7 +574,11 @@
     "selected": "محدد",
     "cancel": "إلغاء التحديد",
     "selectAll": "تحديد الكل",
-    "unselectAll": "إلغاء تحديد الكل"
+    "unselectAll": "إلغاء تحديد الكل",
+    "selectorUseImage": "استخدام هذه الصورة",
+    "selectorCancel": "إلغاء",
+    "selectorNoneSelected": "لم يتم اختيار صورة",
+    "selectorImageCount": "{count} صور"
   },
   "team": {
     "title": "إدارة الفريق",
@@ -644,7 +649,15 @@
     "dataRetentionTitle": "سياسات الاحتفاظ بالبيانات",
     "brandingTitle": "شعار وهوية الموقع",
     "siteNameLabel": "اسم الموقع المعروض",
-    "siteLogoLabel": "شعار الموقع (رابط Cloudinary)",
+    "siteLogoLabel": "شعار الموقع",
+    "siteFaviconLabel": "أيقونة الموقع (Favicon)",
+    "siteFaviconHint": "تظهر في تبويب المتصفح. استخدم صورة مربعة.",
+    "chooseFromMedia": "اختر من الوسائط",
+    "pasteUrlPlaceholder": "أو الصق رابط صورة…",
+    "noLogoSet": "لم يتم تعيين شعار",
+    "noIconSet": "لم يتم تعيين أيقونة (يستخدم الشعار أو الافتراضي)",
+    "chooseSiteLogo": "اختر شعار الموقع",
+    "chooseSiteFavicon": "اختر أيقونة الموقع",
     "logoPreview": "معاينة الشعار",
     "uploadLogoButton": "رفع شعار مخصص",
     "brandingSaveSuccess": "تم تحديث هوية الموقع بنجاح",
