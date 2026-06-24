@@ -30,6 +30,7 @@ export interface IFormTemplate extends Document {
   isLocked: boolean;
   isContactForm: boolean;
   aiAutoFillEnabled: boolean;
+  canAddMoreReplies: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -105,6 +106,10 @@ const formTemplateSchema = new Schema<IFormTemplate>(
       index: true,
     },
     aiAutoFillEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    canAddMoreReplies: {
       type: Boolean,
       default: false,
     },

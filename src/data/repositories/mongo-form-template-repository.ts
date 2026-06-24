@@ -54,6 +54,7 @@ function toEntity(doc: Record<string, unknown>): FormTemplate {
     isContactForm: !!doc.isContactForm,
     contactFormLocked: !!doc.contactFormLocked,
     aiAutoFillEnabled: !!doc.aiAutoFillEnabled,
+    canAddMoreReplies: !!doc.canAddMoreReplies,
     createdAt: doc.createdAt as Date,
     updatedAt: doc.updatedAt as Date,
   };

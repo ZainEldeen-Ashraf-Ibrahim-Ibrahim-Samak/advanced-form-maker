@@ -39,6 +39,7 @@ export function FormManager() {
   const [editFormDesc, setEditFormDesc] = useState("");
   const [editFormAiAutoFillEnabled, setEditFormAiAutoFillEnabled] = useState(false);
   const [editFormIsLocked, setEditFormIsLocked] = useState(false);
+  const [editFormCanAddMoreReplies, setEditFormCanAddMoreReplies] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   // Share Dialog State
@@ -72,6 +73,7 @@ export function FormManager() {
     setEditFormDesc(form.description || "");
     setEditFormAiAutoFillEnabled(form.aiAutoFillEnabled || false);
     setEditFormIsLocked(form.isLocked || false);
+    setEditFormCanAddMoreReplies(form.canAddMoreReplies || false);
     setIsEditOpen(true);
   }
 
@@ -84,6 +86,7 @@ export function FormManager() {
         description: editFormDesc.trim(),
         aiAutoFillEnabled: editFormAiAutoFillEnabled,
         isLocked: editFormIsLocked,
+        canAddMoreReplies: editFormCanAddMoreReplies,
       });
       setIsEditOpen(false);
       setEditingFormId(null);
@@ -342,6 +345,21 @@ export function FormManager() {
                 id="edit-form-locked"
                 checked={editFormIsLocked}
                 onCheckedChange={setEditFormIsLocked}
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-zinc-200 dark:border-zinc-800 p-3 shadow-sm bg-zinc-50/50 dark:bg-zinc-900/50">
+              <div className="space-y-0.5 max-w-[80%]">
+                <Label htmlFor="edit-form-can-add-more" className="text-sm font-semibold cursor-pointer">
+                  {t("canAddMoreReplies")}
+                </Label>
+                <p className="text-[11px] text-muted-foreground leading-normal">
+                  {t("canAddMoreRepliesDesc")}
+                </p>
+              </div>
+              <Switch
+                id="edit-form-can-add-more"
+                checked={editFormCanAddMoreReplies}
+                onCheckedChange={setEditFormCanAddMoreReplies}
               />
             </div>
             <Button

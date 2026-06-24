@@ -161,6 +161,7 @@ export const updateFormTemplateSchema = z.object({
   isLocked: z.boolean().optional(),
   isContactForm: z.boolean().optional(),
   contactFormLocked: z.boolean().optional(),
+  canAddMoreReplies: z.boolean().optional(),
 });
 
 // ── Submission Schemas ─────────────────────────────────────────────

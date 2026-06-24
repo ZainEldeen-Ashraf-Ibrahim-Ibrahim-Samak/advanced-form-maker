@@ -248,6 +248,8 @@ interface UseSubmissionReturn {
   /** True briefly after an SSE status change is received — allows the UI to animate */
   statusChangedLive: boolean;
   aiAutoFillEnabled: boolean;
+  canAddMoreReplies: boolean;
+  formTemplateId: string | null;
 }
 
 
@@ -272,6 +274,8 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
   const [droppedFieldIds, setDroppedFieldIds] = useState<string[]>([]);
   const [statusChangedLive, setStatusChangedLive] = useState(false);
   const [aiAutoFillEnabled, setAiAutoFillEnabled] = useState(false);
+  const [canAddMoreReplies, setCanAddMoreReplies] = useState(false);
+  const [formTemplateId, setFormTemplateId] = useState<string | null>(null);
 
 
   const { draft, updateDraft, clearDraft, isLoaded: draftLoaded } = useDraftAutosave<DraftState>(
@@ -441,6 +445,8 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
         setContactFormFields(normalizeContactFormFields(data.formTemplate?.contactFormFields));
         setContactFormLocked(!!data.formTemplate?.contactFormLocked);
         setAiAutoFillEnabled(!!data.formTemplate?.aiAutoFillEnabled);
+        setCanAddMoreReplies(!!data.formTemplate?.canAddMoreReplies);
+        setFormTemplateId(data.formTemplate?.id ?? null);
         formVersionRef.current = nextFormVersion;
         
         if (!hasDraftData) {
@@ -463,6 +469,8 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
         setContactFormFields(normalizeContactFormFields(data.formTemplate?.contactFormFields));
         setContactFormLocked(!!data.formTemplate?.contactFormLocked);
         setAiAutoFillEnabled(!!data.formTemplate?.aiAutoFillEnabled);
+        setCanAddMoreReplies(!!data.formTemplate?.canAddMoreReplies);
+        setFormTemplateId(data.formTemplate?.id ?? data.submission?.formTemplateId ?? null);
 
         // Existing submissions should reflect DB state after reload/admin updates.
         // Keep local draft only while user is actively editing and there is meaningful draft content.
@@ -796,5 +804,7 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
     clearDroppedFieldWarning,
     statusChangedLive,
     aiAutoFillEnabled,
+    canAddMoreReplies,
+    formTemplateId,
   };
 }

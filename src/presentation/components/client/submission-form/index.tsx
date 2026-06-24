@@ -8,7 +8,7 @@ import { ContactRecords } from "./contact-records";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, CheckCircle2, Loader2, Send } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, Send, PlusCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EMAIL_REGEX, PHONE_REGEX, NAME_REGEX, TEXT_REGEX } from "@/constants/constants";
 import { useAiExtraction } from "@/presentation/view-models/use-ai-extraction";
@@ -59,6 +59,8 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
     clearDroppedFieldWarning,
     statusChangedLive,
     aiAutoFillEnabled,
+    canAddMoreReplies,
+    formTemplateId,
   } = useSubmission(tokenOrId);
 
   const currentFieldValues = useMemo(() => {
@@ -461,6 +463,23 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
             )}
         </form>
       </Card>
+
+      {isViewOnly && canAddMoreReplies && formTemplateId && (
+        <div className="mt-6 flex justify-center">
+          <Button
+            type="button"
+            size="lg"
+            variant="outline"
+            className="gap-2 border-primary text-primary hover:bg-primary/10"
+            onClick={() => {
+              window.location.href = `/${locale}/f/${formTemplateId}`;
+            }}
+          >
+            <PlusCircle className="h-5 w-5" />
+            {t("newAnswerButton")}
+          </Button>
+        </div>
+      )}
 
       <AlertDialog open={showOverwriteConfirm} onOpenChange={(open) => { if (!open) confirmOverwrite(false); }}>
         <AlertDialogContent>

@@ -8,7 +8,7 @@ interface UseFormManagerReturn {
   isLoading: boolean;
   error: string | null;
   createForm: (name: string, description?: string) => Promise<void>;
-  updateForm: (id: string, data: { name?: string; description?: string; isActive?: boolean; aiAutoFillEnabled?: boolean; isLocked?: boolean; isContactForm?: boolean }) => Promise<void>;
+  updateForm: (id: string, data: { name?: string; description?: string; isActive?: boolean; aiAutoFillEnabled?: boolean; isLocked?: boolean; isContactForm?: boolean; canAddMoreReplies?: boolean }) => Promise<void>;
   deleteForm: (id: string) => Promise<{ success: boolean; error?: string }>;
   toggleLock: (formId: string, currentState: boolean) => Promise<void>;
   refresh: () => Promise<void>;
@@ -55,7 +55,7 @@ export function useFormManager(): UseFormManagerReturn {
 
   const updateForm = async (
     id: string,
-    input: { name?: string; description?: string; isActive?: boolean; aiAutoFillEnabled?: boolean; isLocked?: boolean; isContactForm?: boolean }
+    input: { name?: string; description?: string; isActive?: boolean; aiAutoFillEnabled?: boolean; isLocked?: boolean; isContactForm?: boolean; canAddMoreReplies?: boolean }
   ) => {
     setError(null);
     const res = await fetch(`/api/admin/forms/${id}`, {
