@@ -8,6 +8,7 @@ interface UseFormManagerReturn {
   isLoading: boolean;
   error: string | null;
   createForm: (name: string, description?: string) => Promise<void>;
+  copyForm: (id: string) => Promise<void>;
   updateForm: (id: string, data: { name?: string; description?: string; isActive?: boolean; aiAutoFillEnabled?: boolean; isLocked?: boolean; isContactForm?: boolean; canAddMoreReplies?: boolean }) => Promise<void>;
   deleteForm: (id: string) => Promise<{ success: boolean; error?: string }>;
   toggleLock: (formId: string, currentState: boolean) => Promise<void>;
@@ -48,6 +49,14 @@ export function useFormManager(): UseFormManagerReturn {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, description }),
     });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    await fetchForms();
+  };
+
+  const copyForm = async (id: string) => {
+    setError(null);
+    const res = await fetch(`/api/admin/forms/${id}/copy`, { method: "POST" });
     const data = await res.json();
     if (!data.success) throw new Error(data.error);
     await fetchForms();
@@ -99,6 +108,7 @@ export function useFormManager(): UseFormManagerReturn {
     isLoading,
     error,
     createForm,
+    copyForm,
     updateForm,
     deleteForm,
     toggleLock,

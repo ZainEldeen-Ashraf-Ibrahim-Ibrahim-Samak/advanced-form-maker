@@ -1,0 +1,58 @@
+import { auth } from "@/lib/auth";
+import { errorResponse, successResponse, unauthorizedResponse } from "@/lib/api-response";
+import { logger } from "@/lib/dev-logger";
+import { MongoFormTemplateRepository } from "@/data/repositories/mongo-form-template-repository";
+import { MongoFieldDefinitionRepository } from "@/data/repositories/mongo-field-definition-repository";
+import { MongoDashboardCardRepository } from "@/data/repositories/mongo-dashboard-card-repository";
+import { ManageFormsUseCase } from "@/domain/use-cases/admin/manage-forms";
+
+const formRepo = new MongoFormTemplateRepository();
+const fieldRepo = new MongoFieldDefinitionRepository();
+const cardRepo = new MongoDashboardCardRepository();
+const formsUseCase = new ManageFormsUseCase(formRepo, cardRepo);
+
+export const dynamic = "force-dynamic";
+
+export async function POST(_request: Request, { params }: { params: Promise<{ formId: string }> }) {
+  const session = await auth();
+  if (!session?.user) {
+    return unauthorizedResponse();
+  }
+
+  try {
+    const { formId } = await params;
+
+    const sourceForm = await formsUseCase.getForm(formId);
+    if (!sourceForm) {
+      return errorResponse("Form not found", 404, "NOT_FOUND");
+    }
+
+    const sourceFields = await fieldRepo.findByFormId(formId, true);
+
+    // Create the new form with " - copy" appended to the name
+    const newForm = await formsUseCase.createForm(
+      `${sourceForm.name} - copy`,
+      sourceForm.description
+    );
+
+    // Copy all fields into the new form, preserving sort order
+    for (const field of sourceFields) {
+      await fieldRepo.create({
+        formTemplateId: newForm.id,
+        nameEn: field.nameEn,
+        nameAr: field.nameAr,
+        inputType: field.inputType,
+        validationRules: field.validationRules,
+        isMultiple: field.isMultiple,
+        dropdownOptionsEn: field.dropdownOptionsEn,
+        dropdownOptionsAr: field.dropdownOptionsAr,
+        sortOrder: field.sortOrder,
+      });
+    }
+
+    return successResponse(newForm, 201);
+  } catch (error) {
+    logger.error("Failed to copy form", error);
+    return errorResponse("Failed to copy form", 500, "FORM_COPY_FAILED");
+  }
+}

@@ -190,6 +190,7 @@
     "activeForm": "نشط",
     "inactiveForm": "غير نشط",
     "setActive": "تعيين كنشط",
+    "copyForm": "نسخ النموذج",
     "fieldCount": "{count} حقول",
     "submissionCount": "{count} طلبات",
     "noForms": "لم يتم إنشاء نماذج بعد",
@@ -226,6 +227,13 @@
     "isRequired": "حقل مطلوب",
     "sortOrder": "ترتيب العرض",
     "allowMultiple": "السماح بقيم متعددة (معرض/قائمة)",
+    "enableRegex": "تفعيل التحقق بالتعبير النمطي",
+    "regexType": "نوع التحقق",
+    "regexTypes": {
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "name": "الاسم"
+    },
     "contactRecordsTitle": "سجلات التواصل الافتراضية",
     "addContactRecord": "إضافة جهة تواصل",
     "removeContactRecord": "حذف جهة التواصل",

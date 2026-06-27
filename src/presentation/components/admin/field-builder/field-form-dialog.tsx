@@ -30,6 +30,8 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
   const [inputType, setInputType] = useState<InputType>("text");
   const [isRequired, setIsRequired] = useState(false);
   const [isMultiple, setIsMultiple] = useState(false);
+  const [enableRegex, setEnableRegex] = useState(false);
+  const [regexType, setRegexType] = useState<"email" | "phone" | "name">("email");
   const [dropdownOptionsEn, setDropdownOptionsEn] = useState<string[]>([""]);
   const [dropdownOptionsAr, setDropdownOptionsAr] = useState<string[]>([""]);
 
@@ -40,6 +42,9 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
       setInputType(field.inputType);
       setIsRequired(field.validationRules?.required ?? false);
       setIsMultiple(field.isMultiple ?? false);
+      const hasRegex = !!field.validationRules?.regexType;
+      setEnableRegex(hasRegex);
+      setRegexType(field.validationRules?.regexType ?? "email");
       setDropdownOptionsEn(
         field.dropdownOptionsEn.length > 0 ? field.dropdownOptionsEn : [""]
       );
@@ -52,6 +57,8 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
       setInputType("text");
       setIsRequired(false);
       setIsMultiple(false);
+      setEnableRegex(false);
+      setRegexType("email");
       setDropdownOptionsEn([""]);
       setDropdownOptionsAr([""]);
     }
@@ -66,7 +73,10 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
         nameAr: nameAr.trim(),
         inputType,
         isMultiple,
-        validationRules: { required: isRequired },
+        validationRules: {
+          required: isRequired,
+          ...(inputType === "text" && enableRegex ? { regexType } : {}),
+        },
       };
 
       if (inputType === "dropdown") {
@@ -167,6 +177,46 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
                 {t("allowMultiple")}
               </Label>
             </div>
+          )}
+
+          {inputType === "text" && (
+            <>
+              <div className="flex items-center gap-2">
+                <input
+                  title="Enable regex validation"
+                  type="checkbox"
+                  id="enableRegex"
+                  checked={enableRegex}
+                  onChange={(e) => setEnableRegex(e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="enableRegex" className="cursor-pointer">
+                  {t("enableRegex")}
+                </Label>
+              </div>
+
+              <div className="space-y-2">
+                <Label className={!enableRegex ? "text-muted-foreground" : ""}>
+                  {t("regexType")}
+                </Label>
+                <Select
+                  value={regexType}
+                  onValueChange={(v) => setRegexType(v as "email" | "phone" | "name")}
+                  disabled={!enableRegex}
+                >
+                  <SelectTrigger className={!enableRegex ? "opacity-50 cursor-not-allowed" : ""}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(["email", "phone", "name"] as const).map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {t(`regexTypes.${type}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
           )}
 
           {inputType === "dropdown" && (

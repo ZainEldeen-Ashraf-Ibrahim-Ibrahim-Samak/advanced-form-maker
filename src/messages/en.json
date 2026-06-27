@@ -190,6 +190,7 @@
     "activeForm": "Active",
     "inactiveForm": "Inactive",
     "setActive": "Set as Active",
+    "copyForm": "Copy Form",
     "fieldCount": "{count} fields",
     "submissionCount": "{count} submissions",
     "noForms": "No forms created yet",
@@ -226,6 +227,13 @@
     "isRequired": "Required field",
     "sortOrder": "Sort Order",
     "allowMultiple": "Allow Multiple Values (Gallery/List)",
+    "enableRegex": "Enable Regex Validation",
+    "regexType": "Regex Type",
+    "regexTypes": {
+      "email": "Email",
+      "phone": "Phone",
+      "name": "Name"
+    },
     "cameraCapture": "Camera Capture",
     "contactRecordsTitle": "Default Contact Records",
     "addContactRecord": "Add Contact",

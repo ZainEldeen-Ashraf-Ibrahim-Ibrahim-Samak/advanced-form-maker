@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, FileText, Trash2, Settings, Share2, Pencil, ExternalLink, Users } from "lucide-react";
+import { Plus, FileText, Trash2, Settings, Share2, Pencil, ExternalLink, Users, Copy } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { useLocale } from "next-intl";
@@ -26,7 +26,8 @@ export function FormManager() {
   const ts = useTranslations("sharing");
   const tAi = useTranslations("aiExtraction");
   const locale = useLocale();
-  const { forms, isLoading, createForm, updateForm, deleteForm } = useFormManager();
+  const { forms, isLoading, createForm, copyForm, updateForm, deleteForm } = useFormManager();
+  const [copyingFormId, setCopyingFormId] = useState<string | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newFormName, setNewFormName] = useState("");
   const [newFormDesc, setNewFormDesc] = useState("");
@@ -113,6 +114,18 @@ export function FormManager() {
       toast.success(tc("success"));
     } else {
       toast.error(result.error || tc("error"));
+    }
+  }
+
+  async function handleCopy(id: string) {
+    setCopyingFormId(id);
+    try {
+      await copyForm(id);
+      toast.success(tc("success"));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : tc("error"));
+    } finally {
+      setCopyingFormId(null);
     }
   }
 
@@ -235,6 +248,19 @@ export function FormManager() {
                     title={tc("edit") || "Edit"}
                   >
                     <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleCopy(form.id)}
+                    title={t("copyForm")}
+                    disabled={copyingFormId === form.id}
+                  >
+                    {copyingFormId === form.id ? (
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
                   </Button>
                   <Button
                     variant="ghost"
