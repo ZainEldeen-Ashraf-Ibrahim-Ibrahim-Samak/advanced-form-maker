@@ -208,21 +208,24 @@ function ContactFormFieldRow({
               {tc("required")}
             </Label>
           </div>
-
-          {(field.key === "email" || field.key === "phone" || field.key === "name") && (
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id={`contact-regex-${field.id}`}
-                checked={field.regexEnabled ?? false}
-                onCheckedChange={(checked) => onUpdate(field.id, { regexEnabled: checked === true })}
-                disabled={disabled}
-              />
-              <Label htmlFor={`contact-regex-${field.id}`} className="text-sm">
-                {t("enableRegex")}
-              </Label>
-            </div>
-          )}
         </div>
+
+        {(field.key === "email" || field.key === "phone" || field.key === "name") && (
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id={`contact-regex-${field.id}`}
+              checked={!!field.regexEnabled}
+              onChange={(e) => onUpdate(field.id, { regexEnabled: e.target.checked })}
+              disabled={disabled}
+              className="rounded"
+            />
+            <Label htmlFor={`contact-regex-${field.id}`} className="text-sm cursor-pointer">
+              {t("enableRegex")}
+            </Label>
+          </div>
+        )}
+
       </CardContent>
     </Card>
   );
