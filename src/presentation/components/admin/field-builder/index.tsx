@@ -47,6 +47,7 @@ function areContactFormFieldsEqual(a: ContactFormFieldDraft[], b: ContactFormFie
       field.placeholderAr === other.placeholderAr &&
       field.placeholder === other.placeholder &&
       field.required === other.required &&
+      field.regexEnabled === other.regexEnabled &&
       field.sortOrder === other.sortOrder
     );
   });
@@ -207,6 +208,20 @@ function ContactFormFieldRow({
               {tc("required")}
             </Label>
           </div>
+
+          {(field.key === "email" || field.key === "phone" || field.key === "name") && (
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id={`contact-regex-${field.id}`}
+                checked={field.regexEnabled ?? false}
+                onCheckedChange={(checked) => onUpdate(field.id, { regexEnabled: checked === true })}
+                disabled={disabled}
+              />
+              <Label htmlFor={`contact-regex-${field.id}`} className="text-sm">
+                {t("enableRegex")}
+              </Label>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

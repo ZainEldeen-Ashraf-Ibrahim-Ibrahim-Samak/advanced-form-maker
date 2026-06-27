@@ -178,18 +178,18 @@ export function ContactRecords({
                 />
               )}
 
-              {!disabled && field.key === "email" && (
+              {!disabled && field.key === "email" && field.regexEnabled && (
                 <EmailRegix email={fieldValue} showTypoSuggestions={true} />
               )}
 
-              {!disabled && field.key === "phone" && (
+              {!disabled && field.key === "phone" && field.regexEnabled && (
                 <PhoneRegix
                   number={fieldValue}
                   setNumber={(value) => updateFieldValue(field, value)}
                 />
               )}
 
-              {!disabled && field.key === "name" && (
+              {!disabled && field.key === "name" && field.regexEnabled && (
                 <NameRegix name={fieldValue} />
               )}
 

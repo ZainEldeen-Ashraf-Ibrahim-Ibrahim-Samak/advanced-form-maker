@@ -14,6 +14,7 @@ export interface ContactFormField {
   placeholderAr: string;
   placeholder: string;
   required: boolean;
+  regexEnabled?: boolean;
   sortOrder: number;
 }
 
