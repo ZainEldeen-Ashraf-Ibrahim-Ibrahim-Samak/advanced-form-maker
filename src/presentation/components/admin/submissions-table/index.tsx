@@ -436,16 +436,8 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
                   </TableCell>
                   <TableCell className="font-medium group-hover:text-primary transition-colors wrap-break-word">
                     <div>
-                      {sub.clientName
-                        ? sub.clientName
-                        : <span className="italic text-muted-foreground font-normal">{t("unnamedSubmission")}</span>
-                      }
+                      {sub.clientName || contactSummary.name || <span className="italic text-muted-foreground font-normal">{t("unnamedSubmission")}</span>}
                     </div>
-                    {contactSummary.name && (
-                      <div className="mt-0.5 text-xs text-muted-foreground font-normal">
-                        {contactSummary.name}
-                      </div>
-                    )}
                     <div className="mt-1 text-xs text-muted-foreground font-normal md:hidden">
                       {t("formName")}: {formName}
                     </div>

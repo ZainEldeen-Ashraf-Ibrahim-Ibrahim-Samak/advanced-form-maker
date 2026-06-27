@@ -125,9 +125,15 @@ export async function GET(req: Request) {
       const FieldValue = mongoose.model("FieldValue");
       const FormTemplate = mongoose.model("FormTemplate");
 
+      const submissionIds = data.map((doc: any) => doc._id);
+      const formIdStrings = Array.from(new Set(data.map((doc: any) => doc.formTemplateId?.toString()).filter(Boolean)));
+      const formObjectIds = formIdStrings.map((id) => {
+        try { return new mongoose.Types.ObjectId(id); } catch { return id; }
+      });
+
       const [fieldValues, templates] = await Promise.all([
-        FieldValue.find({}).lean().exec(),
-        FormTemplate.find({}).lean().exec(),
+        FieldValue.find({ submissionId: { $in: submissionIds } }).lean().exec(),
+        FormTemplate.find({ _id: { $in: formObjectIds } }).lean().exec(),
       ]);
 
       const templatesMap = new Map(templates.map((t: any) => [t._id.toString(), t.name]));
@@ -142,47 +148,47 @@ export async function GET(req: Request) {
       }
 
       // Determine export title based on form template name
-      const uniqueFormIds = Array.from(
-        new Set(data.map((doc: any) => doc.formTemplateId?.toString()).filter(Boolean))
-      );
-      if (uniqueFormIds.length === 1) {
-        exportTitle = templatesMap.get(uniqueFormIds[0]) || "Submissions";
+      if (formIdStrings.length === 1) {
+        exportTitle = templatesMap.get(formIdStrings[0]) || "Submissions";
       } else {
         exportTitle = "Submissions";
       }
 
       flattenedData = data.map((doc: any, index: number) => {
-        const { _id, __v, ...rest } = doc;
-        const flat: Record<string, any> = {};
-
-        // Merge Form Template Name
+        const docIdStr = doc._id.toString();
         const templateIdStr = doc.formTemplateId?.toString();
-        flat["Form Template"] = templatesMap.get(templateIdStr) || "—";
+        const primaryRecord = doc.contactRecords?.[0];
 
-        // Flatten normal submission fields
-        for (const [key, value] of Object.entries(rest)) {
-          Object.assign(flat, flattenNestedData(value, key));
-        }
+        // Build clean readable row
+        const row: Record<string, any> = {
+          "#": index + 1,
+          "Form": templatesMap.get(templateIdStr) || "—",
+          "Client Name": doc.clientName || "—",
+          "Contact Name": primaryRecord?.name || "—",
+          "Contact Email": primaryRecord?.email || "—",
+          "Contact Phone": primaryRecord?.phone || doc.clientContact || "—",
+          "Contact Address": primaryRecord?.contact || "—",
+          "Contact Role": primaryRecord?.role || "—",
+          "Contact Notes": primaryRecord?.notes || "—",
+          "Status": doc.status || "—",
+          "Submitted At": doc.submittedAt ? new Date(doc.submittedAt).toISOString() : "—",
+          "Last Updated": doc.updatedAt ? new Date(doc.updatedAt).toISOString() : "—",
+        };
 
-        // Merge custom field values
-        const docIdStr = _id.toString();
+        // Append custom field values as named columns
         const customFields = fieldValuesBySubmission.get(docIdStr) || [];
         for (const fv of customFields) {
           const columnName = fv.fieldNameSnapshot || `Field_${fv.fieldDefinitionId}`;
           if (fv.mediaUrl) {
-            flat[columnName] = fv.mediaUrl;
+            row[columnName] = fv.mediaUrl;
           } else if (fv.mediaItems && fv.mediaItems.length > 0) {
-            flat[columnName] = fv.mediaItems.map((item: any) => item.url).join(", ");
+            row[columnName] = fv.mediaItems.map((item: any) => item.url).join(", ");
           } else {
-            flat[columnName] = fv.value !== undefined && fv.value !== null ? String(fv.value) : "";
+            row[columnName] = fv.value !== undefined && fv.value !== null ? String(fv.value) : "";
           }
         }
 
-        return { 
-          "#": index + 1,
-          id: docIdStr, 
-          ...flat 
-        };
+        return row;
       });
     } else {
       // General flattening for other collections
