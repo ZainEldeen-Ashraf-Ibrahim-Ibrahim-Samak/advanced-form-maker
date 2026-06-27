@@ -30,10 +30,10 @@ export async function POST(_request: Request, { params }: { params: Promise<{ fo
     const sourceFields = await fieldRepo.findByFormId(formId, true);
 
     // Create the new form with " - copy" appended to the name
-    const newForm = await formsUseCase.createForm(
-      `${sourceForm.name} - copy`,
-      sourceForm.description
-    );
+    const newForm = await formsUseCase.createForm({
+      name: `${sourceForm.name} - copy`,
+      description: sourceForm.description,
+    });
 
     // Copy all fields into the new form, preserving sort order
     for (const field of sourceFields) {
