@@ -105,6 +105,7 @@ export function normalizeContactFormFields(fields: unknown): ContactFormField[] 
         placeholderAr,
         placeholder: placeholderEn,
         required: Boolean(candidate.required),
+        regexEnabled: candidate.regexEnabled === true,
         sortOrder: Number.isInteger(sortOrderValue) ? sortOrderValue : index,
       };
     })

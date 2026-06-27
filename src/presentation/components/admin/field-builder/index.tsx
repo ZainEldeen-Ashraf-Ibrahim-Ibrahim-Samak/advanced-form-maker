@@ -445,6 +445,7 @@ export function FieldBuilder({ formTemplateId }: FieldBuilderProps) {
                 placeholderAr: nextPlaceholderAr,
                 placeholder: patch.placeholder ?? nextPlaceholderEn,
                 required: patch.required ?? field.required,
+                regexEnabled: patch.regexEnabled ?? field.regexEnabled,
               };
             })()
           : field,
