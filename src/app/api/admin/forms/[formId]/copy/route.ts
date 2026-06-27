@@ -33,9 +33,20 @@ export async function POST(_request: Request, { params }: { params: Promise<{ fo
     const newForm = await formsUseCase.createForm({
       name: `${sourceForm.name} - copy`,
       description: sourceForm.description,
+      aiAutoFillEnabled: sourceForm.aiAutoFillEnabled,
+      isContactForm: sourceForm.isContactForm,
     });
 
-    // Copy all fields into the new form, preserving sort order
+    // Copy all form settings (contact fields, contact records, locks, etc.)
+    await formsUseCase.updateForm(newForm.id, {
+      contactRecords: sourceForm.contactRecords,
+      contactFormFields: sourceForm.contactFormFields,
+      contactFormLocked: sourceForm.contactFormLocked,
+      canAddMoreReplies: sourceForm.canAddMoreReplies,
+      isLocked: false, // new copy starts unlocked
+    });
+
+    // Copy all field definitions preserving sort order
     for (const field of sourceFields) {
       await fieldRepo.create({
         formTemplateId: newForm.id,
