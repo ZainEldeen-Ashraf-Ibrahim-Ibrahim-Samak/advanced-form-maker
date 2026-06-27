@@ -216,7 +216,8 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
             errors.contactRecords = true;
             isValid = false;
           }
-          if (primaryContact.name && !NAME_REGEX.test(primaryContact.name)) {
+          const nameField = contactFormFields.find(f => f.key === "name");
+          if (nameField?.regexEnabled && primaryContact.name && !NAME_REGEX.test(primaryContact.name)) {
             errors.contactRecords = true;
             isValid = false;
           }

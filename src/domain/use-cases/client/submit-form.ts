@@ -218,7 +218,8 @@ export class SubmitFormUseCase {
       if (contact.phone && !PHONE_REGEX.test(contact.phone)) {
         return { success: false, error: "Invalid contact phone format" };
       }
-      if (contact.name && !NAME_REGEX.test(contact.name)) {
+      const nameFieldRegex = activeForm.contactFormFields.find(f => f.key === "name")?.regexEnabled;
+      if (nameFieldRegex && contact.name && !NAME_REGEX.test(contact.name)) {
         return { success: false, error: "Invalid contact name format" };
       }
       if (contact.contact && !TEXT_REGEX.test(contact.contact)) {
