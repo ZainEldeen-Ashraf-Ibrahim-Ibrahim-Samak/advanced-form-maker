@@ -365,6 +365,9 @@ export class SubmitFormUseCase {
       return { success: false, error: "At least one contact record is required" };
     }
 
+    const resubmitForm = await this.formTemplateRepo.findById(submission.formTemplateId);
+    const resubmitNameFieldRegex = resubmitForm?.contactFormFields.find(f => f.key === "name")?.regexEnabled;
+
     for (const contact of normalizedContacts) {
       if (contact.email && !EMAIL_REGEX.test(contact.email)) {
         return { success: false, error: "Invalid contact email format" };
@@ -372,7 +375,7 @@ export class SubmitFormUseCase {
       if (contact.phone && !PHONE_REGEX.test(contact.phone)) {
         return { success: false, error: "Invalid contact phone format" };
       }
-      if (contact.name && !NAME_REGEX.test(contact.name)) {
+      if (resubmitNameFieldRegex && contact.name && !NAME_REGEX.test(contact.name)) {
         return { success: false, error: "Invalid contact name format" };
       }
       if (contact.contact && !TEXT_REGEX.test(contact.contact)) {
