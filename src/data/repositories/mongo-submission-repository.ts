@@ -10,6 +10,7 @@ import { logger } from "@/lib/dev-logger";
 import { NotificationPublisher } from "@/lib/events/publisher";
 
 const RESUBMISSION_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+const DEFAULT_CONTACT_NAME = "Primary Contact";
 
 function isSubmissionEntity(value: unknown): value is Submission {
   if (!value || typeof value !== "object") return false;
@@ -34,7 +35,7 @@ function normalizeContactRecords(records: unknown): Submission["contactRecords"]
     if (!id) return null;
     return {
       id,
-      name,
+      name: name || DEFAULT_CONTACT_NAME,
       email: typeof candidate.email === "string" ? candidate.email : "",
       phone: typeof candidate.phone === "string" ? candidate.phone : "",
       contact: typeof candidate.contact === "string" ? candidate.contact : "",
