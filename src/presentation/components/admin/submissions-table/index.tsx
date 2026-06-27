@@ -40,11 +40,12 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
 
   const getContactSummary = (submission: Submission) => {
     if (contactFormLockedByFormId[submission.formTemplateId]) {
-      return { email: null, phone: null, address: null };
+      return { name: null, email: null, phone: null, address: null };
     }
 
     const fromContactRecords = submission.contactRecords.find((record) => {
       return (
+        normalizeContactValue(record.name) ||
         normalizeContactValue(record.email) ||
         normalizeContactValue(record.phone) ||
         normalizeContactValue(record.contact)
@@ -53,6 +54,7 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
 
     if (fromContactRecords) {
       return {
+        name: normalizeContactValue(fromContactRecords.name),
         email: normalizeContactValue(fromContactRecords.email),
         phone: normalizeContactValue(fromContactRecords.phone),
         address: normalizeContactValue(fromContactRecords.contact),
@@ -62,6 +64,7 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
     const fromLegacyContact = normalizeContactValue(submission.clientContact);
 
     return {
+      name: null,
       email: null,
       phone: fromLegacyContact,
       address: null,
@@ -438,6 +441,11 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
                         : <span className="italic text-muted-foreground font-normal">{t("unnamedSubmission")}</span>
                       }
                     </div>
+                    {contactSummary.name && (
+                      <div className="mt-0.5 text-xs text-muted-foreground font-normal">
+                        {contactSummary.name}
+                      </div>
+                    )}
                     <div className="mt-1 text-xs text-muted-foreground font-normal md:hidden">
                       {t("formName")}: {formName}
                     </div>
