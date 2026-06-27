@@ -436,7 +436,12 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
                   </TableCell>
                   <TableCell className="font-medium group-hover:text-primary transition-colors wrap-break-word">
                     <div>
-                      {sub.clientName || contactSummary.name || <span className="italic text-muted-foreground font-normal">{t("unnamedSubmission")}</span>}
+                      {(() => {
+                        const contactName = sub.contactRecords
+                          ?.map(r => (r.name ?? "").trim())
+                          .find(n => n.length > 0);
+                        return sub.clientName || contactName || <span className="italic text-muted-foreground font-normal">{t("unnamedSubmission")}</span>;
+                      })()}
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground font-normal md:hidden">
                       {t("formName")}: {formName}
