@@ -188,7 +188,6 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
         errors.contactRecords = true;
         isValid = false;
       } else {
-        const primaryContact = contactRecords[0];
         const hasMissingRequiredContactField = contactFormFields.some((field) => {
           if (!field.required) return false;
 
@@ -201,28 +200,36 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
                   ? primaryContact.phone
                   : primaryContact.address;
 
-          return String(value ?? "").trim().length === 0;
+          const isMissing = String(value ?? "").trim().length === 0;
+          if (isMissing) {
+            errors[`contact_${field.key}`] = true;
+          }
+          return isMissing;
         });
 
         if (hasMissingRequiredContactField) {
           errors.contactRecords = true;
           isValid = false;
         } else {
-          if (primaryContact.email && !EMAIL_REGEX.test(primaryContact.email)) {
+          const getField = (key: string) => contactFormFields.find(f => f.key === key);
+          if (getField("email")?.regexEnabled && primaryContact.email && !EMAIL_REGEX.test(primaryContact.email)) {
             errors.contactRecords = true;
+            errors.contact_email = true;
             isValid = false;
           }
-          if (primaryContact.phone && !PHONE_REGEX.test(primaryContact.phone)) {
+          if (getField("phone")?.regexEnabled && primaryContact.phone && !PHONE_REGEX.test(primaryContact.phone)) {
             errors.contactRecords = true;
+            errors.contact_phone = true;
             isValid = false;
           }
-          const nameField = contactFormFields.find(f => f.key === "name");
-          if (nameField?.regexEnabled && primaryContact.name && !NAME_REGEX.test(primaryContact.name)) {
+          if (getField("name")?.regexEnabled && primaryContact.name && !NAME_REGEX.test(primaryContact.name)) {
             errors.contactRecords = true;
+            errors.contact_name = true;
             isValid = false;
           }
-          if (primaryContact.address && !TEXT_REGEX.test(primaryContact.address)) {
+          if (getField("address")?.regexEnabled && primaryContact.address && !TEXT_REGEX.test(primaryContact.address)) {
             errors.contactRecords = true;
+            errors.contact_address = true;
             isValid = false;
           }
         }
@@ -395,15 +402,24 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
                 records={contactRecords}
                 disabled={isViewOnly || isSubmitting}
                 showValidation={!!validationErrors.contactRecords}
+                validationErrors={validationErrors}
                 autoFilledKeys={autoFilledKeys}
                 onUpdate={(id, patch) => {
                   updateContactRecord(id, patch);
                   Object.keys(patch).forEach((key) => {
                     clearAutoFillContactIndicator(key);
                   });
-                  if (validationErrors.contactRecords) {
-                    setValidationErrors((prev) => ({ ...prev, contactRecords: false }));
-                  }
+                  setValidationErrors((prev) => {
+                    const next = { ...prev };
+                    Object.keys(patch).forEach((key) => {
+                      delete next[`contact_${key}`];
+                    });
+                    const hasContactErrors = Object.keys(next).some((k) => k.startsWith("contact_"));
+                    if (!hasContactErrors) {
+                      next.contactRecords = false;
+                    }
+                    return next;
+                  });
                 }}
               />
             )}

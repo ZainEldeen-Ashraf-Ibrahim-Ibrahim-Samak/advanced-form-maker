@@ -17,6 +17,7 @@ interface ContactRecordsProps {
   records: ContactRecordDraft[];
   disabled?: boolean;
   showValidation?: boolean;
+  validationErrors?: Record<string, boolean>;
   onUpdate: (id: string, patch: Partial<Omit<ContactRecordDraft, "id">>) => void;
   autoFilledKeys?: Set<string>;
 }
@@ -27,6 +28,7 @@ export function ContactRecords({
   records,
   disabled = false,
   showValidation = false,
+  validationErrors = {},
   onUpdate,
   autoFilledKeys = new Set(),
 }: ContactRecordsProps) {
@@ -153,6 +155,7 @@ export function ContactRecords({
         {orderedFields.map((field) => {
           const fieldValue = getFieldValue(field);
           const isValidText = fieldValue.length === 0 || TEXT_REGEX.test(fieldValue);
+          const hasError = !!validationErrors[`contact_${field.key}`];
 
           return (
             <div
@@ -174,8 +177,16 @@ export function ContactRecords({
                   placeholder={getLocalizedPlaceholder(field)}
                   disabled={disabled}
                   required={field.required}
-                  className={autoFilledKeys.has(field.key) ? "border-primary/50 focus-visible:ring-primary/50 ring-1 ring-primary/20" : ""}
+                  className={`${
+                    autoFilledKeys.has(field.key) ? "border-primary/50 focus-visible:ring-primary/50 ring-1 ring-primary/20" : ""
+                  } ${
+                    hasError ? "border-destructive focus-visible:ring-destructive" : ""
+                  }`}
                 />
+              )}
+
+              {hasError && (
+                <p className="text-xs text-destructive mt-0.5">{t("fieldRequired")}</p>
               )}
 
               {!disabled && field.key === "email" && field.regexEnabled && (

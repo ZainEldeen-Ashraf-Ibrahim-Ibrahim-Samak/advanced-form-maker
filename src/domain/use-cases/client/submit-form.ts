@@ -211,18 +211,18 @@ export class SubmitFormUseCase {
       return { success: false, error: "At least one contact record is required" };
     }
 
+    const getContactFieldSubmit = (key: string) => activeForm.contactFormFields.find(f => f.key === key);
     for (const contact of normalizedContacts) {
-      if (contact.email && !EMAIL_REGEX.test(contact.email)) {
+      if (getContactFieldSubmit("email")?.regexEnabled && contact.email && !EMAIL_REGEX.test(contact.email)) {
         return { success: false, error: "Invalid contact email format" };
       }
-      if (contact.phone && !PHONE_REGEX.test(contact.phone)) {
+      if (getContactFieldSubmit("phone")?.regexEnabled && contact.phone && !PHONE_REGEX.test(contact.phone)) {
         return { success: false, error: "Invalid contact phone format" };
       }
-      const nameFieldRegex = activeForm.contactFormFields.find(f => f.key === "name")?.regexEnabled;
-      if (nameFieldRegex && contact.name && !NAME_REGEX.test(contact.name)) {
+      if (getContactFieldSubmit("name")?.regexEnabled && contact.name && !NAME_REGEX.test(contact.name)) {
         return { success: false, error: "Invalid contact name format" };
       }
-      if (contact.contact && !TEXT_REGEX.test(contact.contact)) {
+      if (getContactFieldSubmit("address")?.regexEnabled && contact.contact && !TEXT_REGEX.test(contact.contact)) {
         return { success: false, error: "Invalid contact address format" };
       }
     }
