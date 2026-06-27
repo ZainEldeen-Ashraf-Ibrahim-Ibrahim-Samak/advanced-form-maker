@@ -88,7 +88,7 @@ function toEntity(doc: Record<string, unknown>): Submission {
     id: doc._id?.toString() ?? "",
     accessToken: doc.accessToken as string,
     formTemplateId: doc.formTemplateId?.toString() ?? "",
-    clientName: (doc.clientName as string) || "Unnamed Submission",
+    clientName: (doc.clientName as string) || "",
     clientContact: (doc.clientContact as string) || "",
     status: (doc.status as Submission["status"]) || "pending",
     rewriteComment: (doc.rewriteComment as string) || "",

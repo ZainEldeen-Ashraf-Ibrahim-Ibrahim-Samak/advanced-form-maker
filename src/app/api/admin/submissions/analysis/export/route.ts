@@ -135,11 +135,12 @@ export async function GET(req: Request) {
     const rawRows: Record<string, any>[] = docs.map((sub: any, index: number) => {
       const contactRecords = sub.contactRecords || [];
       const contact = contactRecords.find((record: any) => record.email || record.phone || record.contact) || {};
-      
+      const primaryContactName = (contactRecords[0] as any)?.name || "";
+
       return {
         "#": index + 1,
         "Form Name": formNamesById[sub.formTemplateId?.toString()] || "—",
-        "Client Name": sub.clientName || "—",
+        "Client Name": sub.clientName || primaryContactName || "—",
         "Email": contact.email || "—",
         "Phone": contact.phone || sub.clientContact || "—",
         "Address": contact.contact || "—",

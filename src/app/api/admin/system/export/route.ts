@@ -163,7 +163,7 @@ export async function GET(req: Request) {
         const row: Record<string, any> = {
           "#": index + 1,
           "Form": templatesMap.get(templateIdStr) || "—",
-          "Client Name": doc.clientName || "—",
+          "Client Name": doc.clientName || primaryRecord?.name || "—",
           "Contact Name": primaryRecord?.name || "—",
           "Contact Email": primaryRecord?.email || "—",
           "Contact Phone": primaryRecord?.phone || doc.clientContact || "—",

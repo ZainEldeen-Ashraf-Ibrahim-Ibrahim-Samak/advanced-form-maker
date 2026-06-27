@@ -136,10 +136,11 @@ export async function GET(
     const rawRows = submissions.map((sub: any, index: number) => {
       const contactRecords = sub.contactRecords || [];
       const contact = contactRecords.find((record: any) => record.email || record.phone || record.contact) || {};
-      
+      const primaryContactName = contactRecords[0]?.name || "";
+
       const row: Record<string, any> = {
         "#": index + 1,
-        "Client Name": sub.clientName || "—",
+        "Client Name": sub.clientName || primaryContactName || "—",
         "Email": contact.email || "—",
         "Phone": contact.phone || sub.clientContact || "—",
         "Address": contact.contact || "—",
