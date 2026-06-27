@@ -439,8 +439,12 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
                       {(() => {
                         const contactName = sub.contactRecords
                           ?.map(r => (r.name ?? "").trim())
-                          .find(n => n.length > 0);
-                        return sub.clientName || contactName || <span className="italic text-muted-foreground font-normal">{t("unnamedSubmission")}</span>;
+                          .find(n => n.length > 0 && n !== "Primary Contact" && n !== "Unnamed Submission");
+                        const clientNameClean = (sub.clientName ?? "").trim();
+                        const displayClientName = (clientNameClean && clientNameClean !== "Primary Contact" && clientNameClean !== "Unnamed Submission")
+                          ? clientNameClean
+                          : null;
+                        return displayClientName || contactName || <span className="italic text-muted-foreground font-normal">{t("unnamedSubmission")}</span>;
                       })()}
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground font-normal md:hidden">
