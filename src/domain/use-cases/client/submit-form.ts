@@ -327,7 +327,7 @@ export class SubmitFormUseCase {
     try {
       if (redis) {
         await redis.del(`submission:${submission.id}`);
-        await redis.keys("submissions:*").then((keys) => {
+        await redis.keys("submissions:*").then((keys: string[]) => {
           if (keys && keys.length > 0 && redis) return redis.del(...keys);
         });
       }
@@ -366,19 +366,19 @@ export class SubmitFormUseCase {
     }
 
     const resubmitForm = await this.formTemplateRepo.findById(submission.formTemplateId);
-    const resubmitNameFieldRegex = resubmitForm?.contactFormFields.find(f => f.key === "name")?.regexEnabled;
+    const getResubmitContactField = (key: string) => resubmitForm?.contactFormFields.find(f => f.key === key);
 
     for (const contact of normalizedContacts) {
-      if (contact.email && !EMAIL_REGEX.test(contact.email)) {
+      if (getResubmitContactField("email")?.regexEnabled && contact.email && !EMAIL_REGEX.test(contact.email)) {
         return { success: false, error: "Invalid contact email format" };
       }
-      if (contact.phone && !PHONE_REGEX.test(contact.phone)) {
+      if (getResubmitContactField("phone")?.regexEnabled && contact.phone && !PHONE_REGEX.test(contact.phone)) {
         return { success: false, error: "Invalid contact phone format" };
       }
-      if (resubmitNameFieldRegex && contact.name && !NAME_REGEX.test(contact.name)) {
+      if (getResubmitContactField("name")?.regexEnabled && contact.name && !NAME_REGEX.test(contact.name)) {
         return { success: false, error: "Invalid contact name format" };
       }
-      if (contact.contact && !TEXT_REGEX.test(contact.contact)) {
+      if (getResubmitContactField("address")?.regexEnabled && contact.contact && !TEXT_REGEX.test(contact.contact)) {
         return { success: false, error: "Invalid contact address format" };
       }
     }
