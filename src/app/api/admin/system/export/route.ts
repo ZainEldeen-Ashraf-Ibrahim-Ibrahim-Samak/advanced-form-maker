@@ -244,7 +244,9 @@ export async function GET(req: Request) {
 
       doc.setProperties({ title: exportTitle });
       doc.setFont(fontName);
-      doc.text(exportTitle, 14, 15);
+      doc.setFontSize(16);
+      doc.text(exportTitle, 14, 18);
+      doc.setFontSize(10);
 
       const headers = Object.keys(flattenedData[0] || {});
       const pdfBody = flattenedData.map((row) => headers.map((h) => String(row[h] || "")));
@@ -252,7 +254,7 @@ export async function GET(req: Request) {
       autoTable(doc, {
         head: [headers],
         body: pdfBody,
-        startY: 20,
+        startY: 28,
         styles: { font: fontName, fontStyle: "normal", fontSize: 10 },
       });
 

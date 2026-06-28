@@ -142,7 +142,9 @@ export async function GET(req: Request) {
         isFirst = false;
 
         doc.setFont(fontName);
-        doc.text(template.name, 14, 15);
+        doc.setFontSize(16);
+        doc.text(template.name, 14, 18);
+        doc.setFontSize(10);
 
         const submissionIds = submissions.map((s: any) => s._id);
         const fieldValues = await FieldValue.find({ submissionId: { $in: submissionIds } }).lean().exec();
@@ -191,7 +193,7 @@ export async function GET(req: Request) {
         autoTable(doc, {
           head: [headers],
           body: pdfBody,
-          startY: 20,
+          startY: 28,
           styles: { font: fontName, fontStyle: "normal", fontSize: 10 },
         });
       }
