@@ -14,7 +14,7 @@ import { formatDate, buildSubmissionUrl } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
 import type { Submission } from "@/domain/entities/submission";
-import { exportToPDF, exportToJSON } from "@/lib/export";
+import { exportToJSON } from "@/lib/export";
 
 interface SubmissionsTableProps {
   submissions: Submission[];
@@ -86,7 +86,7 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
 
   const toggleSelectRow = (id: string) => {
     if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter(sId => sId !== id));
+      setSelectedIds(selectedIds.filter((sId: string) => sId !== id));
     } else {
       setSelectedIds([...selectedIds, id]);
     }
@@ -114,7 +114,7 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
     try {
       if (deleteTargetId === "MANY") {
         setIsDeletingMany(true);
-        await Promise.all(selectedIds.map(id => onDelete(id)));
+        await Promise.all(selectedIds.map((id: string) => onDelete(id)));
         toast.success(t("submissionsDeleted") || tc("deleted"));
         setSelectedIds([]);
       } else {
@@ -179,10 +179,11 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
     const filename = filenamePrefix === "all-submissions" ? `${formName || "submissions"} data` : filenamePrefix;
     const columns = getExportColumns();
 
-    // CSV and Excel export through the server-side endpoint so field values are included
-    if (format === "csv" || format === "excel") {
+    // CSV, Excel, and PDF export through the server-side endpoint so all data
+    // (custom field values, Status, Submitted At, etc.) are included
+    if (format === "csv" || format === "excel" || format === "pdf") {
       try {
-        const serverFormat = format === "excel" ? "xlsx" : "csv";
+        const serverFormat = format === "excel" ? "xlsx" : format;
         const params = new URLSearchParams({ collection: "submissions", format: serverFormat });
 
         const isSubset = data.length < submissions.length;
@@ -209,9 +210,7 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
     }
 
     try {
-      if (format === "pdf") {
-        await exportToPDF(data, filename, t("exportTitle") || "Submissions Export", columns);
-      } else if (format === "json") {
+      if (format === "json") {
         exportToJSON(data, filename, columns);
       }
       toast.success(tc("exportedSuccess") || "Exported successfully");
