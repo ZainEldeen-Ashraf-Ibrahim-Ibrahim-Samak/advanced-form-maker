@@ -61,7 +61,7 @@ async function resolveSrvUri(uri: string): Promise<string> {
   return `mongodb://${credentials}${hosts}/?${mergedParams.toString()}`;
 }
 
-async function resolveMongoUri(uri: string): Promise<string> {
+export async function resolveMongoUri(uri: string): Promise<string> {
   if (!uri.startsWith("mongodb+srv://")) return uri;
   try {
     const resolved = await resolveSrvUri(uri);

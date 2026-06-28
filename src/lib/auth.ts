@@ -41,25 +41,47 @@ class AccessDeniedError extends CredentialsSignin {
 }
 
 // MongoDB client for Auth.js adapter
-const clientPromise = (async () => {
-  try {
-    const client = new MongoClient(env.MONGODB_URI!, {
-      serverSelectionTimeoutMS: 10000,
-      connectTimeoutMS: 10000,
-      tls: true,
-      retryWrites: true,
-    });
-    await client.connect();
-    return client;
-  } catch (error) {
-    logger.error("Auth helper failed to connect to MongoDB", error);
-    throw error;
-  }
-})();
+let resolvedPromise: Promise<MongoClient> | null = null;
 
-// Suppress unhandled rejection at process level for the module-level connection attempt.
-// The error is already logged inside the IIAFE try/catch.
-clientPromise.catch(() => {});
+function getClientPromise(): Promise<MongoClient> {
+  if (resolvedPromise) {
+    return resolvedPromise;
+  }
+
+  resolvedPromise = (async () => {
+    try {
+      const { resolveMongoUri } = await import("@/lib/db");
+      const resolvedUri = await resolveMongoUri(env.MONGODB_URI!);
+      const client = new MongoClient(resolvedUri, {
+        serverSelectionTimeoutMS: 10000,
+        connectTimeoutMS: 10000,
+        tls: true,
+        retryWrites: true,
+      });
+      await client.connect();
+      return client;
+    } catch (error) {
+      logger.error("Auth helper failed to connect to MongoDB", error);
+      throw error;
+    }
+  })();
+
+  return resolvedPromise;
+}
+
+// A thenable object that acts as a lazy Promise to MongoClient.
+// This prevents Next.js from eagerly initiating a connection on file import during the build phase.
+const clientPromise = {
+  then(onfulfilled?: any, onrejected?: any) {
+    return getClientPromise().then(onfulfilled, onrejected);
+  },
+  catch(onrejected?: any) {
+    return getClientPromise().catch(onrejected);
+  },
+  finally(onfinally?: any) {
+    return getClientPromise().finally(onfinally);
+  },
+} as unknown as Promise<MongoClient>;
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: MongoDBAdapter(clientPromise),
