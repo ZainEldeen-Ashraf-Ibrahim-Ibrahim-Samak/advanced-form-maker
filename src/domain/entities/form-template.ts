@@ -40,6 +40,8 @@ export interface FormTemplate {
   contactFormLocked: boolean;
   aiAutoFillEnabled: boolean;
   canAddMoreReplies: boolean;
+  multiInstanceEnabled: boolean;
+  maxInstances: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -51,6 +53,6 @@ export type CreateFormTemplateInput = Pick<FormTemplate, "name"> & {
 };
 
 export type UpdateFormTemplateInput = Partial<
-  Pick<FormTemplate, "name" | "description" | "isActive" | "isLocked" | "contactRecords" | "contactFormFields" | "aiAutoFillEnabled" | "isContactForm" | "contactFormLocked" | "canAddMoreReplies">
+  Pick<FormTemplate, "name" | "description" | "isActive" | "isLocked" | "contactRecords" | "contactFormFields" | "aiAutoFillEnabled" | "isContactForm" | "contactFormLocked" | "canAddMoreReplies" | "multiInstanceEnabled" | "maxInstances">
 >;
 

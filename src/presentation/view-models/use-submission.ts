@@ -249,6 +249,8 @@ interface UseSubmissionReturn {
   statusChangedLive: boolean;
   aiAutoFillEnabled: boolean;
   canAddMoreReplies: boolean;
+  multiInstanceEnabled: boolean;
+  maxInstances: number | null;
   formTemplateId: string | null;
 }
 
@@ -275,6 +277,8 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
   const [statusChangedLive, setStatusChangedLive] = useState(false);
   const [aiAutoFillEnabled, setAiAutoFillEnabled] = useState(false);
   const [canAddMoreReplies, setCanAddMoreReplies] = useState(false);
+  const [multiInstanceEnabled, setMultiInstanceEnabled] = useState(false);
+  const [maxInstances, setMaxInstances] = useState<number | null>(null);
   const [formTemplateId, setFormTemplateId] = useState<string | null>(null);
 
 
@@ -446,6 +450,8 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
         setContactFormLocked(!!data.formTemplate?.contactFormLocked);
         setAiAutoFillEnabled(!!data.formTemplate?.aiAutoFillEnabled);
         setCanAddMoreReplies(!!data.formTemplate?.canAddMoreReplies);
+        setMultiInstanceEnabled(!!data.formTemplate?.multiInstanceEnabled);
+        setMaxInstances(data.formTemplate?.maxInstances ?? null);
         setFormTemplateId(data.formTemplate?.id ?? null);
         formVersionRef.current = nextFormVersion;
         
@@ -470,6 +476,8 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
         setContactFormLocked(!!data.formTemplate?.contactFormLocked);
         setAiAutoFillEnabled(!!data.formTemplate?.aiAutoFillEnabled);
         setCanAddMoreReplies(!!data.formTemplate?.canAddMoreReplies);
+        setMultiInstanceEnabled(!!data.formTemplate?.multiInstanceEnabled);
+        setMaxInstances(data.formTemplate?.maxInstances ?? null);
         setFormTemplateId(data.formTemplate?.id ?? data.submission?.formTemplateId ?? null);
 
         // Existing submissions should reflect DB state after reload/admin updates.
@@ -805,6 +813,8 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
     statusChangedLive,
     aiAutoFillEnabled,
     canAddMoreReplies,
+    multiInstanceEnabled,
+    maxInstances,
     formTemplateId,
   };
 }

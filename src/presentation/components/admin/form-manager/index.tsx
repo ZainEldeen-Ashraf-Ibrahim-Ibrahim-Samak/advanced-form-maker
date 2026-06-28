@@ -41,6 +41,8 @@ export function FormManager() {
   const [editFormAiAutoFillEnabled, setEditFormAiAutoFillEnabled] = useState(false);
   const [editFormIsLocked, setEditFormIsLocked] = useState(false);
   const [editFormCanAddMoreReplies, setEditFormCanAddMoreReplies] = useState(false);
+  const [editFormMultiInstanceEnabled, setEditFormMultiInstanceEnabled] = useState(false);
+  const [editFormMaxInstances, setEditFormMaxInstances] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
   // Share Dialog State
@@ -75,6 +77,8 @@ export function FormManager() {
     setEditFormAiAutoFillEnabled(form.aiAutoFillEnabled || false);
     setEditFormIsLocked(form.isLocked || false);
     setEditFormCanAddMoreReplies(form.canAddMoreReplies || false);
+    setEditFormMultiInstanceEnabled(form.multiInstanceEnabled || false);
+    setEditFormMaxInstances(form.maxInstances ?? null);
     setIsEditOpen(true);
   }
 
@@ -88,6 +92,8 @@ export function FormManager() {
         aiAutoFillEnabled: editFormAiAutoFillEnabled,
         isLocked: editFormIsLocked,
         canAddMoreReplies: editFormCanAddMoreReplies,
+        multiInstanceEnabled: editFormMultiInstanceEnabled,
+        maxInstances: editFormMaxInstances,
       });
       setIsEditOpen(false);
       setEditingFormId(null);
@@ -388,6 +394,44 @@ export function FormManager() {
                 onCheckedChange={setEditFormCanAddMoreReplies}
               />
             </div>
+            <div className="flex items-center justify-between rounded-lg border border-zinc-200 dark:border-zinc-800 p-3 shadow-sm bg-zinc-50/50 dark:bg-zinc-900/50">
+              <div className="space-y-0.5 max-w-[80%]">
+                <Label htmlFor="edit-form-multi-instance" className="text-sm font-semibold cursor-pointer">
+                  {t("multiInstanceEnabled")}
+                </Label>
+                <p className="text-[11px] text-muted-foreground leading-normal">
+                  {t("multiInstanceEnabledDesc")}
+                </p>
+              </div>
+              <Switch
+                id="edit-form-multi-instance"
+                checked={editFormMultiInstanceEnabled}
+                onCheckedChange={(checked) => {
+                  setEditFormMultiInstanceEnabled(checked);
+                  if (!checked) setEditFormMaxInstances(null);
+                }}
+              />
+            </div>
+            {editFormMultiInstanceEnabled && (
+              <div className="space-y-2 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3 shadow-sm bg-zinc-50/50 dark:bg-zinc-900/50">
+                <Label htmlFor="edit-form-max-instances" className="text-sm font-semibold">
+                  {t("maxInstances")}
+                </Label>
+                <Input
+                  id="edit-form-max-instances"
+                  type="number"
+                  min={1}
+                  max={50}
+                  placeholder={t("maxInstancesLabel")}
+                  value={editFormMaxInstances ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value ? parseInt(e.target.value, 10) : null;
+                    setEditFormMaxInstances(val);
+                  }}
+                  className="w-full"
+                />
+              </div>
+            )}
             <Button
               onClick={handleUpdate}
               disabled={!editFormName.trim() || isEditing}

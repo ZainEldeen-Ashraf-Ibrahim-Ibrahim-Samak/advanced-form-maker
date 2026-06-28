@@ -22,4 +22,5 @@ export interface ExtractionResult {
   contactData: ExtractedContactData;
   fieldValues: Record<string, ExtractedFieldValue>;
   errorMessage?: string | null;
+  records?: ExtractionResult[];
 }

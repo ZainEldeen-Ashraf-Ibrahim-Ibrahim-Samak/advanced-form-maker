@@ -98,6 +98,7 @@ function toEntity(doc: Record<string, unknown>): Submission {
     resubmissionRequest: normalizeResubmissionRequest(doc.resubmissionRequest),
     submittedAt: isNaN(submittedAtRaw) || submittedAtRaw === 0 ? new Date() : new Date(submittedAtRaw),
     lastResubmittedAt: isNaN(lastResubmittedAtRaw) || lastResubmittedAtRaw === 0 ? null : new Date(lastResubmittedAtRaw),
+    sessionId: (doc.sessionId as string) || null,
     updatedAt: isNaN(updatedAtRaw) || updatedAtRaw === 0 ? new Date() : new Date(updatedAtRaw),
   };
 }

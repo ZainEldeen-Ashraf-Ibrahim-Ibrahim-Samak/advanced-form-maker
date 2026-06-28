@@ -51,6 +51,9 @@ interface UseAiExtractionParams {
   onApplyField: (fieldId: string, value: string | number) => void;
   onApplyContact: (key: string, value: string) => void;
   locale: "en" | "ar";
+  multiInstanceEnabled?: boolean;
+  maxInstances?: number | null;
+  onApplyMultipleRecords?: (records: ExtractionResult[]) => void;
 }
 
 export function useAiExtraction({
@@ -61,6 +64,9 @@ export function useAiExtraction({
   onApplyField,
   onApplyContact,
   locale,
+  multiInstanceEnabled = false,
+  maxInstances = null,
+  onApplyMultipleRecords,
 }: UseAiExtractionParams) {
   const [isExtracting, setIsExtracting] = useState(false);
   const [stage, setStage] = useState<ExtractionStage>("idle");
@@ -248,6 +254,8 @@ export function useAiExtraction({
           fieldDefinitions: cleanFieldDefs,
           contactFields: cleanContactFields,
           locale,
+          multiInstanceEnabled,
+          maxInstances,
         }),
       });
 
@@ -262,6 +270,13 @@ export function useAiExtraction({
       
       if (result.status === "failure") {
         throw new Error("notADocument");
+      }
+
+      if (multiInstanceEnabled && result.records && result.records.length > 0 && onApplyMultipleRecords) {
+        onApplyMultipleRecords(result.records);
+        setStage("success");
+        setIsExtracting(false);
+        return;
       }
 
       // 7. Check for overwrite conditions

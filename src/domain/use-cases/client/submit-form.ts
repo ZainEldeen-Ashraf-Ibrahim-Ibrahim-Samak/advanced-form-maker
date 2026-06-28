@@ -15,6 +15,7 @@ import { sanitizeInput } from "@/lib/utils/sanitize";
 interface SubmitFormData {
   clientName: string;
   clientContact?: string;
+  sessionId?: string | null;
   contactRecords: Array<{
     id: string;
     name?: string | null;
@@ -291,6 +292,7 @@ export class SubmitFormUseCase {
         clientContact: data.clientContact || "",
         contactRecords: normalizedContacts,
         formSnapshot: activeFields,
+        sessionId: data.sessionId || null,
       },
       token
     );

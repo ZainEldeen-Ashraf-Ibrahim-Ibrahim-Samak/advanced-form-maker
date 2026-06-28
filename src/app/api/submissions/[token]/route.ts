@@ -204,6 +204,7 @@ export async function POST(
       clientContact: parsed.data.clientContact,
       contactRecords: parsed.data.contactRecords,
       fieldValues: parsed.data.fieldValues,
+      sessionId: parsed.data.sessionId,
     }, {
       tokenOrFormId: token,
     });

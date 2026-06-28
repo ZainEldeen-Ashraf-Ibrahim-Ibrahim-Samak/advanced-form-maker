@@ -62,6 +62,7 @@ export interface Submission {
   resubmissionRequest?: ResubmissionRequest | null;
   submittedAt: Date;
   lastResubmittedAt?: Date | null;
+  sessionId: string | null;
   updatedAt: Date;
 }
 
@@ -72,7 +73,9 @@ export type CreateSubmissionInput = Pick<
   | "contactRecords"
   | "formTemplateId"
   | "formSnapshot"
->;
+> & {
+  sessionId?: string | null;
+};
 
 export type UpdateSubmissionStatusInput = {
   status: SubmissionStatus;

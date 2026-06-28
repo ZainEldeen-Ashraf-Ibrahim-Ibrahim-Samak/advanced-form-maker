@@ -205,6 +205,10 @@
     "lockFormDesc": "Prevent new submissions while keeping the form visible.",
     "canAddMoreReplies": "Allow New Answers",
     "canAddMoreRepliesDesc": "Show a 'New Answer' button after submission so the same user can submit another response to this form.",
+    "multiInstanceEnabled": "Allow Multiple Submissions per Session",
+    "multiInstanceEnabledDesc": "Allow clients to fill and submit multiple records in a single session.",
+    "maxInstances": "Max Instances",
+    "maxInstancesLabel": "Maximum Instances per Session (1-50, leave empty for unlimited)",
     "editForm": "Edit Form",
     "isContactForm": "This is the contact form",
     "isContactFormDesc": "Designate this form as the designated contact form.",
@@ -322,6 +326,7 @@
     "contactRole": "Role",
     "contactNotes": "Notes",
     "submittedAt": "Submitted",
+    "sessionId": "Session ID",
     "lastResubmittedAt": "Last Resubmitted",
     "viewDetail": "View Details",
     "markViewed": "Mark as Viewed",
@@ -459,7 +464,12 @@
     "cameraNotSupported": "Camera is not supported on this browser.",
     "cameraPermissionDenied": "Camera access denied. Please allow camera permission in your browser settings.",
     "cameraNotFound": "No camera found on this device.",
-    "cameraError": "Could not open camera. Please try again."
+    "cameraError": "Could not open camera. Please try again.",
+    "addAnother": "Add Another",
+    "removeInstance": "Remove",
+    "instanceCounter": "Record {current} of {total}",
+    "submitAll": "Submit All",
+    "instanceLimitReached": "Maximum instances limit reached ({count})"
   },
   "aiExtraction": {
     "uploadTitle": "AI Document Auto-Fill",
@@ -488,7 +498,8 @@
     "aiAutoFillDesc": "Automatically fill contact info and custom fields using uploaded files or document photos.",
     "rescan": "Re-scan",
     "quotaExceeded": "AI quota exceeded. Retry in {time}.",
-    "quotaRetryNow": "Quota reset — tap to retry"
+    "quotaRetryNow": "Quota reset — tap to retry",
+    "multiInstanceTruncated": "AI extracted {total} records, but only {max} could be filled due to the form limit."
   },
   "user": {
     "submission": {

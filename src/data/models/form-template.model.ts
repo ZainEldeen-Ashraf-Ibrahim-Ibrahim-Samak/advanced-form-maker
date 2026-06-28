@@ -31,6 +31,8 @@ export interface IFormTemplate extends Document {
   isContactForm: boolean;
   aiAutoFillEnabled: boolean;
   canAddMoreReplies: boolean;
+  multiInstanceEnabled: boolean;
+  maxInstances: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -112,6 +114,14 @@ const formTemplateSchema = new Schema<IFormTemplate>(
     canAddMoreReplies: {
       type: Boolean,
       default: false,
+    },
+    multiInstanceEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    maxInstances: {
+      type: Number,
+      default: null,
     },
     contactFormLocked: {
       type: Boolean,

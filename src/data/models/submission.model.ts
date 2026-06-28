@@ -44,6 +44,7 @@ export interface ISubmission extends Document {
   } | null;
   submittedAt: Date;
   lastResubmittedAt?: Date | null;
+  sessionId: string | null;
   updatedAt: Date;
 }
 
@@ -116,6 +117,7 @@ const submissionSchema = new Schema<ISubmission>(
     resubmissionRequest: { type: resubmissionRequestSchema, default: null },
     submittedAt: { type: Date, default: Date.now },
     lastResubmittedAt: { type: Date, default: null },
+    sessionId: { type: String, default: null, index: true },
   },
   {
     timestamps: true,

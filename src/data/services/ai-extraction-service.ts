@@ -18,7 +18,8 @@ export async function extractDocumentData(
   imageMimeType: string,
   fieldDefinitions: any[],
   contactFields: any[],
-  locale: "en" | "ar"
+  locale: "en" | "ar",
+  options?: { multiInstanceEnabled?: boolean; maxInstances?: number | null }
 ): Promise<ExtractionResult> {
   const apiKey = getApiKey();
   const ai = new GoogleGenAI({ apiKey });
@@ -70,7 +71,7 @@ export async function extractDocumentData(
   }
 
   // 3. Assemble responseSchema
-  const responseSchema = {
+  const singleRecordSchema = {
     type: "OBJECT",
     properties: {
       contactData: {
@@ -87,8 +88,20 @@ export async function extractDocumentData(
     required: ["contactData", "fieldValues"],
   };
 
+  const responseSchema: any = { ...singleRecordSchema };
+  if (options?.multiInstanceEnabled) {
+    responseSchema.properties = {
+      ...responseSchema.properties,
+      records: {
+        type: "ARRAY",
+        items: singleRecordSchema,
+        description: "If the document contains multiple rows/records of data (e.g. a CSV, Excel sheet, or table with multiple entries), extract all of them here.",
+      },
+    };
+  }
+
   // 4. Construct prompt
-  const prompt = `You are a professional document information extraction system.
+  let prompt = `You are a professional document information extraction system.
 Analyze the provided document file or image (such as an ID card photo, PDF, CSV, spreadsheet, or Word document) and extract information into the specified JSON format.
 
 Bilingual & Multi-Language Instructions:
@@ -101,9 +114,13 @@ Bilingual & Multi-Language Instructions:
 - For each custom field value in "fieldValues", provide a confidence score between 0.0 and 1.0 reflecting how clear the reading is.
 - If a field is not found or is completely unreadable on the document, set its value to null and confidence to 0.0.
 - For date fields, normalize the value to YYYY-MM-DD format.
-- For phone numbers, extract all digits, remove unnecessary formatting (e.g., spaces, dashes, parentheses), and normalize the phone format (e.g., preserving leading + or zeros as appropriate).
+- For phone numbers, extract all digits, remove unnecessary formatting (e.g., spaces, dashes, parentheses), and normalize the phone format (e.g., preserving leading + or zeros as appropriate).`;
 
-Extract exactly as instructed. Do not include any explanation.`;
+  if (options?.multiInstanceEnabled) {
+    prompt += `\n- Since multiple records are allowed, if the document contains a list/table/sheet with multiple records, extract ALL rows into the 'records' array in the response schema. Capped at ${options.maxInstances || 50} records. The top-level 'contactData' and 'fieldValues' should represent the FIRST record.`;
+  }
+
+  prompt += "\n\nExtract exactly as instructed. Do not include any explanation.";
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
@@ -180,10 +197,54 @@ Extract exactly as instructed. Do not include any explanation.`;
       status = "failure";
     }
 
+    let records: ExtractionResult[] = [];
+    if (options?.multiInstanceEnabled && Array.isArray(data.records)) {
+      records = data.records.map((rec: any) => {
+        const recContactData = {
+          name: rec.contactData?.name || null,
+          email: rec.contactData?.email || null,
+          phone: rec.contactData?.phone || null,
+          address: rec.contactData?.address || null,
+        };
+
+        const recFieldValues: Record<string, any> = {};
+        for (const [fieldId, extraction] of Object.entries(rec.fieldValues || {})) {
+          const typedExtraction = extraction as any;
+          recFieldValues[fieldId] = {
+            value: typedExtraction.value !== undefined ? typedExtraction.value : null,
+            confidence: typeof typedExtraction.confidence === "number" ? typedExtraction.confidence : 0,
+          };
+        }
+
+        const total = Object.keys(recFieldValues).length + Object.keys(recContactData).length;
+        let filled = 0;
+        for (const key of Object.keys(recContactData)) {
+          if (recContactData[key as keyof typeof recContactData] !== null) filled++;
+        }
+        for (const val of Object.values(recFieldValues)) {
+          if (val.value !== null) filled++;
+        }
+
+        let recStatus: "success" | "partial" | "failure" = "failure";
+        if (total === 0 || filled === total) {
+          recStatus = "success";
+        } else if (filled > 0) {
+          recStatus = "partial";
+        }
+
+        return {
+          status: recStatus,
+          contactData: recContactData,
+          fieldValues: recFieldValues,
+        };
+      });
+    }
+
     return {
       status,
       contactData,
       fieldValues,
+      records: records.length > 0 ? records : undefined,
     };
 
   } catch (error: any) {

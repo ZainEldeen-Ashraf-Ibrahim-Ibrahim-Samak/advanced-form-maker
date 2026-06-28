@@ -32,6 +32,8 @@ export const extractionRequestSchema = z.object({
     })
   ),
   locale: z.enum(["en", "ar"]),
+  multiInstanceEnabled: z.boolean().optional(),
+  maxInstances: z.number().int().min(1).max(50).nullable().optional(),
 });
 
 export type ExtractionRequest = z.infer<typeof extractionRequestSchema>;
@@ -48,11 +50,12 @@ export const extractedFieldValueSchema = z.object({
   confidence: z.number().min(0).max(1),
 });
 
-export const extractionResponseSchema = z.object({
+export const extractionResponseSchema: any = z.object({
   status: z.enum(["success", "partial", "failure"]),
   contactData: extractedContactDataSchema,
   fieldValues: z.record(z.string(), extractedFieldValueSchema),
   errorMessage: z.string().nullable().optional(),
+  records: z.array(z.lazy(() => extractionResponseSchema)).optional(),
 });
 
 export type ExtractionResponse = z.infer<typeof extractionResponseSchema>;

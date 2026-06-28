@@ -32,6 +32,7 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
   const t = useTranslations("submissions");
   const tc = useTranslations("common");
   const router = useRouter();
+  const hasSessionId = submissions.some((sub) => !!sub.sessionId);
 
   const normalizeContactValue = (value?: string | null) => {
     const normalized = (value ?? "").trim();
@@ -403,6 +404,9 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
               <TableHead className="w-12 text-center">{t("indexHeader") || "#"}</TableHead>
               <TableHead className="whitespace-nowrap">{t("clientName")}</TableHead>
               <TableHead className="hidden md:table-cell whitespace-nowrap">{t("formName")}</TableHead>
+              {hasSessionId && (
+                <TableHead className="hidden md:table-cell whitespace-nowrap">{t("sessionId")}</TableHead>
+              )}
               <TableHead className="hidden md:table-cell whitespace-nowrap">{t("contactEmail")}</TableHead>
               <TableHead className="hidden lg:table-cell whitespace-nowrap">{t("contactPhone")}</TableHead>
               <TableHead className="hidden xl:table-cell whitespace-nowrap">{t("contactAddress")}</TableHead>
@@ -478,6 +482,17 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
                     )}
                   </TableCell>
                   <TableCell className="hidden md:table-cell break-all">{formName}</TableCell>
+                  {hasSessionId && (
+                    <TableCell className="hidden md:table-cell font-mono text-xs text-muted-foreground whitespace-nowrap">
+                      {sub.sessionId ? (
+                        <span title={sub.sessionId}>
+                          {sub.sessionId.substring(0, 8)}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                  )}
                   <TableCell className="hidden md:table-cell break-all">{contactSummary.email || "—"}</TableCell>
                   <TableCell className="hidden lg:table-cell break-all">{contactSummary.phone || "—"}</TableCell>
                   <TableCell className="hidden xl:table-cell break-all">{contactSummary.address || "—"}</TableCell>

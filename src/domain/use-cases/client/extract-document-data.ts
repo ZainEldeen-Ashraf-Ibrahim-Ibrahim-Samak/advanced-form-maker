@@ -11,7 +11,11 @@ export class ExtractDocumentDataUseCase {
       validated.imageMimeType,
       validated.fieldDefinitions,
       validated.contactFields,
-      validated.locale
+      validated.locale,
+      {
+        multiInstanceEnabled: validated.multiInstanceEnabled,
+        maxInstances: validated.maxInstances,
+      }
     );
   }
 }
