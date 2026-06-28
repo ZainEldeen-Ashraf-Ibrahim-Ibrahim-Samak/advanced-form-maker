@@ -193,12 +193,12 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
 
           const value =
             field.key === "name"
-              ? primaryContact.name
+              ? currentContactValues.name
               : field.key === "email"
-                ? primaryContact.email
+                ? currentContactValues.email
                 : field.key === "phone"
-                  ? primaryContact.phone
-                  : primaryContact.address;
+                  ? currentContactValues.phone
+                  : currentContactValues.address;
 
           const isMissing = String(value ?? "").trim().length === 0;
           if (isMissing) {
@@ -212,22 +212,22 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
           isValid = false;
         } else {
           const getField = (key: string) => contactFormFields.find(f => f.key === key);
-          if (getField("email")?.regexEnabled && primaryContact.email && !EMAIL_REGEX.test(primaryContact.email)) {
+          if (getField("email")?.regexEnabled && currentContactValues.email && !EMAIL_REGEX.test(currentContactValues.email)) {
             errors.contactRecords = true;
             errors.contact_email = true;
             isValid = false;
           }
-          if (getField("phone")?.regexEnabled && primaryContact.phone && !PHONE_REGEX.test(primaryContact.phone)) {
+          if (getField("phone")?.regexEnabled && currentContactValues.phone && !PHONE_REGEX.test(currentContactValues.phone)) {
             errors.contactRecords = true;
             errors.contact_phone = true;
             isValid = false;
           }
-          if (getField("name")?.regexEnabled && primaryContact.name && !NAME_REGEX.test(primaryContact.name)) {
+          if (getField("name")?.regexEnabled && currentContactValues.name && !NAME_REGEX.test(currentContactValues.name)) {
             errors.contactRecords = true;
             errors.contact_name = true;
             isValid = false;
           }
-          if (getField("address")?.regexEnabled && primaryContact.address && !TEXT_REGEX.test(primaryContact.address)) {
+          if (getField("address")?.regexEnabled && currentContactValues.address && !TEXT_REGEX.test(currentContactValues.address)) {
             errors.contactRecords = true;
             errors.contact_address = true;
             isValid = false;
