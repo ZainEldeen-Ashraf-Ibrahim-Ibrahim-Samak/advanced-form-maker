@@ -139,7 +139,7 @@ export function SubmissionReview({ id }: SubmissionReviewProps) {
     <div className="space-y-6 max-w-5xl mx-auto">
       <Link href="/admin/dashboard">
         <Button variant="ghost" size="sm" className="mb-2">
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
           {tc("back")}
         </Button>
       </Link>
@@ -443,7 +443,7 @@ export function SubmissionReview({ id }: SubmissionReviewProps) {
                   disabled={isUpdating}
                   onClick={() => handleStatusChange("viewed")}
                 >
-                  <Eye className="mr-2 h-4 w-4 text-emerald-500" />
+                  <Eye className="me-2 h-4 w-4 text-emerald-500" />
                   {t("markViewed")}
                 </Button>
               )}
@@ -462,7 +462,7 @@ export function SubmissionReview({ id }: SubmissionReviewProps) {
                   disabled={isUpdating || !rewriteComment.trim() || submission.status === "needs_rewrite"}
                   onClick={() => handleStatusChange("needs_rewrite")}
                 >
-                  <AlertCircle className="mr-2 h-4 w-4" />
+                  <AlertCircle className="me-2 h-4 w-4" />
                   {t("markNeedsRewrite")}
                 </Button>
                 {!rewriteComment.trim() && submission.status !== "needs_rewrite" && (

@@ -272,8 +272,12 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
 
   if (submissions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center border rounded-md bg-muted/20">
-        <p className="text-muted-foreground">{t("noSubmissionsFound")}</p>
+      <div className="flex flex-col items-center justify-center gap-2 p-10 text-center border border-dashed rounded-md bg-muted/20">
+        <div className="p-3 rounded-full bg-muted">
+          <FileText className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <p className="font-medium">{t("noSubmissionsFound")}</p>
+        <p className="text-sm text-muted-foreground max-w-md">{t("noSubmissionsHint")}</p>
       </div>
     );
   }

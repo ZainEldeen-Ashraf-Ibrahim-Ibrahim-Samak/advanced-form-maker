@@ -143,6 +143,9 @@
     "statCardViewed": "تمت المراجعة",
     "statCardNeedsRewrite": "يحتاج تعديل",
     "formSummariesTitle": "ملخص النماذج",
+    "emptyTitle": "مرحباً! لا توجد بيانات بعد",
+    "emptyDesc": "أنشئ أول نموذج لبدء استقبال الطلبات. بمجرد إنشاء النماذج، ستظهر ملخصاتها وإحصاءاتها هنا.",
+    "emptyCta": "إنشاء أول نموذج",
     "editLogoIcon": "أيقونة البطاقة",
     "suggestIcon": "اقتراح أيقونة",
     "suggestingIcon": "جاري الاقتراح...",
@@ -364,6 +367,7 @@
       "needs_rewrite": "يحتاج تعديل"
     },
     "noSubmissionsFound": "لم يتم العثور على طلبات.",
+    "noSubmissionsHint": "ستظهر الطلبات هنا فور قيام أي شخص بتعبئة نموذج. إذا كنت تستخدم عوامل تصفية، جرّب توسيعها.",
     "resubmittedAt": "تمت إعادة الإرسال في {date}",
     "updatedBy": "بواسطة {name}",
     "openMenu": "فتح القائمة",

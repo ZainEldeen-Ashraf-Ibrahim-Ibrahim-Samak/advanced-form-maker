@@ -208,7 +208,7 @@ export function TeamClient({
           <DialogTrigger
             render={
               <Button className="w-full sm:w-auto">
-                <UserPlus className="mr-2 h-4 w-4" />
+                <UserPlus className="me-2 h-4 w-4" />
                 {t("addUser")}
               </Button>
             }
@@ -305,7 +305,7 @@ export function TeamClient({
                 </Button>
                 <Button type="submit" disabled={isCreating}>
                   {isCreating && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   )}
                   {t("save")}
                 </Button>
@@ -407,7 +407,7 @@ export function TeamClient({
               </Button>
               <Button type="submit" disabled={isUpdating}>
                 {isUpdating && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 )}
                 {t("save")}
               </Button>

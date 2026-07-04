@@ -198,7 +198,11 @@ export function FormManager() {
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">{t("noForms")}</p>
+            <p className="text-muted-foreground mb-4">{t("noForms")}</p>
+            <Button onClick={() => setIsCreateOpen(true)}>
+              <Plus className="me-2 h-4 w-4" />
+              {t("createForm")}
+            </Button>
           </CardContent>
         </Card>
       ) : (

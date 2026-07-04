@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, createElement } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useSubmissionsList } from "@/presentation/view-models/use-submissions-list";
 import type { Submission } from "@/domain/entities/submission";
@@ -24,7 +24,7 @@ interface FormOption {
 
 function CardHeaderIcon({ logoUrl, iconName, slug }: { logoUrl?: string | null; iconName?: string; slug?: string }) {
   const iconKey = logoUrl || iconName || null;
-  const Icon = logoUrl ? getCardIcon(logoUrl) : iconName ? getCardIcon(iconName) : getCardIcon(null);
+  const iconComponent = logoUrl ? getCardIcon(logoUrl) : iconName ? getCardIcon(iconName) : getCardIcon(null);
 
   const isCustomIcon = !!logoUrl;
   const slugColor = isCustomIcon ? null : (
@@ -45,10 +45,11 @@ function CardHeaderIcon({ logoUrl, iconName, slug }: { logoUrl?: string | null; 
 
   const colorClass = slugColor ?? getCardIconColor(iconKey, "text-muted-foreground");
   const bgClass    = slugBg    ?? getCardIconBg(iconKey, "bg-muted");
-
+  
+  // Use createElement to avoid Next.js React Compiler thinking we are defining a component during render
   return (
     <div className={`p-2 rounded-lg ${bgClass} shrink-0`}>
-      <Icon className={`h-4 w-4 ${colorClass}`} />
+      {createElement(iconComponent, { className: `h-4 w-4 ${colorClass}` })}
     </div>
   );
 }
@@ -304,10 +305,10 @@ export function SubmissionsManager() {
 
       <div className="flex flex-col sm:flex-row flex-wrap items-center justify-between gap-4 bg-muted/30 p-4 rounded-xl border">
         <div className="relative w-full sm:flex-1 sm:min-w-50 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder={t("searchPlaceholder") || "Search submissions..."} 
-            className="pl-10"
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("searchPlaceholder") || "Search submissions..."}
+            className="ps-10"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />

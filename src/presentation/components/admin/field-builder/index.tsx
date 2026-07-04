@@ -484,7 +484,7 @@ export function FieldBuilder({ formTemplateId }: FieldBuilderProps) {
           <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Button type="button" onClick={handleAddField}>
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="me-2 h-4 w-4" />
           {t("addField")}
         </Button>
       </div>
@@ -557,7 +557,7 @@ export function FieldBuilder({ formTemplateId }: FieldBuilderProps) {
                 onClick={handleAddContact}
                 disabled={isLoadingContacts || isSavingContacts}
               >
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="me-2 h-4 w-4" />
                 {t("contactFormAddInput")}
               </Button>
             )}

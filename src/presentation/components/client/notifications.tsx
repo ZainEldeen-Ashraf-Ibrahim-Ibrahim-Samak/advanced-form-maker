@@ -63,7 +63,7 @@ export function ClientNotifications({ token }: NotificationsProps) {
               className="w-fit border-amber-400 hover:bg-amber-100 dark:border-amber-600 dark:hover:bg-amber-900/50 mt-1"
               onClick={() => markAsSeen(notification.id)}
             >
-              <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <CheckCircle2 className="me-2 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               {t("markAsSeen")}
             </Button>
           </AlertDescription>

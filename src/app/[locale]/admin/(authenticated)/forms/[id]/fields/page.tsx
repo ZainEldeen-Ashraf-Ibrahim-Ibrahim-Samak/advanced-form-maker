@@ -26,7 +26,7 @@ export default async function FieldsPage({ params }: FieldsPageProps) {
     <div className="space-y-4">
       <Link href="/admin/forms">
         <Button variant="ghost" size="sm">
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
           {t("backToForms")}
         </Button>
       </Link>

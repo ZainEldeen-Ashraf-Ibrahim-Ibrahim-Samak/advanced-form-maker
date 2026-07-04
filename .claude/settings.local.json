@@ -26,7 +26,14 @@
       "PowerShell(cd \"C:\\\\Users\\\\ALFA2023\\\\Desktop\\\\advanced-form-maker\"; $env:SKIP_ENV_VALIDATION=\"true\"; npx next build --help 2>&1 | Select-Object -First 3; echo \"---\"; Get-Content \"node_modules\\\\next\\\\dist\\\\server\\\\font-utils.js\" 2>$null | Select-String \"Bricolage|Figtree|google-fonts\" | Select-Object -First 5)",
       "PowerShell(cd \"C:\\\\Users\\\\ALFA2023\\\\Desktop\\\\advanced-form-maker\"; $data = Get-Content \"node_modules\\\\next\\\\dist\\\\compiled\\\\@next\\\\font\\\\dist\\\\google\\\\font-data.json\" -Raw | ConvertFrom-Json; \"Bricolage: $\\(\\($data.PSObject.Properties.Name | Where-Object { $_ -match 'Bricolage' }\\) -join ', '\\)\"; \"Figtree: $\\(\\($data.PSObject.Properties.Name | Where-Object { $_ -match 'Figtree' }\\) -join ', '\\)\")",
       "PowerShell(cd \"C:\\\\Users\\\\ALFA2023\\\\Desktop\\\\advanced-form-maker\"; $env:SKIP_ENV_VALIDATION=\"true\"; npx next dev --port 3000 2>&1 | Select-Object -First 15)",
-      "PowerShell(timeout 20 npx *)"
+      "PowerShell(timeout 20 npx *)",
+      "Skill(run)",
+      "PowerShell(npm run *)",
+      "PowerShell(npm install *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{url_effective}\\\\n\" -L http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3000/en/admin/login)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/ar/admin/login)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -L http://localhost:3000/ar/admin/dashboard)"
     ]
   }
 }

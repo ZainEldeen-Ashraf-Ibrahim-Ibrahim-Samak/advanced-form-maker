@@ -10,11 +10,12 @@ import { Button } from "@/components/ui/button";
 import { SubmissionsTable } from "@/presentation/components/admin/submissions-table";
 import {
   ChevronLeft, ChevronRight, Cloud, HardDrive, Copy, Plus,
-  Clock, FilePen, Eye, AlertCircle, BarChart3, type LucideIcon,
+  Clock, FilePen, Eye, AlertCircle, BarChart3, FileText, type LucideIcon,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { CardManagerDialog } from "@/presentation/components/admin/card-manager-dialog";
-import { getCardIcon, getCardIconColor, getCardIconBg } from "@/lib/card-icons";
+import { CARD_ICON_MAP, getCardIconColor, getCardIconBg } from "@/lib/card-icons";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Link } from "@/i18n/navigation";
@@ -87,13 +88,10 @@ function FormCardHeaderIcon({
   logoUrl?: string | null;
   iconName?: string;
 }) {
-  const Icon = logoUrl
-    ? getCardIcon(logoUrl)
-    : iconName
-      ? getCardIcon(iconName)
-      : getCardIcon(null);
-  const colorClass = getCardIconColor(logoUrl || iconName || null, "text-muted-foreground");
-  const bgClass = getCardIconBg(logoUrl || iconName || null, "bg-muted");
+  const iconKey = logoUrl || iconName || null;
+  const Icon = (iconKey ? CARD_ICON_MAP[iconKey] : null) || FileText;
+  const colorClass = getCardIconColor(iconKey, "text-muted-foreground");
+  const bgClass = getCardIconBg(iconKey, "bg-muted");
 
   return (
     <div className={cn("p-2 rounded-lg shrink-0", bgClass)}>
@@ -181,6 +179,32 @@ export function AdminDashboard() {
         <h2 className="text-2xl font-bold tracking-tight">{t("title")}</h2>
         <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
       </div>
+
+      {/* Cards loading skeletons */}
+      {isLoadingCards && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-36 w-full rounded-xl" />
+          ))}
+        </div>
+      )}
+
+      {/* First-run empty state */}
+      {!isLoadingCards && cards.length === 0 && (
+        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed py-14 px-6 text-center">
+          <div className="p-3 rounded-full bg-primary/10">
+            <FileText className="h-6 w-6 text-primary" />
+          </div>
+          <h3 className="text-base font-semibold">{t("emptyTitle")}</h3>
+          <p className="text-sm text-muted-foreground max-w-md">{t("emptyDesc")}</p>
+          <Link href="/admin/forms">
+            <Button className="mt-2 gap-2">
+              <Plus className="h-4 w-4" />
+              {t("emptyCta")}
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Cards section header */}
       {!isLoadingCards && cards.length > 0 && (

@@ -151,6 +151,9 @@
     "statCardViewed": "Viewed",
     "statCardNeedsRewrite": "Needs Rewrite",
     "formSummariesTitle": "Form Summaries",
+    "emptyTitle": "Welcome! Nothing here yet",
+    "emptyDesc": "Create your first form to start collecting submissions. Once forms exist, their summaries and stats will appear here.",
+    "emptyCta": "Create your first form",
     "customCard": "Custom Card",
     "addCustomCard": "Add Custom Card",
     "addCustomCardTitle": "New Custom Card",
@@ -364,6 +367,7 @@
       "needs_rewrite": "Needs Rewrite"
     },
     "noSubmissionsFound": "No submissions found.",
+    "noSubmissionsHint": "Submissions will appear here as soon as someone fills in a form. If you are using filters, try widening them.",
     "resubmittedAt": "Resubmitted {date}",
     "updatedBy": "Updated by {name}",
     "openMenu": "Open menu",
