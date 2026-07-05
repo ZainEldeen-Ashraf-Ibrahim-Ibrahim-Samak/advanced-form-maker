@@ -74,6 +74,8 @@ export function useDashboardAnalytics() {
           logoUrl: c.logoUrl,
           metricLabel: c.metricLabel,
           metricValue: c.metricValue,
+          buttonLabelAr: c.buttonLabelAr,
+          buttonLabelEn: c.buttonLabelEn,
         };
       }
     });

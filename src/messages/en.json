@@ -182,7 +182,10 @@
     "iconSuggestionQuota": "AI quota exceeded. Retry in {time}.",
     "copyLink": "Copy Link",
     "qrCode": "QR Code",
-    "addNewForm": "Add new {name}"
+    "addNewForm": "Add new {name}",
+    "editButtonLabelAr": "Button Label (AR)",
+    "editButtonLabelEn": "Button Label (EN)",
+    "helperButtonLabel": "Custom text shown on the card's action button. Leave blank to use the default \"Add new {name}\" label."
   },
   "forms": {
     "title": "Form Templates",

@@ -292,11 +292,16 @@ export function AdminDashboard() {
                   ? (card.displayNameAr ?? card.displayNameEn ?? card.name)
                   : (card.displayNameEn ?? card.displayNameAr ?? card.name);
 
+              const buttonLabel =
+                locale === "ar"
+                  ? (card.buttonLabelAr ?? card.buttonLabelEn)
+                  : (card.buttonLabelEn ?? card.buttonLabelAr);
+
               return (
                 <Card
                   key={card.formTemplateId}
                   className={cn(
-                    "flex flex-col justify-between hover:shadow-md transition-shadow",
+                    "flex flex-col justify-between pt-0 hover:shadow-md transition-shadow",
                     card.isLocked && "ring-1 ring-amber-300 dark:ring-amber-700",
                   )}
                 >
@@ -352,7 +357,7 @@ export function AdminDashboard() {
                         disabled={card.isLocked}
                       >
                         <Plus className="h-3.5 w-3.5" />
-                        {t("addNewForm", { name: title })}
+                        {buttonLabel ?? t("addNewForm", { name: title })}
                       </Button>
                     </Link>
                   </div>

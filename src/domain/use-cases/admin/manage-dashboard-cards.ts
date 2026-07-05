@@ -19,6 +19,8 @@ export interface FormSummaryCardItem {
   logoUrl: string | null;
   metricLabel: string | null;
   metricValue: string | null;
+  buttonLabelAr: string | null;
+  buttonLabelEn: string | null;
 }
 
 export interface StatCardItem {
@@ -125,6 +127,8 @@ export class ManageDashboardCardsUseCase {
           logoUrl: card.logoUrl,
           metricLabel: card.metricLabel,
           metricValue: card.metricValue,
+          buttonLabelAr: card.buttonLabelAr,
+          buttonLabelEn: card.buttonLabelEn,
         };
       })
     );
@@ -171,6 +175,8 @@ export class ManageDashboardCardsUseCase {
           logoUrl: fc.logoUrl,
           metricLabel: fc.metricLabel,
           metricValue: fc.metricValue,
+          buttonLabelAr: fc.buttonLabelAr,
+          buttonLabelEn: fc.buttonLabelEn,
         });
       }
     }

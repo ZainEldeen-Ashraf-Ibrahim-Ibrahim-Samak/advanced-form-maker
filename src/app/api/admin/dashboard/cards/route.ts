@@ -40,6 +40,8 @@ const formCardSchema = z.object({
   logoUrl: z.string().nullable().optional(),
   metricLabel: z.string().nullable().optional(),
   metricValue: z.string().nullable().optional(),
+  buttonLabelAr: z.string().nullable().optional(),
+  buttonLabelEn: z.string().nullable().optional(),
 });
 
 const statCardSchema = z.object({

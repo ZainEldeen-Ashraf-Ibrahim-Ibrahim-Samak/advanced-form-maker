@@ -115,7 +115,7 @@ function SortableCardRow({
   onToggleVisibility: (id: string) => void;
   onUpdateField: (
     id: string,
-    field: "displayNameAr" | "displayNameEn" | "logoUrl" | "metricLabel" | "metricValue",
+    field: "displayNameAr" | "displayNameEn" | "logoUrl" | "metricLabel" | "metricValue" | "buttonLabelAr" | "buttonLabelEn",
     value: string | null
   ) => void;
   onSuggestIcon: (id: string, nameAr: string, nameEn: string) => Promise<void>;
@@ -313,6 +313,34 @@ function SortableCardRow({
             />
             <p className="text-[9px] text-muted-foreground leading-snug">{t("helperMetricValue")}</p>
           </div>
+          {/* Button label (form cards only) */}
+          {card.cardType === "form" && (
+            <>
+              <div className="space-y-1" dir="rtl">
+                <label className="text-[10px] text-muted-foreground font-semibold block text-right">{t("editButtonLabelAr") || "Button Label (AR)"}</label>
+                <Input
+                  size={undefined}
+                  className="h-8 text-xs text-right"
+                  dir="rtl"
+                  value={card.buttonLabelAr ?? ""}
+                  onChange={(e) => onUpdateField(cardId, "buttonLabelAr", e.target.value || null)}
+                  placeholder={t("addNewForm", { name: card.name })}
+                />
+                <p className="text-[9px] text-muted-foreground leading-snug" dir="rtl">{t("helperButtonLabel")}</p>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] text-muted-foreground font-semibold">{t("editButtonLabelEn") || "Button Label (EN)"}</label>
+                <Input
+                  size={undefined}
+                  className="h-8 text-xs"
+                  value={card.buttonLabelEn ?? ""}
+                  onChange={(e) => onUpdateField(cardId, "buttonLabelEn", e.target.value || null)}
+                  placeholder={t("addNewForm", { name: card.name })}
+                />
+                <p className="text-[9px] text-muted-foreground leading-snug">{t("helperButtonLabel")}</p>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -384,7 +412,7 @@ export function CardManagerDialog({ open, onOpenChange, cards, onSave, onSuggest
 
   const updateDraftCardField = (
     id: string,
-    field: "displayNameAr" | "displayNameEn" | "logoUrl" | "metricLabel" | "metricValue",
+    field: "displayNameAr" | "displayNameEn" | "logoUrl" | "metricLabel" | "metricValue" | "buttonLabelAr" | "buttonLabelEn",
     value: string | null
   ) => {
     setDraftCards((prev) =>

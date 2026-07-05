@@ -9,6 +9,8 @@ export interface IDashboardCard extends Document {
   logoUrl: string | null;
   metricLabel: string | null;
   metricValue: string | null;
+  buttonLabelAr: string | null;
+  buttonLabelEn: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -48,6 +50,14 @@ const dashboardCardSchema = new Schema<IDashboardCard>(
       default: null,
     },
     metricValue: {
+      type: String,
+      default: null,
+    },
+    buttonLabelAr: {
+      type: String,
+      default: null,
+    },
+    buttonLabelEn: {
       type: String,
       default: null,
     },

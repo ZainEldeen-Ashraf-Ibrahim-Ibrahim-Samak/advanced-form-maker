@@ -8,6 +8,8 @@ export interface DashboardCard {
   logoUrl: string | null;
   metricLabel: string | null;
   metricValue: string | null;
+  buttonLabelAr: string | null;
+  buttonLabelEn: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,4 +29,6 @@ export interface UpdateDashboardCardInput {
   logoUrl?: string | null;
   metricLabel?: string | null;
   metricValue?: string | null;
+  buttonLabelAr?: string | null;
+  buttonLabelEn?: string | null;
 }

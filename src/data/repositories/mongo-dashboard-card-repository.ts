@@ -16,6 +16,8 @@ function toEntity(doc: any): DashboardCard {
     logoUrl: doc.logoUrl ?? null,
     metricLabel: doc.metricLabel ?? null,
     metricValue: doc.metricValue ?? null,
+    buttonLabelAr: doc.buttonLabelAr ?? null,
+    buttonLabelEn: doc.buttonLabelEn ?? null,
     createdAt: doc.createdAt as Date,
     updatedAt: doc.updatedAt as Date,
   };
@@ -47,7 +49,9 @@ export class MongoDashboardCardRepository implements DashboardCardRepository {
         if (card.logoUrl !== undefined) updateDoc.logoUrl = card.logoUrl;
         if (card.metricLabel !== undefined) updateDoc.metricLabel = card.metricLabel;
         if (card.metricValue !== undefined) updateDoc.metricValue = card.metricValue;
-        
+        if (card.buttonLabelAr !== undefined) updateDoc.buttonLabelAr = card.buttonLabelAr;
+        if (card.buttonLabelEn !== undefined) updateDoc.buttonLabelEn = card.buttonLabelEn;
+
         return {
           updateOne: {
             filter: { formTemplateId: new mongoose.Types.ObjectId(card.formTemplateId) },
