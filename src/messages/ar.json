@@ -610,7 +610,10 @@
     "selectorUseImage": "استخدام هذه الصورة",
     "selectorCancel": "إلغاء",
     "selectorNoneSelected": "لم يتم اختيار صورة",
-    "selectorImageCount": "{count} صور"
+    "selectorImageCount": "{count} صور",
+    "uploadNew": "رفع صورة جديدة",
+    "invalidFileType": "الرجاء اختيار ملف صورة",
+    "uploadError": "فشل الرفع"
   },
   "team": {
     "title": "إدارة الفريق",

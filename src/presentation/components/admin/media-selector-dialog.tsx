@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useMediaManager, MediaResource } from "@/presentation/view-models/use-media-manager";
-import { Loader2, Check, ImageIcon, RefreshCw } from "lucide-react";
+import { Loader2, Check, ImageIcon, RefreshCw, UploadCloud } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { logger } from "@/lib/dev-logger";
 
 
 
@@ -29,6 +31,9 @@ export function MediaSelectorDialog({
   const t = useTranslations("media");
   const { resources, isLoading, isPaginating, hasMore, loadMore, refresh } = useMediaManager();
   const [selected, setSelected] = useState<string | null>(currentUrl || null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const imageResources = resources.filter((r: MediaResource) => r.resource_type === "image");
 
@@ -44,6 +49,84 @@ export function MediaSelectorDialog({
     onOpenChange(nextOpen);
   };
 
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error(t("invalidFileType") || "Please select an image file");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const signRes = await fetch("/api/cloudinary/sign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fieldType: "image",
+          folder: "media-library",
+          timestamp: Math.round(Date.now() / 1000),
+        }),
+      });
+      const signData = await signRes.json();
+      if (!signRes.ok || !signData.success) {
+        throw new Error("Failed to get upload signature");
+      }
+
+      const { signature, timestamp, apikey, cloudname, folder, uploadPreset, resourceType } = signData.data;
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("api_key", apikey);
+      formData.append("timestamp", timestamp.toString());
+      formData.append("signature", signature);
+      formData.append("folder", folder);
+      if (uploadPreset) formData.append("upload_preset", uploadPreset);
+      formData.append("resource_type", resourceType || "image");
+
+      const cloudUrl = `https://api.cloudinary.com/v1_1/${cloudname}/${resourceType || "image"}/upload`;
+
+      const data: any = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", cloudUrl);
+        xhr.upload.onprogress = (ev) => {
+          if (ev.lengthComputable) {
+            setUploadProgress(Math.round((ev.loaded / ev.total) * 100));
+          }
+        };
+        xhr.onload = () => {
+          try {
+            const parsed = JSON.parse(xhr.responseText);
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve(parsed);
+            } else {
+              reject(new Error(parsed.error?.message || `Upload failed (${xhr.status})`));
+            }
+          } catch {
+            reject(new Error("Upload failed"));
+          }
+        };
+        xhr.onerror = () => reject(new Error("Network error"));
+        xhr.send(formData);
+      });
+
+      toast.success(t("uploadSuccess"));
+      await refresh();
+      setSelected(data.secure_url);
+    } catch (err) {
+      logger.error("Media upload error", err);
+      const message = err instanceof Error ? err.message : t("uploadError") || "Upload failed";
+      toast.error(message);
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-3xl h-[80vh] flex flex-col gap-0 p-0">
@@ -56,10 +139,38 @@ export function MediaSelectorDialog({
           <p className="text-sm text-muted-foreground">
             {isLoading ? t("loading") : t("selectorImageCount", { count: imageResources.length })}
           </p>
-          <Button variant="ghost" size="sm" onClick={refresh} disabled={isLoading}>
-            <RefreshCw className={cn("h-4 w-4 me-1.5", isLoading && "animate-spin")} />
-            {t("refresh")}
-          </Button>
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleUpload}
+              className="hidden"
+              disabled={isUploading}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 me-1.5 animate-spin" />
+                  {uploadProgress > 0 ? `${uploadProgress}%` : t("loading")}
+                </>
+              ) : (
+                <>
+                  <UploadCloud className="h-4 w-4 me-1.5" />
+                  {t("uploadNew") || "Upload New"}
+                </>
+              )}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={refresh} disabled={isLoading}>
+              <RefreshCw className={cn("h-4 w-4 me-1.5", isLoading && "animate-spin")} />
+              {t("refresh")}
+            </Button>
+          </div>
         </div>
 
         {/* Grid */}

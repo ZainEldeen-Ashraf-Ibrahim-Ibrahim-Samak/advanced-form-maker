@@ -610,7 +610,10 @@
     "selectorUseImage": "Use this image",
     "selectorCancel": "Cancel",
     "selectorNoneSelected": "No image selected",
-    "selectorImageCount": "{count} images"
+    "selectorImageCount": "{count} images",
+    "uploadNew": "Upload New",
+    "invalidFileType": "Please select an image file",
+    "uploadError": "Upload failed"
   },
   "team": {
     "title": "Team Management",
