@@ -82,7 +82,6 @@ export function SettingsForm() {
 
   useEffect(() => {
     if (settings) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalState(settings);
       setSiteName(settings.branding?.siteName || "ADVANCED FORM MAKER");
       setSiteLogoUrl(settings.branding?.siteLogoUrl || "");
