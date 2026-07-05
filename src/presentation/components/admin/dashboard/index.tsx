@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { SubmissionsTable } from "@/presentation/components/admin/submissions-table";
 import {
-  ChevronLeft, ChevronRight, Cloud, HardDrive, Copy, Plus,
+  ChevronLeft, ChevronRight, Copy, Plus,
   Clock, FilePen, Eye, AlertCircle, BarChart3, FileText, type LucideIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -106,7 +106,7 @@ export function AdminDashboard() {
   const { submissions, total, totalPages, counts, isLoading, fetchSubmissions, deleteSubmission } =
     useSubmissionsList();
   const {
-    cloudinaryUsage, isLoadingUsage, cards, isLoadingCards,
+    cards, isLoadingCards,
     saveCards, suggestIcon, addStatCard, deleteStatCard,
   } = useDashboardAnalytics();
 
@@ -361,69 +361,6 @@ export function AdminDashboard() {
             })}
         </div>
       )}
-
-      {/* Storage metrics */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("cloudinaryStorageTitle")}</CardTitle>
-            <HardDrive className="h-4 w-4 text-sky-500" />
-          </CardHeader>
-          <CardContent>
-            {isLoadingUsage ? (
-              <div className="text-sm text-muted-foreground animate-pulse">{t("loadingMetrics")}</div>
-            ) : cloudinaryUsage ? (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span>{t("used", { amount: `${(cloudinaryUsage.storage.usage / 1024 / 1024).toFixed(2)} MB` })}</span>
-                  <span className="text-muted-foreground">{t("limit", { amount: `${(cloudinaryUsage.storage.limit / 1024 / 1024 / 1024).toFixed(2)} GB` })}</span>
-                </div>
-                <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-sky-500 rounded-full transition-all"
-                    style={{ width: `${Math.min(cloudinaryUsage.storage.used_percent * 100, 100)}%` }}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground pt-0.5">
-                  {t("quotaUsed", { percent: (cloudinaryUsage.storage.used_percent * 100).toFixed(1) })}
-                </p>
-              </div>
-            ) : (
-              <div className="text-sm text-destructive">{t("failedToLoadStorage")}</div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("cloudinaryBandwidthTitle")}</CardTitle>
-            <Cloud className="h-4 w-4 text-violet-500" />
-          </CardHeader>
-          <CardContent>
-            {isLoadingUsage ? (
-              <div className="text-sm text-muted-foreground animate-pulse">{t("loadingMetrics")}</div>
-            ) : cloudinaryUsage ? (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span>{t("used", { amount: `${(cloudinaryUsage.bandwidth.usage / 1024 / 1024).toFixed(2)} MB` })}</span>
-                  <span className="text-muted-foreground">{t("limit", { amount: `${(cloudinaryUsage.bandwidth.limit / 1024 / 1024 / 1024).toFixed(2)} GB` })}</span>
-                </div>
-                <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-violet-500 rounded-full transition-all"
-                    style={{ width: `${Math.min(cloudinaryUsage.bandwidth.used_percent * 100, 100)}%` }}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground pt-0.5">
-                  {t("quotaUsed", { percent: (cloudinaryUsage.bandwidth.used_percent * 100).toFixed(1) })}
-                </p>
-              </div>
-            ) : (
-              <div className="text-sm text-destructive">{t("failedToLoadBandwidth")}</div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Recent submissions */}
       <div>

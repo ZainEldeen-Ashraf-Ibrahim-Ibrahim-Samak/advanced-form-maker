@@ -5,16 +5,37 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { MediaSelectorDialog } from "@/presentation/components/admin/media-selector-dialog";
-import { Images, X } from "lucide-react";
+import { Images, X, Cloud, HardDrive } from "lucide-react";
 import Image from "next/image";
+import { StorageUsageMetrics } from "@/domain/repositories/storage-repository";
 
 export function SettingsForm() {
   const t = useTranslations("adminSettings");
+  const td = useTranslations("dashboard");
   const { settings, isLoading, isSaving, isSavingBranding, isBackingUp, saveSettings, saveBranding, triggerBackup } = useAdminSettings();
+  const [cloudinaryUsage, setCloudinaryUsage] = useState<StorageUsageMetrics | null>(null);
+  const [isLoadingUsage, setIsLoadingUsage] = useState(true);
+
+  useEffect(() => {
+    async function fetchUsage() {
+      try {
+        const res = await fetch("/api/admin/analytics/cloudinary-usage");
+        if (!res.ok) throw new Error("Failed to load usage metrics");
+        const data = await res.json();
+        setCloudinaryUsage(data);
+      } catch (err) {
+        console.error("Cloudinary usage fetch error:", err);
+      } finally {
+        setIsLoadingUsage(false);
+      }
+    }
+    fetchUsage();
+  }, []);
   const [localState, setLocalState] = useState<SettingsState | null>(null);
   const [siteName, setSiteName] = useState("");
   const [siteLogoUrl, setSiteLogoUrl] = useState("");
@@ -147,6 +168,70 @@ export function SettingsForm() {
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 pb-2">
             {t("dataRetentionTitle")}
           </h3>
+
+          {/* Storage metrics */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{td("cloudinaryStorageTitle")}</CardTitle>
+                <HardDrive className="h-4 w-4 text-sky-500" />
+              </CardHeader>
+              <CardContent>
+                {isLoadingUsage ? (
+                  <div className="text-sm text-muted-foreground animate-pulse">{td("loadingMetrics")}</div>
+                ) : cloudinaryUsage ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>{td("used", { amount: `${(cloudinaryUsage.storage.usage / 1024 / 1024).toFixed(2)} MB` })}</span>
+                      <span className="text-muted-foreground">{td("limit", { amount: `${(cloudinaryUsage.storage.limit / 1024 / 1024 / 1024).toFixed(2)} GB` })}</span>
+                    </div>
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-sky-500 rounded-full transition-all"
+                        style={{ width: `${Math.min(cloudinaryUsage.storage.used_percent * 100, 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground pt-0.5">
+                      {td("quotaUsed", { percent: (cloudinaryUsage.storage.used_percent * 100).toFixed(1) })}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-sm text-destructive">{td("failedToLoadStorage")}</div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{td("cloudinaryBandwidthTitle")}</CardTitle>
+                <Cloud className="h-4 w-4 text-violet-500" />
+              </CardHeader>
+              <CardContent>
+                {isLoadingUsage ? (
+                  <div className="text-sm text-muted-foreground animate-pulse">{td("loadingMetrics")}</div>
+                ) : cloudinaryUsage ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>{td("used", { amount: `${(cloudinaryUsage.bandwidth.usage / 1024 / 1024).toFixed(2)} MB` })}</span>
+                      <span className="text-muted-foreground">{td("limit", { amount: `${(cloudinaryUsage.bandwidth.limit / 1024 / 1024 / 1024).toFixed(2)} GB` })}</span>
+                    </div>
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-violet-500 rounded-full transition-all"
+                        style={{ width: `${Math.min(cloudinaryUsage.bandwidth.used_percent * 100, 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground pt-0.5">
+                      {td("quotaUsed", { percent: (cloudinaryUsage.bandwidth.used_percent * 100).toFixed(1) })}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-sm text-destructive">{td("failedToLoadBandwidth")}</div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="draft_retention_days">{t("draftRetentionTitle")}</Label>
