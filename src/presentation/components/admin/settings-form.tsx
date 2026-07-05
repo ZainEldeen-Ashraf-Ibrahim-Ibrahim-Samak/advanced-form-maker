@@ -10,9 +10,132 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { MediaSelectorDialog } from "@/presentation/components/admin/media-selector-dialog";
-import { Images, X, Cloud, HardDrive } from "lucide-react";
+import { Images, X, Cloud, HardDrive, UploadCloud, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { StorageUsageMetrics } from "@/domain/repositories/storage-repository";
+import { uploadImageToCloudinary } from "@/lib/cloudinary/upload-image-client";
+import { cn } from "@/lib/utils";
+
+interface BrandingImageDropzoneProps {
+  url: string;
+  onUrlChange: (url: string) => void;
+  folder: string;
+  emptyLabel: string;
+  imageAlt: string;
+  imageClassName?: string;
+  disabled?: boolean;
+}
+
+function BrandingImageDropzone({
+  url,
+  onUrlChange,
+  folder,
+  emptyLabel,
+  imageAlt,
+  imageClassName = "object-contain p-2",
+  disabled,
+}: BrandingImageDropzoneProps) {
+  const t = useTranslations("media");
+  const [isUploading, setIsUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [dragActive, setDragActive] = useState(false);
+
+  const uploadFile = async (file: File) => {
+    if (disabled || isUploading) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error(t("invalidFileType") || "Please select an image file");
+      return;
+    }
+    setIsUploading(true);
+    setProgress(0);
+    try {
+      const result = await uploadImageToCloudinary(file, folder, setProgress);
+      onUrlChange(result.secure_url);
+      toast.success(t("uploadSuccess"));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t("uploadError") || "Upload failed";
+      toast.error(message);
+    } finally {
+      setIsUploading(false);
+      setProgress(0);
+    }
+  };
+
+  const onDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (disabled || isUploading) return;
+    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
+    else if (e.type === "dragleave") setDragActive(false);
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (disabled || isUploading) return;
+    const file = e.dataTransfer.files?.[0];
+    if (file) void uploadFile(file);
+  };
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (file) void uploadFile(file);
+  };
+
+  return (
+    <div
+      className={cn(
+        "relative h-24 w-full rounded-lg border overflow-hidden flex items-center justify-center transition-colors",
+        url ? "bg-muted" : "border-2 border-dashed",
+        dragActive ? "border-primary bg-primary/5 ring-4 ring-primary/10" : "border-muted-foreground/20",
+      )}
+      onDragEnter={onDrag}
+      onDragOver={onDrag}
+      onDragLeave={onDrag}
+      onDrop={onDrop}
+    >
+      {!disabled && (
+        <input
+          type="file"
+          accept="image/*"
+          onChange={onFileChange}
+          disabled={isUploading}
+          title={emptyLabel}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+        />
+      )}
+
+      {isUploading ? (
+        <div className="flex flex-col items-center gap-1.5 text-primary">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span className="text-xs font-medium">{progress > 0 ? `${progress}%` : t("loading")}</span>
+        </div>
+      ) : url ? (
+        <>
+          <Image src={url} alt={imageAlt} fill className={imageClassName} sizes="200px" unoptimized />
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onUrlChange("");
+            }}
+            className="absolute top-1.5 end-1.5 z-20 rounded-full bg-background/80 p-1 shadow hover:bg-destructive hover:text-destructive-foreground transition-colors"
+            aria-label={imageAlt}
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </>
+      ) : (
+        <div className="flex flex-col items-center gap-1 text-muted-foreground pointer-events-none">
+          <UploadCloud className="h-5 w-5" />
+          <span className="text-xs text-center px-2">{dragActive ? t("dropToUpload") || "Drop to upload" : emptyLabel}</span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function SettingsForm() {
   const t = useTranslations("adminSettings");
@@ -322,31 +445,16 @@ export function SettingsForm() {
             <div className="space-y-3">
               <Label>{t("siteLogoLabel")}</Label>
 
-              {/* Preview */}
-              {siteLogoUrl ? (
-                <div className="relative h-24 w-full rounded-lg border bg-muted flex items-center justify-center overflow-hidden">
-                  <Image
-                    src={siteLogoUrl}
-                    alt={t("siteLogoLabel")}
-                    fill
-                    className="object-contain p-2"
-                    sizes="200px"
-                    unoptimized
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setSiteLogoUrl("")}
-                    className="absolute top-1.5 end-1.5 rounded-full bg-background/80 p-1 shadow hover:bg-destructive hover:text-destructive-foreground transition-colors"
-                    aria-label={t("siteLogoLabel")}
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ) : (
-                <div className="h-24 w-full rounded-lg border-2 border-dashed border-muted-foreground/20 flex items-center justify-center text-xs text-muted-foreground">
-                  {t("noLogoSet")}
-                </div>
-              )}
+              {/* Preview / dropzone */}
+              <BrandingImageDropzone
+                url={siteLogoUrl}
+                onUrlChange={setSiteLogoUrl}
+                folder="branding/logo"
+                emptyLabel={t("noLogoSet")}
+                imageAlt={t("siteLogoLabel")}
+                imageClassName="object-contain p-2"
+                disabled={isSavingBranding}
+              />
 
               {/* Actions + URL input */}
               <div className="space-y-2">
@@ -378,31 +486,16 @@ export function SettingsForm() {
                 <p className="text-xs text-muted-foreground">{t("siteFaviconHint")}</p>
               </div>
 
-              {/* Preview */}
-              {siteFaviconUrl ? (
-                <div className="relative h-24 w-full rounded-lg border bg-muted flex items-center justify-center overflow-hidden">
-                  <Image
-                    src={siteFaviconUrl}
-                    alt={t("siteFaviconLabel")}
-                    fill
-                    className="object-contain p-4"
-                    sizes="200px"
-                    unoptimized
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setSiteFaviconUrl("")}
-                    className="absolute top-1.5 end-1.5 rounded-full bg-background/80 p-1 shadow hover:bg-destructive hover:text-destructive-foreground transition-colors"
-                    aria-label={t("siteFaviconLabel")}
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ) : (
-                <div className="h-24 w-full rounded-lg border-2 border-dashed border-muted-foreground/20 flex items-center justify-center text-xs text-muted-foreground">
-                  {t("noIconSet")}
-                </div>
-              )}
+              {/* Preview / dropzone */}
+              <BrandingImageDropzone
+                url={siteFaviconUrl}
+                onUrlChange={setSiteFaviconUrl}
+                folder="branding/favicon"
+                emptyLabel={t("noIconSet")}
+                imageAlt={t("siteFaviconLabel")}
+                imageClassName="object-contain p-4"
+                disabled={isSavingBranding}
+              />
 
               {/* Actions + URL input */}
               <div className="space-y-2">

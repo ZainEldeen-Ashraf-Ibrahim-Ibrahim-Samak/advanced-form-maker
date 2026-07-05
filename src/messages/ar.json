@@ -613,7 +613,8 @@
     "selectorImageCount": "{count} صور",
     "uploadNew": "رفع صورة جديدة",
     "invalidFileType": "الرجاء اختيار ملف صورة",
-    "uploadError": "فشل الرفع"
+    "uploadError": "فشل الرفع",
+    "dropToUpload": "أفلت هنا للرفع"
   },
   "team": {
     "title": "إدارة الفريق",

@@ -16,28 +16,12 @@ export class ManageMediaUseCase {
 
   async getMediaFiles(nextCursor?: string, maxResults = 30) {
     try {
-      // Use search API for better filtering if available, or resources listing.
-      // Search allows multiple resource types but needs indexing enabled.
-      // We will try listing resources in 'submissions' folder.
-      
+      // List all uploaded assets regardless of folder (submissions, media-library, etc.)
       const result = await cloudinary.api.resources({
         type: "upload",
-        prefix: "submissions", // No trailing slash sometimes works better/different
         max_results: maxResults,
         next_cursor: nextCursor,
       });
-
-      // If no results in prefix, try without prefix to see if data exists elsewhere
-      if (result.resources.length === 0 && !nextCursor) {
-        const globalResult = await cloudinary.api.resources({
-          type: "upload",
-          max_results: maxResults,
-        });
-        return {
-          resources: globalResult.resources,
-          next_cursor: globalResult.next_cursor
-        };
-      }
 
       return {
         resources: result.resources,

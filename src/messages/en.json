@@ -613,7 +613,8 @@
     "selectorImageCount": "{count} images",
     "uploadNew": "Upload New",
     "invalidFileType": "Please select an image file",
-    "uploadError": "Upload failed"
+    "uploadError": "Upload failed",
+    "dropToUpload": "Drop to upload"
   },
   "team": {
     "title": "Team Management",

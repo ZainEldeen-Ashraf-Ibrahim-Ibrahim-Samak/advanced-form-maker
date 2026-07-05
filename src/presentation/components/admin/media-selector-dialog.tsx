@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { logger } from "@/lib/dev-logger";
+import { uploadImageToCloudinary } from "@/lib/cloudinary/upload-image-client";
 
 
 
@@ -49,11 +50,7 @@ export function MediaSelectorDialog({
     onOpenChange(nextOpen);
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-
+  const uploadFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast.error(t("invalidFileType") || "Please select an image file");
       return;
@@ -63,60 +60,10 @@ export function MediaSelectorDialog({
     setUploadProgress(0);
 
     try {
-      const signRes = await fetch("/api/cloudinary/sign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fieldType: "image",
-          folder: "media-library",
-          timestamp: Math.round(Date.now() / 1000),
-        }),
-      });
-      const signData = await signRes.json();
-      if (!signRes.ok || !signData.success) {
-        throw new Error("Failed to get upload signature");
-      }
-
-      const { signature, timestamp, apikey, cloudname, folder, uploadPreset, resourceType } = signData.data;
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("api_key", apikey);
-      formData.append("timestamp", timestamp.toString());
-      formData.append("signature", signature);
-      formData.append("folder", folder);
-      if (uploadPreset) formData.append("upload_preset", uploadPreset);
-      formData.append("resource_type", resourceType || "image");
-
-      const cloudUrl = `https://api.cloudinary.com/v1_1/${cloudname}/${resourceType || "image"}/upload`;
-
-      const data: any = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", cloudUrl);
-        xhr.upload.onprogress = (ev) => {
-          if (ev.lengthComputable) {
-            setUploadProgress(Math.round((ev.loaded / ev.total) * 100));
-          }
-        };
-        xhr.onload = () => {
-          try {
-            const parsed = JSON.parse(xhr.responseText);
-            if (xhr.status >= 200 && xhr.status < 300) {
-              resolve(parsed);
-            } else {
-              reject(new Error(parsed.error?.message || `Upload failed (${xhr.status})`));
-            }
-          } catch {
-            reject(new Error("Upload failed"));
-          }
-        };
-        xhr.onerror = () => reject(new Error("Network error"));
-        xhr.send(formData);
-      });
-
+      const result = await uploadImageToCloudinary(file, "media-library", setUploadProgress);
       toast.success(t("uploadSuccess"));
       await refresh();
-      setSelected(data.secure_url);
+      setSelected(result.secure_url);
     } catch (err) {
       logger.error("Media upload error", err);
       const message = err instanceof Error ? err.message : t("uploadError") || "Upload failed";
@@ -125,6 +72,13 @@ export function MediaSelectorDialog({
       setIsUploading(false);
       setUploadProgress(0);
     }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    await uploadFile(file);
   };
 
   return (
