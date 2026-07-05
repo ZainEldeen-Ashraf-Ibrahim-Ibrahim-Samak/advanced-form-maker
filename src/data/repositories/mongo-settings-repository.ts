@@ -53,7 +53,13 @@ export class MongoSettingsRepository {
 
   async updateBranding(
     updaterId: string,
-    brandingUpdates: { siteName?: string; siteLogoUrl?: string; siteFaviconUrl?: string }
+    brandingUpdates: {
+      siteName?: string;
+      siteLogoUrl?: string;
+      siteFaviconUrl?: string;
+      addFormButtonLabel?: string;
+      addFormButtonLink?: string;
+    }
   ): Promise<ISettingsConfiguration> {
     try {
       await connectToDatabase();
@@ -64,6 +70,8 @@ export class MongoSettingsRepository {
             siteName: brandingUpdates.siteName ?? "ADVANCED FORM MAKER",
             siteLogoUrl: brandingUpdates.siteLogoUrl ?? "",
             siteFaviconUrl: brandingUpdates.siteFaviconUrl ?? "",
+            addFormButtonLabel: brandingUpdates.addFormButtonLabel ?? "Add New Form",
+            addFormButtonLink: brandingUpdates.addFormButtonLink ?? "/admin/forms",
           },
           updatedBy: updaterId,
         });
@@ -74,6 +82,8 @@ export class MongoSettingsRepository {
         siteName: brandingUpdates.siteName !== undefined ? brandingUpdates.siteName : (settings.branding?.siteName ?? "ADVANCED FORM MAKER"),
         siteLogoUrl: brandingUpdates.siteLogoUrl !== undefined ? brandingUpdates.siteLogoUrl : (settings.branding?.siteLogoUrl ?? ""),
         siteFaviconUrl: brandingUpdates.siteFaviconUrl !== undefined ? brandingUpdates.siteFaviconUrl : (settings.branding?.siteFaviconUrl ?? ""),
+        addFormButtonLabel: brandingUpdates.addFormButtonLabel !== undefined ? brandingUpdates.addFormButtonLabel : (settings.branding?.addFormButtonLabel ?? "Add New Form"),
+        addFormButtonLink: brandingUpdates.addFormButtonLink !== undefined ? brandingUpdates.addFormButtonLink : (settings.branding?.addFormButtonLink ?? "/admin/forms"),
       };
       settings.updatedBy = updaterId;
       return await settings.save();

@@ -13,12 +13,23 @@ export class ManageSettingsUseCase {
     return await this.repo.upsertSettings(updaterId, updates);
   }
 
-  async updateBranding(updaterId: string, input: { siteName?: string; siteLogoUrl?: string; siteFaviconUrl?: string }) {
+  async updateBranding(
+    updaterId: string,
+    input: {
+      siteName?: string;
+      siteLogoUrl?: string;
+      siteFaviconUrl?: string;
+      addFormButtonLabel?: string;
+      addFormButtonLink?: string;
+    }
+  ) {
     const urlField = z.union([z.string().url(), z.literal("")]).optional();
     const parsed = z.object({
       siteName: z.string().min(1).max(100).optional(),
       siteLogoUrl: urlField,
       siteFaviconUrl: urlField,
+      addFormButtonLabel: z.string().min(1).max(100).optional(),
+      addFormButtonLink: z.string().min(1).max(500).optional(),
     }).parse(input);
 
     return await this.repo.updateBranding(updaterId, parsed);

@@ -163,6 +163,8 @@ export function SettingsForm() {
   const [siteName, setSiteName] = useState("");
   const [siteLogoUrl, setSiteLogoUrl] = useState("");
   const [siteFaviconUrl, setSiteFaviconUrl] = useState("");
+  const [addFormButtonLabel, setAddFormButtonLabel] = useState("");
+  const [addFormButtonLink, setAddFormButtonLink] = useState("");
   const [logoSelectorOpen, setLogoSelectorOpen] = useState(false);
   const [faviconSelectorOpen, setFaviconSelectorOpen] = useState(false);
 
@@ -209,6 +211,8 @@ export function SettingsForm() {
       setSiteName(settings.branding?.siteName || "ADVANCED FORM MAKER");
       setSiteLogoUrl(settings.branding?.siteLogoUrl || "");
       setSiteFaviconUrl(settings.branding?.siteFaviconUrl || "");
+      setAddFormButtonLabel(settings.branding?.addFormButtonLabel || "Add New Form");
+      setAddFormButtonLink(settings.branding?.addFormButtonLink || "/admin/forms");
     }
   }, [settings]);
 
@@ -521,11 +525,40 @@ export function SettingsForm() {
             </div>
           </div>
 
+          {/* Add New Form button (top nav) */}
+          <div className="grid gap-4 sm:grid-cols-2 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="add_form_button_label">{t("addFormButtonLabelLabel")}</Label>
+              <Input
+                id="add_form_button_label"
+                type="text"
+                maxLength={100}
+                placeholder="e.g. Add New Form"
+                value={addFormButtonLabel}
+                onChange={(e) => setAddFormButtonLabel(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="add_form_button_link">{t("addFormButtonLinkLabel")}</Label>
+              <Input
+                id="add_form_button_link"
+                type="text"
+                maxLength={500}
+                placeholder="e.g. /admin/forms"
+                value={addFormButtonLink}
+                onChange={(e) => setAddFormButtonLink(e.target.value)}
+              />
+              <p className="text-xs text-zinc-500">{t("addFormButtonLinkHint")}</p>
+            </div>
+          </div>
+
           <div className="pt-2">
             <Button
               type="button"
-              disabled={isSavingBranding || !siteName.trim()}
-              onClick={() => saveBranding({ siteName, siteLogoUrl, siteFaviconUrl })}
+              disabled={isSavingBranding || !siteName.trim() || !addFormButtonLabel.trim() || !addFormButtonLink.trim()}
+              onClick={() =>
+                saveBranding({ siteName, siteLogoUrl, siteFaviconUrl, addFormButtonLabel, addFormButtonLink })
+              }
             >
               {isSavingBranding ? t("saving") : t("saveButton")}
             </Button>

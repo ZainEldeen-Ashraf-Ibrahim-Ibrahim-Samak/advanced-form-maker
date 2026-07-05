@@ -5,7 +5,7 @@ import { LanguageSwitcher } from "@/presentation/components/shared/language-swit
 import { ThemeToggle } from "@/presentation/components/shared/theme-toggle";
 import { Logo } from "@/presentation/components/shared/logo";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, Plus } from "lucide-react";
 import { LiveNotifications } from "@/presentation/components/admin/live-notifications";
 import { SidebarNav } from "@/presentation/components/admin/sidebar-nav";
 import { LogoutButton } from "@/presentation/components/admin/logout-button";
@@ -107,6 +107,18 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
 
         {/* Main content */}
         <main className="flex-1 p-6 overflow-auto">
+          <div className="flex justify-end mb-4">
+            <a
+              href={branding.addFormButtonLink}
+              target={branding.addFormButtonLink.startsWith("http") ? "_blank" : undefined}
+              rel={branding.addFormButtonLink.startsWith("http") ? "noopener noreferrer" : undefined}
+            >
+              <Button size="sm" className="gap-1.5">
+                <Plus className="h-4 w-4" />
+                {branding.addFormButtonLabel}
+              </Button>
+            </a>
+          </div>
           <LiveNotifications />
           {children}
         </main>

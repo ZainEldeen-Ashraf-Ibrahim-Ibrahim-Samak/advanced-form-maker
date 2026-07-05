@@ -18,6 +18,8 @@ export interface ISettingsConfiguration extends Document {
     siteName: string;
     siteLogoUrl: string;
     siteFaviconUrl?: string;
+    addFormButtonLabel?: string;
+    addFormButtonLink?: string;
   };
   updatedAt: Date;
   updatedBy: string;
@@ -41,6 +43,8 @@ const SettingsConfigurationSchema = new Schema<ISettingsConfiguration>({
     siteName: { type: String, default: "ADVANCED FORM MAKER", maxlength: 100 },
     siteLogoUrl: { type: String, default: "", maxlength: 500 },
     siteFaviconUrl: { type: String, default: "", maxlength: 500 },
+    addFormButtonLabel: { type: String, default: "Add New Form", maxlength: 100 },
+    addFormButtonLink: { type: String, default: "/admin/forms", maxlength: 500 },
   },
   updatedAt: { type: Date, default: Date.now },
   updatedBy: { type: String, required: true },

@@ -19,6 +19,8 @@ export interface SettingsState {
     siteName: string;
     siteLogoUrl: string;
     siteFaviconUrl?: string;
+    addFormButtonLabel?: string;
+    addFormButtonLink?: string;
   };
 }
 
@@ -43,7 +45,13 @@ export function useAdminSettings() {
           draft_retention_days: data.data.draft_retention_days ?? null,
           cloudinary_storage_threshold: data.data.cloudinary_storage_threshold ?? null,
           storage_cleanup_target: data.data.storage_cleanup_target ?? null,
-          branding: data.data.branding || { siteName: "ADVANCED FORM MAKER", siteLogoUrl: "", siteFaviconUrl: "" },
+          branding: data.data.branding || {
+            siteName: "ADVANCED FORM MAKER",
+            siteLogoUrl: "",
+            siteFaviconUrl: "",
+            addFormButtonLabel: "Add New Form",
+            addFormButtonLink: "/admin/forms",
+          },
         });
       }
     } catch (e: unknown) {
@@ -79,7 +87,13 @@ export function useAdminSettings() {
     }
   };
 
-  const saveBranding = async (input: { siteName?: string; siteLogoUrl?: string; siteFaviconUrl?: string }) => {
+  const saveBranding = async (input: {
+    siteName?: string;
+    siteLogoUrl?: string;
+    siteFaviconUrl?: string;
+    addFormButtonLabel?: string;
+    addFormButtonLink?: string;
+  }) => {
     setIsSavingBranding(true);
     try {
       const res = await fetch("/api/admin/settings/branding", {
@@ -101,6 +115,8 @@ export function useAdminSettings() {
             siteName: data.data.siteName,
             siteLogoUrl: data.data.siteLogoUrl,
             siteFaviconUrl: data.data.siteFaviconUrl ?? "",
+            addFormButtonLabel: data.data.addFormButtonLabel ?? "Add New Form",
+            addFormButtonLink: data.data.addFormButtonLink ?? "/admin/forms",
           },
         });
         toast.success(t("brandingSaveSuccess") || "Branding settings saved successfully");

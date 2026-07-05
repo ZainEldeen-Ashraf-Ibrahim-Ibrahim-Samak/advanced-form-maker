@@ -13,8 +13,15 @@ const patchSchema = z.object({
   siteName: z.string().min(1, "Site name cannot be empty").max(100, "Site name is too long").optional(),
   siteLogoUrl: urlField,
   siteFaviconUrl: urlField,
+  addFormButtonLabel: z.string().min(1, "Button label cannot be empty").max(100, "Button label is too long").optional(),
+  addFormButtonLink: z.string().min(1, "Button link cannot be empty").max(500, "Button link is too long").optional(),
 }).refine(
-  (data) => data.siteName !== undefined || data.siteLogoUrl !== undefined || data.siteFaviconUrl !== undefined,
+  (data) =>
+    data.siteName !== undefined ||
+    data.siteLogoUrl !== undefined ||
+    data.siteFaviconUrl !== undefined ||
+    data.addFormButtonLabel !== undefined ||
+    data.addFormButtonLink !== undefined,
   { message: "At least one branding field must be provided" },
 );
 
@@ -44,6 +51,8 @@ export async function PATCH(request: Request) {
       siteName: updatedSettings.branding?.siteName,
       siteLogoUrl: updatedSettings.branding?.siteLogoUrl,
       siteFaviconUrl: updatedSettings.branding?.siteFaviconUrl,
+      addFormButtonLabel: updatedSettings.branding?.addFormButtonLabel,
+      addFormButtonLink: updatedSettings.branding?.addFormButtonLink,
     });
   } catch (error: unknown) {
     logger.error("Failed to update branding settings", error);

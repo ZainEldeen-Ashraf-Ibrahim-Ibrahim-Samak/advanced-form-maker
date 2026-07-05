@@ -8,7 +8,13 @@ export function SiteName({ className = "" }: { className?: string }) {
   return <span className={className}>{SITE_NAME}</span>;
 }
 
-export async function getSiteBranding(): Promise<{ siteName: string; siteLogoUrl: string; siteFaviconUrl: string }> {
+export async function getSiteBranding(): Promise<{
+  siteName: string;
+  siteLogoUrl: string;
+  siteFaviconUrl: string;
+  addFormButtonLabel: string;
+  addFormButtonLink: string;
+}> {
   try {
     const useCase = new ManageSettingsUseCase();
     const settings = await useCase.getSettings();
@@ -16,6 +22,8 @@ export async function getSiteBranding(): Promise<{ siteName: string; siteLogoUrl
       siteName: settings?.branding?.siteName || SITE_NAME,
       siteLogoUrl: settings?.branding?.siteLogoUrl || "",
       siteFaviconUrl: settings?.branding?.siteFaviconUrl || "",
+      addFormButtonLabel: settings?.branding?.addFormButtonLabel || "Add New Form",
+      addFormButtonLink: settings?.branding?.addFormButtonLink || "/admin/forms",
     };
   } catch (error) {
     console.error("Failed to get site branding:", error);
@@ -23,6 +31,8 @@ export async function getSiteBranding(): Promise<{ siteName: string; siteLogoUrl
       siteName: SITE_NAME,
       siteLogoUrl: "",
       siteFaviconUrl: "",
+      addFormButtonLabel: "Add New Form",
+      addFormButtonLink: "/admin/forms",
     };
   }
 }
