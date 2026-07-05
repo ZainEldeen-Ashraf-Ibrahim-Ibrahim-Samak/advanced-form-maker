@@ -26,6 +26,7 @@ export interface FieldDefinition {
   isMultiple: boolean;
   dropdownOptionsEn: string[];
   dropdownOptionsAr: string[];
+  defaultValue?: string;
   sortOrder: number;
   isActive: boolean;
   createdAt: Date;
@@ -49,6 +50,7 @@ export type UpdateFieldDefinitionInput = Partial<
     | "validationRules"
     | "dropdownOptionsEn"
     | "dropdownOptionsAr"
+    | "defaultValue"
     | "sortOrder"
   >
 >;

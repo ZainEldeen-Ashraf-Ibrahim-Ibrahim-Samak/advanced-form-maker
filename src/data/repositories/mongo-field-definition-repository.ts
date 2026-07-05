@@ -20,6 +20,7 @@ function toEntity(doc: Record<string, unknown>): FieldDefinition {
     isMultiple: (doc.isMultiple as boolean) ?? false,
     dropdownOptionsEn: (doc.dropdownOptionsEn as string[]) ?? [],
     dropdownOptionsAr: (doc.dropdownOptionsAr as string[]) ?? [],
+    defaultValue: (doc.defaultValue as string) ?? "",
     sortOrder: doc.sortOrder as number,
     isActive: doc.isActive as boolean,
     createdAt: doc.createdAt as Date,

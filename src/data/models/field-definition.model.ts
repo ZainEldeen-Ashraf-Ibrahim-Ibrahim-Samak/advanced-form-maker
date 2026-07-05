@@ -17,6 +17,7 @@ export interface IFieldDefinition extends Document {
   isMultiple: boolean;
   dropdownOptionsEn: string[];
   dropdownOptionsAr: string[];
+  defaultValue?: string;
   sortOrder: number;
   isActive: boolean;
   createdAt: Date;
@@ -62,6 +63,12 @@ const fieldDefinitionSchema = new Schema<IFieldDefinition>(
     dropdownOptionsAr: {
       type: [String],
       default: [],
+    },
+    defaultValue: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
     },
     sortOrder: {
       type: Number,

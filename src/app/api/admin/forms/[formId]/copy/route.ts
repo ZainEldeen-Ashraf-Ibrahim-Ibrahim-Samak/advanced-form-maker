@@ -43,6 +43,9 @@ export async function POST(_request: Request, { params }: { params: Promise<{ fo
       contactFormFields: sourceForm.contactFormFields,
       contactFormLocked: sourceForm.contactFormLocked,
       canAddMoreReplies: sourceForm.canAddMoreReplies,
+      multiInstanceEnabled: sourceForm.multiInstanceEnabled,
+      maxInstances: sourceForm.maxInstances,
+      isActive: sourceForm.isActive,
       isLocked: false, // new copy starts unlocked
     });
 
@@ -57,6 +60,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ fo
         isMultiple: field.isMultiple,
         dropdownOptionsEn: field.dropdownOptionsEn,
         dropdownOptionsAr: field.dropdownOptionsAr,
+        defaultValue: field.defaultValue,
         sortOrder: field.sortOrder,
       });
     }

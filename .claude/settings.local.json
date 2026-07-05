@@ -33,7 +33,8 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code} %{url_effective}\\\\n\" -L http://localhost:3000/)",
       "Bash(curl -s http://localhost:3000/en/admin/login)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/ar/admin/login)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -L http://localhost:3000/ar/admin/dashboard)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -L http://localhost:3000/ar/admin/dashboard)",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -First 30)"
     ]
   }
 }

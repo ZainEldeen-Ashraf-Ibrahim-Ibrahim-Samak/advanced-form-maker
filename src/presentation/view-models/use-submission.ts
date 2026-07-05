@@ -35,6 +35,22 @@ interface DraftState {
   formData: Record<string, FormFieldData>;
 }
 
+function resolveDefaultValue(field: FieldDefinition, locale: string): string | undefined {
+  const def = field.defaultValue?.trim();
+  if (!def) return undefined;
+  if (field.inputType === "image" || field.inputType === "file" || field.inputType === "camera") {
+    return undefined;
+  }
+  if (field.inputType === "dropdown") {
+    // Defaults are stored as the English option; map to the Arabic option by index.
+    const index = field.dropdownOptionsEn.indexOf(def);
+    if (index === -1) return undefined;
+    if (locale === "ar") return field.dropdownOptionsAr[index];
+    return def;
+  }
+  return def;
+}
+
 interface SubmissionFieldPayload {
   fieldDefinitionId: string;
   value: string | number | string[] | null;
@@ -458,7 +474,11 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
         if (!hasDraftData) {
           const initialForm: Record<string, FormFieldData> = {};
           data.fields.forEach((f: FieldDefinition) => {
-            initialForm[f.id] = { fieldDefinitionId: f.id };
+            const defaultValue = resolveDefaultValue(f, locale);
+            initialForm[f.id] =
+              defaultValue !== undefined
+                ? { fieldDefinitionId: f.id, value: f.isMultiple && f.inputType === "dropdown" ? [defaultValue] : defaultValue }
+                : { fieldDefinitionId: f.id };
           });
           updateDraft({
             clientName: "",

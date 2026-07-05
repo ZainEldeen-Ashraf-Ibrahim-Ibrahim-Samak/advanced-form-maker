@@ -235,6 +235,9 @@
     "sortOrder": "ترتيب العرض",
     "allowMultiple": "السماح بقيم متعددة (معرض/قائمة)",
     "enableRegex": "تفعيل التحقق بالتعبير النمطي",
+    "defaultValue": "القيمة الافتراضية",
+    "defaultValuePlaceholder": "قيمة معبأة مسبقًا تظهر للمستخدم (اختياري)",
+    "noDefaultValue": "بدون قيمة افتراضية",
     "regexType": "نوع التحقق",
     "regexTypes": {
       "email": "البريد الإلكتروني",

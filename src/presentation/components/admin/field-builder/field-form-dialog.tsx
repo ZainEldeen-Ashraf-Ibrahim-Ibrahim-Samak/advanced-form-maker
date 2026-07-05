@@ -34,6 +34,7 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
   const [regexType, setRegexType] = useState<"email" | "phone" | "name">("email");
   const [dropdownOptionsEn, setDropdownOptionsEn] = useState<string[]>([""]);
   const [dropdownOptionsAr, setDropdownOptionsAr] = useState<string[]>([""]);
+  const [defaultValue, setDefaultValue] = useState("");
 
   useEffect(() => {
     if (field) {
@@ -51,6 +52,7 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
       setDropdownOptionsAr(
         field.dropdownOptionsAr.length > 0 ? field.dropdownOptionsAr : [""]
       );
+      setDefaultValue(field.defaultValue ?? "");
     } else {
       setNameEn("");
       setNameAr("");
@@ -61,6 +63,7 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
       setRegexType("email");
       setDropdownOptionsEn([""]);
       setDropdownOptionsAr([""]);
+      setDefaultValue("");
     }
   }, [field, open]);
 
@@ -83,6 +86,10 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
         data.dropdownOptionsEn = dropdownOptionsEn.filter((o) => o.trim() !== "");
         data.dropdownOptionsAr = dropdownOptionsAr.filter((o) => o.trim() !== "");
       }
+
+      const supportsDefault =
+        inputType === "text" || inputType === "number" || inputType === "date" || inputType === "dropdown";
+      data.defaultValue = supportsDefault ? defaultValue.trim() : "";
 
       await onSave(data);
     } finally {
@@ -265,6 +272,44 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
                 </Button>
               </div>
             </>
+          )}
+
+          {(inputType === "text" || inputType === "number" || inputType === "date") && (
+            <div className="space-y-2">
+              <Label htmlFor="defaultValue">{t("defaultValue")}</Label>
+              <Input
+                id="defaultValue"
+                type={inputType === "number" ? "number" : inputType === "date" ? "date" : "text"}
+                value={defaultValue}
+                onChange={(e) => setDefaultValue(e.target.value)}
+                maxLength={500}
+                placeholder={t("defaultValuePlaceholder")}
+              />
+            </div>
+          )}
+
+          {inputType === "dropdown" && (
+            <div className="space-y-2">
+              <Label>{t("defaultValue")}</Label>
+              <Select
+                value={defaultValue === "" ? "__none__" : defaultValue}
+                onValueChange={(v) => setDefaultValue(v && v !== "__none__" ? v : "")}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("defaultValuePlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">{t("noDefaultValue")}</SelectItem>
+                  {dropdownOptionsEn
+                    .filter((o) => o.trim() !== "")
+                    .map((opt, i) => (
+                      <SelectItem key={i} value={opt}>
+                        {opt}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
           )}
 
           <div className="flex justify-end gap-2 pt-2">

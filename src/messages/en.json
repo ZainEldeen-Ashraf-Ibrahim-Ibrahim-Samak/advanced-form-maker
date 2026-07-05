@@ -235,6 +235,9 @@
     "sortOrder": "Sort Order",
     "allowMultiple": "Allow Multiple Values (Gallery/List)",
     "enableRegex": "Enable Regex Validation",
+    "defaultValue": "Default Value",
+    "defaultValuePlaceholder": "Pre-filled value shown to the user (optional)",
+    "noDefaultValue": "No default",
     "regexType": "Regex Type",
     "regexTypes": {
       "email": "Email",

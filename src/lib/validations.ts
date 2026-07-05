@@ -58,6 +58,7 @@ export const createFieldDefinitionSchema = z
     validationRules: validationRulesSchema.optional().default({}),
     dropdownOptionsEn: z.array(z.string()).optional().default([]),
     dropdownOptionsAr: z.array(z.string()).optional().default([]),
+    defaultValue: z.string().max(500).optional().default(""),
     sortOrder: z.number().int().min(0).optional(),
   })
   .refine(
@@ -98,6 +99,7 @@ export const updateFieldDefinitionSchema = z.object({
   validationRules: validationRulesSchema.optional(),
   dropdownOptionsEn: z.array(z.string()).optional(),
   dropdownOptionsAr: z.array(z.string()).optional(),
+  defaultValue: z.string().max(500).optional(),
   sortOrder: z.number().int().min(0).optional(),
 });
 
