@@ -536,9 +536,14 @@ export function useSubmission(tokenOrId: string): UseSubmissionReturn {
             }
 
             const matchedVal = data.values?.find((v: FieldValue) => v.fieldDefinitionId === f.id);
+            const defaultValue = matchedVal ? undefined : resolveDefaultValue(f, locale);
             reconciledFormData[f.id] = {
               fieldDefinitionId: f.id,
-              value: matchedVal?.value,
+              value: matchedVal
+                ? matchedVal.value
+                : defaultValue !== undefined
+                  ? (f.isMultiple && f.inputType === "dropdown" ? [defaultValue] : defaultValue)
+                  : undefined,
               mediaUrl: matchedVal?.mediaUrl,
               mediaPublicId: matchedVal?.mediaPublicId,
               mediaItems: matchedVal?.mediaItems || [],
