@@ -688,6 +688,8 @@
     "siteLogoLabel": "شعار الموقع",
     "siteFaviconLabel": "أيقونة الموقع (Favicon)",
     "siteFaviconHint": "تظهر في تبويب المتصفح. استخدم صورة مربعة.",
+    "addFormButtonSectionTitle": "الزر العلوي \"إضافة نموذج جديد\"",
+    "addFormButtonSectionHint": "يظهر هذا الزر أعلى كل صفحة في الموقع بالكامل — تحكم في نصه والوجهة التي ينتقل إليها من هنا.",
     "addFormButtonLabelLabel": "نص زر \"إضافة نموذج جديد\"",
     "addFormButtonLinkLabel": "رابط زر \"إضافة نموذج جديد\"",
     "addFormButtonLinkHint": "الوجهة التي ينتقل إليها الزر العلوي، مثل /admin/forms أو رابط كامل.",

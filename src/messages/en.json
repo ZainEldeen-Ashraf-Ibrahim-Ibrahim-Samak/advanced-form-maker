@@ -688,6 +688,8 @@
     "siteLogoLabel": "Site Logo",
     "siteFaviconLabel": "Site Icon (Favicon)",
     "siteFaviconHint": "Shown in the browser tab. Use a square image.",
+    "addFormButtonSectionTitle": "\"Add New Form\" Top Button",
+    "addFormButtonSectionHint": "This button appears at the top of every page across the whole site — control its text and where it links to here.",
     "addFormButtonLabelLabel": "\"Add New Form\" Button Text",
     "addFormButtonLinkLabel": "\"Add New Form\" Button Link",
     "addFormButtonLinkHint": "Where the top button navigates to, e.g. /admin/forms or a full URL.",

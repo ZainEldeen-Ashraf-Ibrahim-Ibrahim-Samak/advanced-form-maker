@@ -525,30 +525,40 @@ export function SettingsForm() {
             </div>
           </div>
 
-          {/* Add New Form button (top nav) */}
-          <div className="grid gap-4 sm:grid-cols-2 pt-2">
-            <div className="space-y-2">
-              <Label htmlFor="add_form_button_label">{t("addFormButtonLabelLabel")}</Label>
-              <Input
-                id="add_form_button_label"
-                type="text"
-                maxLength={100}
-                placeholder="e.g. Add New Form"
-                value={addFormButtonLabel}
-                onChange={(e) => setAddFormButtonLabel(e.target.value)}
-              />
+          {/* Add New Form button (shown at the top of every admin page, site-wide) */}
+          <div className="space-y-3 pt-4 mt-2 border-t border-dashed border-zinc-200 dark:border-zinc-800">
+            <div className="space-y-0.5">
+              <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                {t("addFormButtonSectionTitle")}
+              </h4>
+              <p className="text-xs text-muted-foreground">{t("addFormButtonSectionHint")}</p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="add_form_button_link">{t("addFormButtonLinkLabel")}</Label>
-              <Input
-                id="add_form_button_link"
-                type="text"
-                maxLength={500}
-                placeholder="e.g. /admin/forms"
-                value={addFormButtonLink}
-                onChange={(e) => setAddFormButtonLink(e.target.value)}
-              />
-              <p className="text-xs text-zinc-500">{t("addFormButtonLinkHint")}</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="add_form_button_label">{t("addFormButtonLabelLabel")}</Label>
+                <Input
+                  id="add_form_button_label"
+                  type="text"
+                  maxLength={100}
+                  required
+                  placeholder="e.g. Add New Form"
+                  value={addFormButtonLabel}
+                  onChange={(e) => setAddFormButtonLabel(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="add_form_button_link">{t("addFormButtonLinkLabel")}</Label>
+                <Input
+                  id="add_form_button_link"
+                  type="text"
+                  maxLength={500}
+                  required
+                  placeholder="e.g. /admin/forms"
+                  value={addFormButtonLink}
+                  onChange={(e) => setAddFormButtonLink(e.target.value)}
+                />
+                <p className="text-xs text-zinc-500">{t("addFormButtonLinkHint")}</p>
+              </div>
             </div>
           </div>
 
