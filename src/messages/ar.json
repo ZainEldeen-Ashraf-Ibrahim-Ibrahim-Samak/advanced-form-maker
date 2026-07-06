@@ -182,7 +182,7 @@
     "iconSuggestionQuota": "تم تجاوز حصة الذكاء الاصطناعي. أعد المحاولة خلال {time}.",
     "copyLink": "نسخ الرابط",
     "qrCode": "رمز QR",
-    "addNewForm": "إضافة {name} جديد",
+    "addNewForm": "إضافة طلب جديد الي {name}",
     "editButtonLabelAr": "نص الزر (عربي)",
     "editButtonLabelEn": "نص الزر (إنجليزي)",
     "helperButtonLabel": "نص مخصص يظهر على زر الإجراء في البطاقة. اتركه فارغاً لاستخدام النص الافتراضي \"إضافة {name} جديد\"."
