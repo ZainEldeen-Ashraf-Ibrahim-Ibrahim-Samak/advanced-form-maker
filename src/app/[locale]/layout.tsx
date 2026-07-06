@@ -29,6 +29,8 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {
