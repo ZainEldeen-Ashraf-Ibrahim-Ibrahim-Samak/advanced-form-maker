@@ -27,7 +27,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ fo
       return errorResponse("Form not found", 404, "NOT_FOUND");
     }
 
-    const sourceFields = await fieldRepo.findByFormId(formId, true);
+    const sourceFields = await fieldRepo.findByFormId(formId, false);
 
     // Create the new form with " - copy" appended to the name
     const newForm = await formsUseCase.createForm({
@@ -45,7 +45,6 @@ export async function POST(_request: Request, { params }: { params: Promise<{ fo
       canAddMoreReplies: sourceForm.canAddMoreReplies,
       multiInstanceEnabled: sourceForm.multiInstanceEnabled,
       maxInstances: sourceForm.maxInstances,
-      isActive: sourceForm.isActive,
       isLocked: false, // new copy starts unlocked
     });
 
