@@ -147,6 +147,8 @@ export function AdminDashboard() {
     }
   };
 
+  const totalFormsActive = cards.filter((c) => c.cardType === "form" && c.isActive).length;
+
   const getLiveCount = (slug: string) => {
     if (slug === "total") return counts.total;
     if (slug === "pending") return counts.pending;
@@ -164,6 +166,7 @@ export function AdminDashboard() {
       "@draft": counts.draft,
       "@viewed": counts.viewed,
       "@needs_rewrite": counts.needs_rewrite,
+      "@total_forms_active": totalFormsActive,
     };
     if (tokenMap[raw.trim()] !== undefined) return tokenMap[raw.trim()];
     return Object.entries(tokenMap).reduce(

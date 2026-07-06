@@ -45,6 +45,7 @@ export async function PATCH(request: Request) {
     const updaterId = session.user.id || "admin";
     const updatedSettings = await useCase.updateBranding(updaterId, bodyResult.data);
 
+    revalidatePath("/[locale]", "layout");
     revalidatePath("/", "layout");
 
     return successResponse({

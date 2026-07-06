@@ -13,6 +13,7 @@ export interface FormSummaryCardItem {
   sortOrder: number;
   submissionCount: number;
   isLocked: boolean;
+  isActive: boolean;
   contactFormLocked: boolean;
   displayNameAr: string | null;
   displayNameEn: string | null;
@@ -121,6 +122,7 @@ export class ManageDashboardCardsUseCase {
           sortOrder: card.sortOrder,
           submissionCount,
           isLocked: template.isLocked,
+          isActive: template.isActive,
           contactFormLocked: template.contactFormLocked,
           displayNameAr: card.displayNameAr,
           displayNameEn: card.displayNameEn,

@@ -168,7 +168,7 @@
     "helperCardNameAr": "عنوان البطاقة الظاهر للمستخدمين العرب. اتركه فارغاً لاستخدام الاسم الافتراضي.",
     "helperIcon": "Pick a visual icon for this card or click ✦ to get an AI suggestion based on the card name.",
     "helperMetricLabel": "Optional label shown below the number on the card, e.g. \"Submissions\" or \"Pending\". Leave blank to use the default.",
-    "helperMetricValue": "Override the live count with a static number or text. Use @total, @pending, @draft, @viewed, or @needs_rewrite to link to the real-time count. Leave blank to show the automatic value.",
+    "helperMetricValue": "Override the live count with a static number or text. Use @total, @pending, @draft, @viewed, @needs_rewrite, or @total_forms_active to link to the real-time count. Leave blank to show the automatic value.",
     "helperVisibility": "Toggle the eye icon to show or hide this card on the dashboard.",
     "helperDragReorder": "Drag the grip handle to change the order cards appear on the dashboard.",
     "helperNewCardEn": "Required. The English name for your new custom card.",
