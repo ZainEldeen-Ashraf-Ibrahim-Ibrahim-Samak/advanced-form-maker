@@ -234,7 +234,15 @@ export async function GET(req: Request) {
       }
     } 
     else if (format === "pdf") {
-      const doc = new jsPDF();
+      const rawHeaders = Array.from(
+        rawRows.reduce<Set<string>>((keys, row) => {
+          Object.keys(row).forEach((k) => keys.add(k));
+          return keys;
+        }, new Set<string>())
+      );
+      // Wide submissions (many custom fields/cards) don't fit a portrait page —
+      // use landscape and let columns wrap instead of being squeezed unreadable.
+      const doc = new jsPDF({ orientation: rawHeaders.length > 6 ? "landscape" : "portrait" });
       let fontName = "helvetica";
       const fontPath = path.join(process.cwd(), "public", "fonts", "Amiri-Regular.ttf");
       if (fs.existsSync(fontPath)) {
@@ -303,19 +311,17 @@ export async function GET(req: Request) {
       doc.setFontSize(14);
       doc.text("Raw Submissions Data", 14, currentY);
       
-      const headers = Array.from(
-        rawRows.reduce<Set<string>>((keys, row) => {
-          Object.keys(row).forEach((k) => keys.add(k));
-          return keys;
-        }, new Set<string>())
-      );
-      const pdfBody = rawRows.map((row) => headers.map((h) => String(row[h] ?? "")));
+      const pdfBody = rawRows.map((row) => rawHeaders.map((h) => String(row[h] ?? "")));
 
       autoTable(doc, {
-        head: [headers],
+        head: [rawHeaders],
         body: pdfBody,
         startY: currentY + 5,
-        styles: { font: fontName, fontStyle: "normal", fontSize: 9 },
+        styles: { font: fontName, fontStyle: "normal", fontSize: rawHeaders.length > 12 ? 7 : 9, overflow: "linebreak", cellWidth: "wrap" },
+        headStyles: { fontSize: rawHeaders.length > 12 ? 7 : 9 },
+        horizontalPageBreak: true,
+        horizontalPageBreakRepeat: 0,
+        margin: { top: 20, left: 8, right: 8 },
       });
 
       bodyContent = Buffer.from(doc.output("arraybuffer"));
