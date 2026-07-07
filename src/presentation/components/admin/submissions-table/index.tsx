@@ -243,12 +243,11 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
 
       const iframe = document.createElement("iframe");
       iframe.style.position = "fixed";
-      iframe.style.right = "0";
-      iframe.style.bottom = "0";
-      iframe.style.width = "0";
-      iframe.style.height = "0";
+      iframe.style.top = "-10000px";
+      iframe.style.left = "-10000px";
+      iframe.style.width = "1px";
+      iframe.style.height = "1px";
       iframe.style.border = "none";
-      iframe.src = blobUrl;
 
       iframe.onload = () => {
         try {
@@ -260,6 +259,10 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
       };
 
       document.body.appendChild(iframe);
+      // Assign src only after the iframe is attached to the DOM — Chrome's
+      // built-in PDF viewer won't reliably initialize inside a detached
+      // or zero-size iframe, which silently breaks print().
+      iframe.src = blobUrl;
 
       // Clean up the iframe and blob URL after printing is likely done
       const cleanup = () => {
