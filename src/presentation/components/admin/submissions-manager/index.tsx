@@ -243,7 +243,7 @@ export function SubmissionsManager() {
       {!isLoadingCards && cards.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           {cards
-            .filter((c) => c.visible)
+            .filter((c) => c.visible && !(c.cardType === "stat" && c.slug === "total"))
             .map((card) => {
               if (card.cardType === "stat") {
                 const title = locale === "ar"
