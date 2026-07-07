@@ -381,8 +381,10 @@ export function useAiExtraction({
   };
 
   const confirmOverwrite = (confirm: boolean) => {
-    if (pendingDataRef.current) {
-      applyExtraction(pendingDataRef.current, confirm);
+    const pendingData = pendingDataRef.current;
+    if (pendingData) {
+      pendingDataRef.current = null;
+      applyExtraction(pendingData, confirm);
     }
   };
 
