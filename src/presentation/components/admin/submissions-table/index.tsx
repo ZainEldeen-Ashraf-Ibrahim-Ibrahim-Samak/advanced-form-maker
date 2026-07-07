@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Copy, Eye, MoreHorizontal, Trash2, Loader2, Download, FileText, FileSpreadsheet, File, Phone, MessageCircle } from "lucide-react";
+import { Copy, Eye, MoreHorizontal, Trash2, Loader2, Download, FileText, FileSpreadsheet, File, Phone, MessageCircle, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -76,6 +76,7 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isDeletingMany, setIsDeletingMany] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   const toggleSelectAll = () => {
     if (selectedIds.length === submissions.length && submissions.length > 0) {
@@ -220,6 +221,59 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
     }
   };
 
+  const handlePrint = async (data: Submission[]) => {
+    if (data.length === 0) return;
+    setIsPrinting(true);
+    try {
+      const params = new URLSearchParams({ collection: "submissions", format: "pdf" });
+
+      const isSubset = data.length < submissions.length;
+      if (isSubset) {
+        params.set("ids", data.map((s) => s.id).join(","));
+      } else {
+        if (exportFormId && exportFormId !== "all") params.set("formId", exportFormId);
+        if (exportStatusFilter && exportStatusFilter !== "all") params.set("status", exportStatusFilter);
+      }
+
+      const response = await fetch(`/api/admin/system/export?${params.toString()}`);
+      if (!response.ok) throw new Error("Failed to generate PDF");
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const iframe = document.createElement("iframe");
+      iframe.style.position = "fixed";
+      iframe.style.right = "0";
+      iframe.style.bottom = "0";
+      iframe.style.width = "0";
+      iframe.style.height = "0";
+      iframe.style.border = "none";
+      iframe.src = blobUrl;
+
+      iframe.onload = () => {
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+        } catch {
+          toast.error(tc("printFailed") || "Failed to open print dialog");
+        }
+      };
+
+      document.body.appendChild(iframe);
+
+      // Clean up the iframe and blob URL after printing is likely done
+      const cleanup = () => {
+        document.body.removeChild(iframe);
+        URL.revokeObjectURL(blobUrl);
+      };
+      setTimeout(cleanup, 60000);
+    } catch {
+      toast.error(tc("printFailed") || "Failed to print submissions");
+    } finally {
+      setIsPrinting(false);
+    }
+  };
+
   if (isLoading && submissions.length === 0) {
     return (
       <div className="rounded-md border">
@@ -336,9 +390,22 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button 
-              variant="destructive" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePrint(submissions.filter(s => selectedIds.includes(s.id)))}
+              disabled={isPrinting}
+            >
+              {isPrinting ? (
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Printer className="me-2 h-4 w-4" />
+              )}
+              {tc("print") || "Print"}
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
               onClick={handleDeleteSelectedClick}
               disabled={isDeletingMany}
             >
@@ -353,9 +420,23 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
         </div>
       )}
       <div className={`flex items-center justify-end gap-2 mb-4 ${selectedIds.length > 0 ? "hidden" : ""}`}>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handlePrint(submissions)}
+          disabled={submissions.length === 0 || isPrinting}
+          title={submissions.length === 0 ? t("noSubmissionsToExport") || "No submissions to export" : ""}
+        >
+          {isPrinting ? (
+            <Loader2 className="me-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Printer className="me-2 h-4 w-4" />
+          )}
+          {tc("print") || "Print"}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => handleExport("pdf", submissions, "all-submissions")}
           disabled={submissions.length === 0}
           title={submissions.length === 0 ? t("noSubmissionsToExport") || "No submissions to export" : ""}
@@ -532,6 +613,10 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
                         <DropdownMenuItem onClick={() => handleCopyLink(sub.accessToken)}>
                           <Copy className="me-2 h-4 w-4" />
                           {t("copyLink")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handlePrint([sub])}>
+                          <Printer className="me-2 h-4 w-4" />
+                          {tc("print") || "Print"}
                         </DropdownMenuItem>
                         <DropdownMenuSub>
                           <DropdownMenuSubTrigger>

@@ -71,7 +71,9 @@
     "loggedInAs": "مسجل الدخول باسم:",
     "whatsapp": "واتساب",
     "call": "اتصال",
-    "exportFailed": "فشل تصدير البيانات"
+    "exportFailed": "فشل تصدير البيانات",
+    "print": "طباعة",
+    "printFailed": "فشلت الطباعة"
   },
   "auth": {
     "login": "تسجيل الدخول",

@@ -71,7 +71,9 @@
     "loggedInAs": "Logged in as:",
     "whatsapp": "WhatsApp",
     "call": "Call",
-    "exportFailed": "Export failed"
+    "exportFailed": "Export failed",
+    "print": "Print",
+    "printFailed": "Failed to print"
   },
   "auth": {
     "login": "Login",
