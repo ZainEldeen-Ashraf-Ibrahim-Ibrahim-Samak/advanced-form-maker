@@ -117,7 +117,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "No data found for collection" }, { status: 404 });
     }
 
-    let flattenedData: Record<string, any>[] = [];
+    const groupedData: Record<string, Record<string, any>[]> = {};
     let exportTitle = targetModelName;
 
     // Special handling for Submission to merge custom fields and form names
@@ -154,15 +154,20 @@ export async function GET(req: Request) {
         exportTitle = "Submissions";
       }
 
-      flattenedData = data.map((doc: any, index: number) => {
+      data.forEach((doc: any) => {
         const docIdStr = doc._id.toString();
         const templateIdStr = doc.formTemplateId?.toString();
         const primaryRecord = doc.contactRecords?.[0];
+        
+        const formName = templatesMap.get(templateIdStr) || "Other Submissions";
+        if (!groupedData[formName]) {
+          groupedData[formName] = [];
+        }
 
         // Build clean readable row
         const row: Record<string, any> = {
-          "#": index + 1,
-          "Form": templatesMap.get(templateIdStr) || "—",
+          "#": groupedData[formName].length + 1,
+          "Form": formName,
           "Client Name": doc.clientName || primaryRecord?.name || "—",
           "Contact Name": primaryRecord?.name || "—",
           "Contact Email": primaryRecord?.email || "—",
@@ -192,11 +197,11 @@ export async function GET(req: Request) {
           }
         }
 
-        return row;
+        groupedData[formName].push(row);
       });
     } else {
       // General flattening for other collections
-      flattenedData = data.map((doc: any, index: number) => {
+      groupedData[exportTitle] = data.map((doc: any, index: number) => {
         const { _id, __v, ...rest } = doc;
         const flat = {};
         for (const [key, value] of Object.entries(rest)) {
@@ -211,41 +216,42 @@ export async function GET(req: Request) {
     }
 
     const format = searchParams.get("format") || "xlsx";
-
-    // Clean sheet name to fit 31-char limit and exclude invalid characters (like :, ?, *, /, \)
-    const cleanSheetName = exportTitle
-      .replace(/[:\?\*\/\\\[\]]/g, "")
-      .substring(0, 31) || "Sheet1";
-
-    // Generate XLSX workbook
-    const worksheet = xlsx.utils.json_to_sheet(flattenedData);
-    const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, worksheet, cleanSheetName);
-
     let bodyContent: Buffer | string;
     let contentType: string;
 
     if (format === "xlsx") {
+      const workbook = xlsx.utils.book_new();
+      
+      for (const [groupName, rows] of Object.entries(groupedData)) {
+        // Clean sheet name to fit 31-char limit and exclude invalid characters (like :, ?, *, /, \)
+        const cleanSheetName = groupName.replace(/[:\?\*\/\\\[\]]/g, "").substring(0, 31) || "Sheet1";
+        const worksheet = xlsx.utils.json_to_sheet(rows);
+        
+        let finalSheetName = cleanSheetName;
+        let counter = 1;
+        while (workbook.SheetNames.includes(finalSheetName)) {
+          finalSheetName = `${cleanSheetName.substring(0, 28)}_${counter}`;
+          counter++;
+        }
+        
+        xlsx.utils.book_append_sheet(workbook, worksheet, finalSheetName);
+      }
+      
       bodyContent = xlsx.write(workbook, { type: "buffer", bookType: "xlsx" });
       contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     } else if (format === "csv") {
+      const workbook = xlsx.utils.book_new();
+      const allRows = Object.values(groupedData).flat();
+      const worksheet = xlsx.utils.json_to_sheet(allRows);
+      xlsx.utils.book_append_sheet(workbook, worksheet, "Data");
+      
       bodyContent = xlsx.write(workbook, { type: "buffer", bookType: "csv" });
       contentType = "text/csv";
     } else if (format === "json") {
-      bodyContent = JSON.stringify(flattenedData, null, 2);
+      bodyContent = JSON.stringify(groupedData, null, 2);
       contentType = "application/json";
     } else if (format === "pdf") {
-      const headers = Array.from(
-        flattenedData.reduce<Set<string>>((keys, row) => {
-          Object.keys(row).forEach((k) => keys.add(k));
-          return keys;
-        }, new Set<string>())
-      );
-      const pdfBody = flattenedData.map((row) => headers.map((h) => String(row[h] ?? "")));
-
-      // Wide submissions (many custom fields/cards) don't fit a portrait page —
-      // use landscape and let columns wrap instead of being squeezed unreadable.
-      const doc = new jsPDF({ orientation: headers.length > 6 ? "landscape" : "portrait" });
+      const doc = new jsPDF({ orientation: "landscape" });
       let fontName = "helvetica";
       const fontPath = path.join(process.cwd(), "public", "fonts", "Amiri-Regular.ttf");
       if (fs.existsSync(fontPath)) {
@@ -257,21 +263,42 @@ export async function GET(req: Request) {
       }
 
       doc.setProperties({ title: exportTitle });
-      doc.setFont(fontName);
-      doc.setFontSize(16);
-      doc.text(exportTitle, 14, 18);
-      doc.setFontSize(10);
+      
+      let startY = 14;
+      let firstGroup = true;
 
-      autoTable(doc, {
-        head: [headers],
-        body: pdfBody,
-        startY: 28,
-        styles: { font: fontName, fontStyle: "normal", fontSize: headers.length > 12 ? 7 : 9, overflow: "linebreak", cellWidth: "wrap" },
-        headStyles: { fontSize: headers.length > 12 ? 7 : 9 },
-        horizontalPageBreak: true,
-        horizontalPageBreakRepeat: 0,
-        margin: { top: 28, left: 8, right: 8 },
-      });
+      for (const [groupName, rows] of Object.entries(groupedData)) {
+        if (!firstGroup) {
+          doc.addPage();
+          startY = 14;
+        }
+        firstGroup = false;
+
+        doc.setFont(fontName);
+        doc.setFontSize(16);
+        doc.text(groupName, 14, startY + 4);
+        doc.setFontSize(10);
+        startY += 12;
+
+        const headers = Array.from(
+          rows.reduce<Set<string>>((keys, row) => {
+            Object.keys(row).forEach((k) => keys.add(k));
+            return keys;
+          }, new Set<string>())
+        );
+        const pdfBody = rows.map((row) => headers.map((h) => String(row[h] ?? "")));
+
+        autoTable(doc, {
+          head: [headers],
+          body: pdfBody,
+          startY: startY,
+          styles: { font: fontName, fontStyle: "normal", fontSize: headers.length > 12 ? 7 : 9, overflow: "linebreak", cellWidth: "wrap" },
+          headStyles: { fontSize: headers.length > 12 ? 7 : 9 },
+          horizontalPageBreak: true,
+          horizontalPageBreakRepeat: 0,
+          margin: { top: 14, left: 8, right: 8 },
+        });
+      }
 
       bodyContent = Buffer.from(doc.output("arraybuffer"));
       contentType = "application/pdf";
