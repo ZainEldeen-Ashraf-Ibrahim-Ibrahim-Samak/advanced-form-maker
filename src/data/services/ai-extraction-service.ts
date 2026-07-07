@@ -114,7 +114,12 @@ Bilingual & Multi-Language Instructions:
 - For each custom field value in "fieldValues", provide a confidence score between 0.0 and 1.0 reflecting how clear the reading is.
 - If a field is not found or is completely unreadable on the document, set its value to null and confidence to 0.0.
 - For date fields, normalize the value to YYYY-MM-DD format.
-- For phone numbers, extract all digits, remove unnecessary formatting (e.g., spaces, dashes, parentheses), and normalize the phone format (e.g., preserving leading + or zeros as appropriate).`;
+- For phone numbers, extract all digits, remove unnecessary formatting (e.g., spaces, dashes, parentheses), and normalize the phone format (e.g., preserving leading + or zeros as appropriate).
+
+Reading Quality Instructions:
+- Read printed/typed (computer-generated) text with the same care and attention as handwritten text. Do not skip, skim, or assume printed text is "already clear" — zoom into the actual pixels of every field, printed or handwritten, before extracting its value.
+- Pay special attention to visually similar digits, which are easy to misread in both printed and handwritten numerals: 6 vs 7 (and their Arabic-Indic equivalents ٦ vs ٧), 0 vs 8, 1 vs 7, 5 vs 6. When a digit is ambiguous, look at its full shape (e.g. a 6 has a closed loop at the bottom, a 7 does not) rather than guessing from context.
+- Never guess or hallucinate a value for a field that is not clearly legible; if genuinely unreadable, set value to null and confidence to 0.0 rather than outputting a low-confidence guess.`;
 
   if (options?.multiInstanceEnabled) {
     prompt += `\n- Since multiple records are allowed, if the document contains a list/table/sheet with multiple records, extract ALL rows into the 'records' array in the response schema. Capped at ${options.maxInstances || 50} records. The top-level 'contactData' and 'fieldValues' should represent the FIRST record.`;
