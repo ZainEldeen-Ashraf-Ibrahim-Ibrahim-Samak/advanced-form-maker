@@ -124,6 +124,49 @@ export function useAiExtraction({
     });
   };
 
+  // Re-encode an oversized image as JPEG, downscaling only as much as needed to
+  // fit the size cap. Full-resolution phone photos (common for handwritten
+  // documents) can exceed the 10MB limit even though the content itself is
+  // perfectly extractable — reject only if it still doesn't fit after this.
+  const compressImageIfNeeded = (file: File, maxSizeBytes: number): Promise<File> => {
+    if (file.size <= maxSizeBytes) return Promise.resolve(file);
+
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const canvas = document.createElement("canvas");
+        const { width, height } = img;
+        let scale = 1;
+
+        const tryEncode = (): void => {
+          canvas.width = Math.round(width * scale);
+          canvas.height = Math.round(height * scale);
+          const ctx = canvas.getContext("2d");
+          if (!ctx) { reject(new Error("invalidFile")); return; }
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob((blob) => {
+            if (!blob) { reject(new Error("invalidFile")); return; }
+            if (blob.size <= maxSizeBytes || scale <= 0.2) {
+              resolve(new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }));
+            } else {
+              scale -= 0.15;
+              tryEncode();
+            }
+          }, "image/jpeg", 0.85);
+        };
+
+        tryEncode();
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("invalidFile"));
+      };
+      img.src = objectUrl;
+    });
+  };
+
   const applyExtraction = useCallback((result: ExtractionResult, overwrite: boolean) => {
     const newFilledFields = new Set<string>();
     const newFilledKeys = new Set<string>();
@@ -187,15 +230,24 @@ export function useAiExtraction({
     pendingDataRef.current = null;
 
     try {
-      // 1. Client-side validation: Max 10MB size
       const maxSizeBytes = 10 * 1024 * 1024;
-      if (file.size > maxSizeBytes) {
-        throw new Error("fileTooLarge");
-      }
-
       const fileKind = getAiExtractionFileKind(file);
       if (!fileKind) {
         throw new Error("invalidFile");
+      }
+
+      // 1. Images: downscale/re-compress oversized photos instead of rejecting them outright
+      if (fileKind === "image" && file.size > maxSizeBytes) {
+        try {
+          file = await compressImageIfNeeded(file, maxSizeBytes);
+        } catch {
+          throw new Error("fileTooLarge");
+        }
+      }
+
+      // Non-image documents (PDF/Word/etc.) can't be re-compressed client-side
+      if (file.size > maxSizeBytes) {
+        throw new Error("fileTooLarge");
       }
 
       if (fileKind === "image") {
