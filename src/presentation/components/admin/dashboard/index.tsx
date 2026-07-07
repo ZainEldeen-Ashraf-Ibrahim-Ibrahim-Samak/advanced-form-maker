@@ -175,6 +175,24 @@ export function AdminDashboard() {
     );
   };
 
+  // Some cards were saved with a raw metric-token as their name (e.g. "total_forms_active")
+  // instead of a real label. Detect that and show a translated label instead of the raw token.
+  const TOKEN_LABEL_KEYS: Record<string, string> = {
+    total: "statLabelTotal",
+    pending: "statLabelPending",
+    draft: "statLabelDraft",
+    viewed: "statLabelViewed",
+    needs_rewrite: "statLabelNeedsRewrite",
+    total_forms_active: "statLabelTotalFormsActive",
+  };
+
+  const resolveStatTitle = (rawName: string | null | undefined, fallback: string): string => {
+    if (!rawName) return fallback;
+    const normalized = rawName.trim().replace(/^@/, "").replace(/^\d+_/, "").toLowerCase();
+    const key = TOKEN_LABEL_KEYS[normalized];
+    return key ? t(key) : rawName;
+  };
+
   return (
     <div className="space-y-8">
       {/* Page header */}
@@ -243,8 +261,8 @@ export function AdminDashboard() {
               if (card.cardType === "stat") {
                 const title =
                   locale === "ar"
-                    ? (card.displayNameAr ?? card.defaultLabelAr)
-                    : (card.displayNameEn ?? card.defaultLabelEn);
+                    ? resolveStatTitle(card.displayNameAr, card.defaultLabelAr)
+                    : resolveStatTitle(card.displayNameEn, card.defaultLabelEn);
 
                 const styles = STAT_STYLES[card.slug] ?? {
                   bg: "bg-primary",
