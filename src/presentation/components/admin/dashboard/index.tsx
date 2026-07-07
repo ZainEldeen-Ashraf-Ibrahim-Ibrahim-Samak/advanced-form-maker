@@ -158,8 +158,8 @@ export function AdminDashboard() {
     return 0;
   };
 
-  const resolveMetricValue = (raw: string | null | undefined, cardSlug: string): string | number => {
-    if (raw === null || raw === undefined || raw === "") return getLiveCount(cardSlug);
+  const resolveMetricValue = (raw: string | null | undefined, cardSlug: string, fallback?: number): string | number => {
+    if (raw === null || raw === undefined || raw === "") return fallback ?? getLiveCount(cardSlug);
     const tokenMap: Record<string, number> = {
       "@total": counts.total,
       "@pending": counts.pending,
@@ -325,9 +325,7 @@ export function AdminDashboard() {
                     <CardContent className="pt-4">
                       <div className="flex items-end justify-between">
                         <div className="text-4xl font-bold tabular-nums tracking-tight text-foreground">
-                          {card.metricValue !== null && card.metricValue !== undefined
-                            ? card.metricValue
-                            : card.submissionCount}
+                          {resolveMetricValue(card.metricValue, "", card.submissionCount)}
                         </div>
                         <Button
                           variant="ghost"
