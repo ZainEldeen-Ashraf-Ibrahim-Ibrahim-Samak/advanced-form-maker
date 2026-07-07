@@ -346,8 +346,13 @@ export async function GET(
       doc.setFontSize(14);
       doc.text("Raw Submissions Data", 14, currentY);
       
-      const headers = Object.keys(rawRows[0] || {});
-      const pdfBody = rawRows.map((row) => headers.map((h) => String(row[h] || "")));
+      const headers = Array.from(
+        rawRows.reduce<Set<string>>((keys, row) => {
+          Object.keys(row).forEach((k) => keys.add(k));
+          return keys;
+        }, new Set<string>())
+      );
+      const pdfBody = rawRows.map((row) => headers.map((h) => String(row[h] ?? "")));
 
       autoTable(doc, {
         head: [headers],

@@ -84,7 +84,11 @@ export async function GET(req: Request) {
             } else if (fv.mediaItems && fv.mediaItems.length > 0) {
               flat[columnName] = fv.mediaItems.map((item: any) => item.url).join(", ");
             } else {
-              flat[columnName] = fv.value !== undefined && fv.value !== null ? String(fv.value) : "";
+              let strVal = fv.value !== undefined && fv.value !== null ? String(fv.value) : "";
+              if (strVal.length > 1000) {
+                strVal = strVal.substring(0, 1000) + "... [Truncated]";
+              }
+              flat[columnName] = strVal;
             }
           }
 
@@ -176,7 +180,11 @@ export async function GET(req: Request) {
             } else if (fv.mediaItems && fv.mediaItems.length > 0) {
               flat[columnName] = fv.mediaItems.map((item: any) => item.url).join(", ");
             } else {
-              flat[columnName] = fv.value !== undefined && fv.value !== null ? String(fv.value) : "";
+              let strVal = fv.value !== undefined && fv.value !== null ? String(fv.value) : "";
+              if (strVal.length > 1000) {
+                strVal = strVal.substring(0, 1000) + "... [Truncated]";
+              }
+              flat[columnName] = strVal;
             }
           }
 
@@ -187,7 +195,12 @@ export async function GET(req: Request) {
           };
         });
 
-        const headers = Object.keys(flattenedData[0] || {});
+        const headers = Array.from(
+          flattenedData.reduce<Set<string>>((keys, row) => {
+            Object.keys(row).forEach((k) => keys.add(k));
+            return keys;
+          }, new Set<string>())
+        );
         const pdfBody = flattenedData.map((row) => headers.map((h) => String((row as any)[h] || "")));
 
         autoTable(doc, {
