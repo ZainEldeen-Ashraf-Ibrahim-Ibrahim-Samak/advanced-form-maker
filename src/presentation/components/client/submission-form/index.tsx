@@ -139,9 +139,15 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
       const instForm: Record<string, any> = {};
       fields.forEach((f) => {
         const ext = rec.fieldValues?.[f.id];
+        let value = ext?.value !== undefined ? ext.value : null;
+        // Multi-select dropdowns store their value as string[]; the AI only
+        // ever returns a single scalar match per field, so wrap it here too.
+        if (f.inputType === "dropdown" && f.isMultiple && value !== null) {
+          value = [String(value)] as any;
+        }
         instForm[f.id] = {
           fieldDefinitionId: f.id,
-          value: ext?.value !== undefined ? ext.value : null,
+          value,
         };
       });
 

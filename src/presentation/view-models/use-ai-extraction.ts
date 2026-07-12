@@ -48,7 +48,7 @@ interface UseAiExtractionParams {
   contactFormFields: any[];
   currentFieldValues: Record<string, string | number | null>;
   currentContactValues: Record<string, string>;
-  onApplyField: (fieldId: string, value: string | number) => void;
+  onApplyField: (fieldId: string, value: string | number | string[]) => void;
   onApplyContact: (key: string, value: string) => void;
   locale: "en" | "ar";
   multiInstanceEnabled?: boolean;
@@ -196,7 +196,14 @@ export function useAiExtraction({
           const hasValue = currentValue !== null && currentValue !== undefined && String(currentValue).trim().length > 0;
 
           if (overwrite || !hasValue) {
-            onApplyField(fieldId, val);
+            // Multi-select dropdowns store their value as string[]; the AI only
+            // ever returns a single scalar match, so wrap it to match the shape
+            // the manual multi-select UI (and submit-time validation) expects.
+            const field = fieldDefinitions.find((f) => f.id === fieldId);
+            const appliedValue = field?.inputType === "dropdown" && field?.isMultiple
+              ? [String(val)]
+              : val;
+            onApplyField(fieldId, appliedValue);
             newFilledFields.add(fieldId);
           }
         }
@@ -219,7 +226,7 @@ export function useAiExtraction({
     setIsExtracting(false);
     setShowOverwriteConfirm(false);
     pendingDataRef.current = null;
-  }, [currentContactValues, currentFieldValues, onApplyContact, onApplyField]);
+  }, [currentContactValues, currentFieldValues, fieldDefinitions, onApplyContact, onApplyField]);
 
   const maxImages = 5;
 
