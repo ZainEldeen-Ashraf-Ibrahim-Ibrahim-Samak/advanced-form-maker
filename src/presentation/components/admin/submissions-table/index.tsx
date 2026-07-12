@@ -277,11 +277,83 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
     }
   };
 
+  const renderActionsMenu = (sub: Submission) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger nativeButton={true} render={<Button variant="ghost" className="h-8 w-8 p-0" />}>
+        <span className="sr-only">{t("openMenu")}</span>
+        <MoreHorizontal className="h-4 w-4" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); router.push(`/admin/submissions/${sub.id}`); }}>
+          <Eye className="me-2 h-4 w-4" />
+          {t("viewDetail")}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleCopyLink(sub.accessToken); }}>
+          <Copy className="me-2 h-4 w-4" />
+          {t("copyLink")}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handlePrint([sub]); }}>
+          <Printer className="me-2 h-4 w-4" />
+          {tc("print") || "Print"}
+        </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger onClick={(e) => e.stopPropagation()}>
+            <Download className="me-2 h-4 w-4" />
+            {tc("export")}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent alignOffset={-5}>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleExport("csv", [sub], `submission-${sub.id}`); }}>
+                <FileText className="me-2 h-4 w-4" />
+                {tc("exportCSV")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleExport("excel", [sub], `submission-${sub.id}`); }}>
+                <FileSpreadsheet className="me-2 h-4 w-4" />
+                {tc("exportExcel")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleExport("pdf", [sub], `submission-${sub.id}`); }}>
+                <File className="me-2 h-4 w-4" />
+                {tc("exportPDF")}
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
+        <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); handleDeleteClick(sub.id); }}>
+          <Trash2 className="me-2 h-4 w-4" />
+          {t("deleteSubmission")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   if (isLoading && submissions.length === 0) {
     return (
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
+      <>
+        {/* Mobile Loading State */}
+        <div className="grid gap-4 md:hidden">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex flex-col gap-3 rounded-lg border p-4 bg-card">
+              <div className="flex items-start gap-3">
+                <Skeleton className="h-4 w-4 rounded" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+                <Skeleton className="h-8 w-8" />
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <Skeleton className="h-6 w-20 rounded-full" />
+                <div className="flex justify-end">
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Desktop Loading State */}
+        <div className="hidden md:block rounded-md border">
+          <Table>
+            <TableHeader>
             <TableRow>
               <TableHead className="w-12">
                 <Checkbox disabled className="opacity-50" />
@@ -324,6 +396,7 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
           </TableBody>
         </Table>
       </div>
+      </>
     );
   }
 
@@ -478,7 +551,112 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
           {tc("exportJSON") || "JSON"}
         </Button>
       </div>
-      <div className={`rounded-md border ${selectedIds.length > 0 ? "rounded-t-none border-t-0" : ""}`}>
+      {/* Mobile Card Layout */}
+      <div className={`grid grid-cols-1 gap-4 md:hidden ${selectedIds.length > 0 ? "mt-4" : ""}`}>
+        {submissions.map((sub) => {
+          const latestUpdater = getLatestUpdater(sub);
+          const contactSummary = getContactSummary(sub);
+          const isSelected = selectedIds.includes(sub.id);
+          const formName = formNamesById[sub.formTemplateId] || "—";
+          
+          const contactName = sub.contactRecords
+            ?.map(r => (r.name ?? "").trim())
+            .find(n => n.length > 0 && n !== "Primary Contact" && n !== "Unnamed Submission");
+          const clientNameClean = (sub.clientName ?? "").trim();
+          const displayClientName = (clientNameClean && clientNameClean !== "Primary Contact" && clientNameClean !== "Unnamed Submission")
+            ? clientNameClean
+            : null;
+          const displayName = displayClientName || contactName || <span className="italic text-muted-foreground font-normal">{t("unnamedSubmission")}</span>;
+
+          return (
+            <div 
+              key={sub.id} 
+              className={`flex flex-col gap-3 rounded-lg border p-4 bg-card text-card-foreground shadow-sm transition-colors cursor-pointer ${isSelected ? "border-primary/50 bg-primary/5" : "hover:border-primary/30"}`}
+              onClick={() => router.push(`/admin/submissions/${sub.id}`)}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <div onClick={(e) => e.stopPropagation()} className="mt-1 shrink-0">
+                    <Checkbox 
+                      checked={isSelected}
+                      onCheckedChange={() => toggleSelectRow(sub.id)}
+                      aria-label={`Select ${sub.clientName || 'submission'}`}
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-semibold truncate">{displayName}</div>
+                    <div className="text-sm text-muted-foreground mt-0.5 truncate">{formName}</div>
+                  </div>
+                </div>
+                <div onClick={(e) => e.stopPropagation()} className="shrink-0">
+                  {renderActionsMenu(sub)}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-sm mt-1">
+                <div>
+                  <div className="text-muted-foreground text-xs mb-1">{tc("status")}</div>
+                  <div className="flex flex-col items-start gap-1">
+                    {getStatusBadge(sub.status)}
+                    {latestUpdater && (
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap bg-muted/60 px-1.5 py-0.5 rounded">
+                         {t("updatedBy", { name: latestUpdater })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-muted-foreground text-xs mb-1">{t("submittedAt")}</div>
+                  <div>
+                    <span>{formatDate(sub.submittedAt)}</span>
+                    {sub.lastResubmittedAt && (
+                      <span className="block text-xs text-amber-600/80 mt-0.5">
+                        {t("resubmittedAt", { date: formatDate(sub.lastResubmittedAt) })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {(contactSummary.phone || contactSummary.email) && (
+                <div className="pt-3 mt-1 border-t flex flex-col gap-1.5 text-sm break-all">
+                  {contactSummary.email && (
+                    <div className="text-muted-foreground">{contactSummary.email}</div>
+                  )}
+                  {contactSummary.phone && (
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-muted-foreground">{contactSummary.phone}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <a 
+                          href={`tel:${contactSummary.phone}`} 
+                          title={t("contactPhone")}
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-1.5 bg-emerald-100 text-emerald-700 rounded-md dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+                        >
+                          <Phone className="h-3.5 w-3.5" />
+                        </a>
+                        <a 
+                          href={`https://wa.me/${contactSummary.phone.replace(/\D/g, "")}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={tc("whatsapp")}
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-1.5 bg-emerald-100 text-emerald-700 rounded-md dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+                        >
+                          <MessageCircle className="h-3.5 w-3.5" />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop Table Layout */}
+      <div className={`hidden md:block rounded-md border ${selectedIds.length > 0 ? "rounded-t-none border-t-0" : ""}`}>
         <Table>
           <TableHeader>
             <TableRow>
@@ -603,52 +781,7 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
                     )}
                   </TableCell>
                   <TableCell className="text-end" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger nativeButton={true} render={<Button variant="ghost" className="h-8 w-8 p-0" />}>
-                        <span className="sr-only">{t("openMenu")}</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => router.push(`/admin/submissions/${sub.id}`)}>
-                          <Eye className="me-2 h-4 w-4" />
-                          {t("viewDetail")}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleCopyLink(sub.accessToken)}>
-                          <Copy className="me-2 h-4 w-4" />
-                          {t("copyLink")}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handlePrint([sub])}>
-                          <Printer className="me-2 h-4 w-4" />
-                          {tc("print") || "Print"}
-                        </DropdownMenuItem>
-                        <DropdownMenuSub>
-                          <DropdownMenuSubTrigger>
-                            <Download className="me-2 h-4 w-4" />
-                            {tc("export")}
-                          </DropdownMenuSubTrigger>
-                          <DropdownMenuPortal>
-                            <DropdownMenuSubContent alignOffset={-5}>
-                              <DropdownMenuItem onClick={() => handleExport("csv", [sub], `submission-${sub.id}`)}>
-                                <FileText className="me-2 h-4 w-4" />
-                                {tc("exportCSV")}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleExport("excel", [sub], `submission-${sub.id}`)}>
-                                <FileSpreadsheet className="me-2 h-4 w-4" />
-                                {tc("exportExcel")}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleExport("pdf", [sub], `submission-${sub.id}`)}>
-                                <File className="me-2 h-4 w-4" />
-                                {tc("exportPDF")}
-                              </DropdownMenuItem>
-                            </DropdownMenuSubContent>
-                          </DropdownMenuPortal>
-                        </DropdownMenuSub>
-                        <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteClick(sub.id)}>
-                          <Trash2 className="me-2 h-4 w-4" />
-                          {t("deleteSubmission")}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {renderActionsMenu(sub)}
                   </TableCell>
                 </TableRow>
               );

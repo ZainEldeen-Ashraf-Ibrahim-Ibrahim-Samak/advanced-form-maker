@@ -110,15 +110,20 @@ export function useAiExtraction({
     });
   };
 
-  // Re-encode any image to a normalized JPEG so the MIME type sent to the API
-  // always matches the server's strict allow-list. Phone cameras/gallery pickers
-  // frequently report nonstandard or empty `file.type` values (e.g. "image/jpg",
-  // "", HEIC variants), which otherwise get rejected by the server as invalid.
-  const normalizeImageMimeType = (file: File): Promise<File> => {
-    if (supportedImageMimeTypes.has(file.type.toLowerCase())) {
-      return Promise.resolve(file);
-    }
+  const isHeicFile = (file: File): boolean => {
+    const mimeType = file.type.toLowerCase();
+    return (
+      mimeType === "image/heic" ||
+      mimeType === "image/heif" ||
+      hasSupportedExtension(file.name.toLowerCase(), [".heic", ".heif"])
+    );
+  };
 
+  // Re-encode oversized/native canvas images to a normalized JPEG so the MIME
+  // type sent to the API always matches the server's strict allow-list. Phone
+  // cameras/gallery pickers frequently report nonstandard or empty `file.type`
+  // values (e.g. "image/jpg", ""), which otherwise get rejected by the server.
+  const reencodeImageAsJpeg = (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
@@ -141,6 +146,26 @@ export function useAiExtraction({
       };
       img.src = objectUrl;
     });
+  };
+
+  // Normalize any image file to a plain JPEG before it's sent to the API.
+  // iOS cameras/photo libraries default to HEIC, which WebKit's <img>/<canvas>
+  // pipeline cannot reliably decode (this was the main cause of AI extraction
+  // failing on iOS) and which the Gemini vision API doesn't accept either — so
+  // HEIC always goes through a dedicated decoder instead of the native canvas path.
+  const normalizeImageMimeType = async (file: File): Promise<File> => {
+    if (isHeicFile(file)) {
+      const heic2any = (await import("heic2any")).default;
+      const converted = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.92 });
+      const blob = Array.isArray(converted) ? converted[0] : converted;
+      return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
+    }
+
+    if (supportedImageMimeTypes.has(file.type.toLowerCase())) {
+      return file;
+    }
+
+    return reencodeImageAsJpeg(file);
   };
 
   const applyExtraction = useCallback((result: ExtractionResult, overwrite: boolean) => {
@@ -291,11 +316,33 @@ export function useAiExtraction({
       const result = json.data as ExtractionResult;
       
       if (result.status === "failure") {
-        throw new Error("notADocument");
+        throw new Error(result.errorMessage || "notADocument");
       }
 
       if (multiInstanceEnabled && result.records && result.records.length > 0 && onApplyMultipleRecords) {
         onApplyMultipleRecords(result.records);
+
+        // Multi-instance records are applied directly (not through applyExtraction),
+        // so mark all fields/keys the AI actually returned a value for as filled —
+        // otherwise the summary counter stays at its initial empty state and shows
+        // "0 filled" even though the instances were populated correctly.
+        const filledFieldIds = new Set<string>();
+        const filledKeys = new Set<string>();
+        for (const record of result.records) {
+          if (record.contactData) {
+            for (const [key, value] of Object.entries(record.contactData)) {
+              if (value !== null && value !== undefined) filledKeys.add(key);
+            }
+          }
+          if (record.fieldValues) {
+            for (const [fieldId, extraction] of Object.entries(record.fieldValues)) {
+              if (extraction.value !== null && extraction.value !== undefined) filledFieldIds.add(fieldId);
+            }
+          }
+        }
+        setAutoFilledFieldIds(filledFieldIds);
+        setAutoFilledKeys(filledKeys);
+
         setStage("success");
         setIsExtracting(false);
         return;
