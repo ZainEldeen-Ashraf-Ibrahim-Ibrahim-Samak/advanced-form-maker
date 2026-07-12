@@ -16,6 +16,9 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
     UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
     GEMINI_API_KEY: z.string().min(1),
+    GEMINI_API_KEY_2: z.string().min(1).optional(),
+    GEMINI_API_KEY_3: z.string().min(1).optional(),
+    GEMINI_API_KEY_4: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_LOG_LEVEL: z
@@ -50,6 +53,9 @@ export const env = createEnv({
     NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
     NEXT_PUBLIC_GOOGLE_HTML_VERIFICATION: process.env.NEXT_PUBLIC_GOOGLE_HTML_VERIFICATION,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    GEMINI_API_KEY_2: process.env.GEMINI_API_KEY_2,
+    GEMINI_API_KEY_3: process.env.GEMINI_API_KEY_3,
+    GEMINI_API_KEY_4: process.env.GEMINI_API_KEY_4,
   },
   skipValidation:
     !!process.env.SKIP_ENV_VALIDATION ||

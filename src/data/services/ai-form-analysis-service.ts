@@ -10,12 +10,21 @@ export interface AIFormAnalysisResult {
   sentimentOverview: string;
 }
 
-const getApiKey = (): string => {
-  const apiKey = env.GEMINI_API_KEY;
-  if (!apiKey) {
+// Collect all configured Gemini API keys, in priority order. When the current
+// key hits its quota limit, analysis falls back to the next configured key
+// instead of failing outright.
+const getApiKeys = (): string[] => {
+  const keys = [
+    env.GEMINI_API_KEY,
+    env.GEMINI_API_KEY_2,
+    env.GEMINI_API_KEY_3,
+    env.GEMINI_API_KEY_4,
+  ].filter((key): key is string => !!key);
+
+  if (keys.length === 0) {
     throw new Error("GEMINI_API_KEY is not configured on the server");
   }
-  return apiKey;
+  return keys;
 };
 
 const responseSchema = {
@@ -44,8 +53,7 @@ const responseSchema = {
 };
 
 export async function analyzeFormSubmissions(submissions: any[], locale: string = "ar"): Promise<AIFormAnalysisResult> {
-  const apiKey = getApiKey();
-  const ai = new GoogleGenAI({ apiKey });
+  const apiKeys = getApiKeys();
 
   // Sample to first 500 submissions to fit context and keep response times fast
   const sampledSubmissions = submissions.slice(0, 500).map((sub, idx) => {
@@ -90,9 +98,11 @@ export async function analyzeFormSubmissions(submissions: any[], locale: string 
   const MAX_RETRIES = 2;
 
   let lastError: any;
+  let keyIndex = 0;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     const model = MODEL_FALLBACKS[Math.min(attempt, MODEL_FALLBACKS.length - 1)];
+    const ai = new GoogleGenAI({ apiKey: apiKeys[keyIndex] });
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
@@ -130,6 +140,12 @@ export async function analyzeFormSubmissions(submissions: any[], locale: string 
 
       const geminiErr = parseGeminiError(error);
       if (geminiErr.isQuotaError) {
+        if (keyIndex < apiKeys.length - 1) {
+          keyIndex++;
+          logger.error(`Gemini API key #${keyIndex} quota exceeded, falling back to next key`, { retryAfterSeconds: geminiErr.retryAfterSeconds });
+          attempt--; // don't consume a model-fallback attempt on a key switch
+          continue;
+        }
         logger.error(`Gemini API quota exceeded on model "${model}"`, { retryAfterSeconds: geminiErr.retryAfterSeconds });
         throw new Error(geminiErr.cleanMessage);
       }

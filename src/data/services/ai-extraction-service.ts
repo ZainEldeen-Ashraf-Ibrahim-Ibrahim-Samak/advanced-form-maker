@@ -4,13 +4,21 @@ import { devlogger } from "@/lib/devlogger";
 import { parseGeminiError } from "@/lib/gemini-error";
 import { ExtractionResult } from "@/domain/entities/ai-extraction";
 
-// Check if Gemini API key exists
-const getApiKey = (): string => {
-  const apiKey = env.GEMINI_API_KEY;
-  if (!apiKey) {
+// Collect all configured Gemini API keys, in priority order. When the first
+// key hits its quota limit, extraction falls back to the next configured key
+// instead of failing outright.
+const getApiKeys = (): string[] => {
+  const keys = [
+    env.GEMINI_API_KEY,
+    env.GEMINI_API_KEY_2,
+    env.GEMINI_API_KEY_3,
+    env.GEMINI_API_KEY_4,
+  ].filter((key): key is string => !!key);
+
+  if (keys.length === 0) {
     throw new Error("GEMINI_API_KEY is not configured on the server");
   }
-  return apiKey;
+  return keys;
 };
 
 export async function extractDocumentData(
@@ -20,8 +28,7 @@ export async function extractDocumentData(
   locale: "en" | "ar",
   options?: { multiInstanceEnabled?: boolean; maxInstances?: number | null }
 ): Promise<ExtractionResult> {
-  const apiKey = getApiKey();
-  const ai = new GoogleGenAI({ apiKey });
+  const apiKeys = getApiKeys();
 
   // 1. Filter and build dynamic field schema
   const fieldProperties: Record<string, any> = {};
@@ -130,33 +137,64 @@ Reading Quality Instructions:
 
   prompt += "\n\nExtract exactly as instructed. Do not include any explanation.";
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => {
-    controller.abort();
-  }, 30000); // 30 seconds hard timeout
+  const callGemini = async (apiKey: string): Promise<string> => {
+    const ai = new GoogleGenAI({ apiKey });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 30000); // 30 seconds hard timeout
+
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-flash-latest",
+        contents: [
+          ...images.map((image) => ({
+            inlineData: {
+              mimeType: image.mimeType,
+              data: image.data,
+            },
+          })),
+          prompt,
+        ],
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: responseSchema as any,
+          abortSignal: controller.signal,
+        },
+      });
+
+      const responseText = response.text;
+      if (!responseText) {
+        throw new Error("Empty response from Gemini API");
+      }
+      return responseText;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  };
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-flash-latest",
-      contents: [
-        ...images.map((image) => ({
-          inlineData: {
-            mimeType: image.mimeType,
-            data: image.data,
-          },
-        })),
-        prompt,
-      ],
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: responseSchema as any,
-        abortSignal: controller.signal,
-      },
-    });
+    let responseText: string | null = null;
+    let lastError: any = null;
 
-    const responseText = response.text;
-    if (!responseText) {
-      throw new Error("Empty response from Gemini API");
+    for (let i = 0; i < apiKeys.length; i++) {
+      try {
+        responseText = await callGemini(apiKeys[i]);
+        break;
+      } catch (err: any) {
+        lastError = err;
+        const isLastKey = i === apiKeys.length - 1;
+        const geminiErr = parseGeminiError(err);
+        if (geminiErr.isQuotaError && !isLastKey) {
+          devlogger.error(`Gemini API key #${i + 1} quota exceeded, falling back to next key`, { retryAfterSeconds: geminiErr.retryAfterSeconds });
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    if (responseText === null) {
+      throw lastError || new Error("Failed to extract document data");
     }
 
     const data = JSON.parse(responseText);
@@ -282,7 +320,5 @@ Reading Quality Instructions:
       fieldValues: {},
       errorMessage: error.message || "Failed to extract document data",
     };
-  } finally {
-    clearTimeout(timeoutId);
   }
 }
