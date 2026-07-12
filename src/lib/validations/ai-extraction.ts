@@ -1,19 +1,28 @@
 import { z } from "zod";
 
+const documentMimeTypeSchema = z.enum([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "application/pdf",
+  "text/csv",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
+
 export const extractionRequestSchema = z.object({
-  imageBase64: z.string().min(1),
-  imageMimeType: z.enum([
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/heic",
-    "application/pdf",
-    "text/csv",
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ]),
+  images: z
+    .array(
+      z.object({
+        data: z.string().min(1),
+        mimeType: documentMimeTypeSchema,
+      })
+    )
+    .min(1)
+    .max(5),
   fieldDefinitions: z.array(
     z.object({
       id: z.string().min(1),

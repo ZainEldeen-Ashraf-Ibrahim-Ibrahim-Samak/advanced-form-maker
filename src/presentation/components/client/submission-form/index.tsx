@@ -748,7 +748,7 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
             {aiAutoFillEnabled && (
               <div className="space-y-4">
                 <AiPhotoUpload
-                  onFileSelected={handleExtractFromPhoto}
+                  onFilesSelected={handleExtractFromPhoto}
                   isExtracting={isExtracting}
                   stage={aiStage}
                   elapsedSeconds={aiElapsedSeconds}

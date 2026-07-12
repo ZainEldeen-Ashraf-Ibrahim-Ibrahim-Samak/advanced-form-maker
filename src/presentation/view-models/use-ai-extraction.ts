@@ -78,7 +78,7 @@ export function useAiExtraction({
   const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   
-  const lastFileRef = useRef<File | null>(null);
+  const lastFilesRef = useRef<File[] | null>(null);
   const pendingDataRef = useRef<ExtractionResult | null>(null);
 
   // Time tracking effect
@@ -220,8 +220,16 @@ export function useAiExtraction({
     pendingDataRef.current = null;
   }, [currentContactValues, currentFieldValues, onApplyContact, onApplyField]);
 
-  const handleExtractFromPhoto = async (file: File) => {
-    lastFileRef.current = file;
+  const maxImages = 5;
+
+  const handleExtractFromPhoto = async (fileOrFiles: File | File[]) => {
+    let files = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
+    if (files.length === 0) return;
+    if (files.length > maxImages) {
+      files = files.slice(0, maxImages);
+    }
+
+    lastFilesRef.current = files;
     setIsExtracting(true);
     setStage("uploading");
     setError(null);
@@ -230,48 +238,64 @@ export function useAiExtraction({
     pendingDataRef.current = null;
 
     try {
-      const maxSizeBytes = 10 * 1024 * 1024;
-      const fileKind = getAiExtractionFileKind(file);
-      if (!fileKind) {
-        throw new Error("invalidFile");
-      }
+      const maxSizeBytes = 500 * 1024 * 1024;
+      let lowResolutionWarning = false;
 
-      // 1. Images: downscale/re-compress oversized photos instead of rejecting them outright
-      if (fileKind === "image" && file.size > maxSizeBytes) {
-        try {
-          file = await compressImageIfNeeded(file, maxSizeBytes);
-        } catch {
-          throw new Error("fileTooLarge");
-        }
-      }
-
-      // Non-image documents (PDF/Word/etc.) can't be re-compressed client-side
-      if (file.size > maxSizeBytes) {
-        throw new Error("fileTooLarge");
-      }
-
-      if (fileKind === "image") {
-        // 2. Pre-validate image resolution
-        try {
-          const { width, height } = await validateImageResolution(file);
-          if (width < 640 || height < 480) {
-            setError(locale === "ar" ? "دقة الصورة منخفضة جداً. يجب أن تكون الصورة على الأقل 640×480 بكسل." : "Resolution too low. Image must be at least 640x480 pixels.");
-            setStage("error");
-            setIsExtracting(false);
-            return;
-          }
-
-          if (width < 1024 || height < 768) {
-            setWarning(locale === "ar" ? "دقة الصورة أقل من الموصى بها (1024×768). قد تكون دقة الاستخراج أقل." : "Image resolution is below recommended 1024x768. Text extraction might be less accurate.");
-          }
-        } catch (err) {
+      const processedFiles: File[] = [];
+      for (let file of files) {
+        const fileKind = getAiExtractionFileKind(file);
+        if (!fileKind) {
           throw new Error("invalidFile");
         }
+
+        // 1. Images: downscale/re-compress oversized photos instead of rejecting them outright
+        if (fileKind === "image" && file.size > maxSizeBytes) {
+          try {
+            file = await compressImageIfNeeded(file, maxSizeBytes);
+          } catch {
+            throw new Error("fileTooLarge");
+          }
+        }
+
+        // Non-image documents (PDF/Word/etc.) can't be re-compressed client-side
+        if (file.size > maxSizeBytes) {
+          throw new Error("fileTooLarge");
+        }
+
+        if (fileKind === "image") {
+          // 2. Pre-validate image resolution
+          try {
+            const { width, height } = await validateImageResolution(file);
+            if (width < 640 || height < 480) {
+              setError(locale === "ar" ? "دقة الصورة منخفضة جداً. يجب أن تكون الصورة على الأقل 640×480 بكسل." : "Resolution too low. Image must be at least 640x480 pixels.");
+              setStage("error");
+              setIsExtracting(false);
+              return;
+            }
+
+            if (width < 1024 || height < 768) {
+              lowResolutionWarning = true;
+            }
+          } catch (err) {
+            throw new Error("invalidFile");
+          }
+        }
+
+        processedFiles.push(file);
+      }
+
+      if (lowResolutionWarning) {
+        setWarning(locale === "ar" ? "دقة الصورة أقل من الموصى بها (1024×768). قد تكون دقة الاستخراج أقل." : "Image resolution is below recommended 1024x768. Text extraction might be less accurate.");
       }
 
       // 3. Stage update
       setStage("analyzing");
-      const base64Data = await toBase64(file);
+      const images = await Promise.all(
+        processedFiles.map(async (file) => ({
+          data: await toBase64(file),
+          mimeType: file.type,
+        }))
+      );
 
       // 4. Collect field/contact metadata
       const cleanFieldDefs = fieldDefinitions
@@ -301,8 +325,7 @@ export function useAiExtraction({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          imageBase64: base64Data,
-          imageMimeType: file.type,
+          images,
           fieldDefinitions: cleanFieldDefs,
           contactFields: cleanContactFields,
           locale,
@@ -374,9 +397,9 @@ export function useAiExtraction({
   };
 
   const retryExtraction = () => {
-    if (lastFileRef.current && retryCount < 2) {
+    if (lastFilesRef.current && retryCount < 2) {
       setRetryCount((prev) => prev + 1);
-      handleExtractFromPhoto(lastFileRef.current);
+      handleExtractFromPhoto(lastFilesRef.current);
     }
   };
 
@@ -419,7 +442,7 @@ export function useAiExtraction({
     setRetryCount(0);
     setAutoFilledFieldIds(new Set());
     setAutoFilledKeys(new Set());
-    lastFileRef.current = null;
+    lastFilesRef.current = null;
     pendingDataRef.current = null;
   };
 

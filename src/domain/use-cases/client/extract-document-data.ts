@@ -7,8 +7,7 @@ export class ExtractDocumentDataUseCase {
     const validated = extractionRequestSchema.parse(requestData);
 
     return await extractDocumentData(
-      validated.imageBase64,
-      validated.imageMimeType,
+      validated.images,
       validated.fieldDefinitions,
       validated.contactFields,
       validated.locale,

@@ -14,8 +14,7 @@ const getApiKey = (): string => {
 };
 
 export async function extractDocumentData(
-  imageBase64: string,
-  imageMimeType: string,
+  images: { data: string; mimeType: string }[],
   fieldDefinitions: any[],
   contactFields: any[],
   locale: "en" | "ar",
@@ -121,6 +120,10 @@ Reading Quality Instructions:
 - Pay special attention to visually similar digits, which are easy to misread in both printed and handwritten numerals: 6 vs 7 (and their Arabic-Indic equivalents ٦ vs ٧), 0 vs 8, 1 vs 7, 5 vs 6. When a digit is ambiguous, look at its full shape (e.g. a 6 has a closed loop at the bottom, a 7 does not) rather than guessing from context.
 - Never guess or hallucinate a value for a field that is not clearly legible; if genuinely unreadable, set value to null and confidence to 0.0 rather than outputting a low-confidence guess.`;
 
+  if (images.length > 1) {
+    prompt += `\n- You have been given ${images.length} images/pages. They may represent different sides or pages of the same document (e.g. the front and back of an ID card) or a multi-page document. Treat them as one combined document and merge information found across all of them when filling in a single field.`;
+  }
+
   if (options?.multiInstanceEnabled) {
     prompt += `\n- Since multiple records are allowed, if the document contains a list/table/sheet with multiple records, extract ALL rows into the 'records' array in the response schema. Capped at ${options.maxInstances || 50} records. The top-level 'contactData' and 'fieldValues' should represent the FIRST record.`;
   }
@@ -136,12 +139,12 @@ Reading Quality Instructions:
     const response = await ai.models.generateContent({
       model: "gemini-flash-latest",
       contents: [
-        {
+        ...images.map((image) => ({
           inlineData: {
-            mimeType: imageMimeType,
-            data: imageBase64,
+            mimeType: image.mimeType,
+            data: image.data,
           },
-        },
+        })),
         prompt,
       ],
       config: {

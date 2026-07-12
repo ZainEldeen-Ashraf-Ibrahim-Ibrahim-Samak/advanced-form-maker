@@ -491,7 +491,7 @@
   },
   "aiExtraction": {
     "uploadTitle": "AI Document Auto-Fill",
-    "uploadDescription": "Upload a photo, CSV, Excel, Word, or PDF file to automatically fill in the form.",
+    "uploadDescription": "Upload one or more photos (e.g. front and back of a document), or a CSV, Excel, Word, or PDF file, to automatically fill in the form.",
     "uploadButton": "Upload Document",
     "analyzing": "Analyzing document...",
     "extractionSuccess": "Document analyzed successfully!",
@@ -508,7 +508,7 @@
     "overwriteConfirmButton": "Overwrite Values",
     "noMatchingFields": "No matching fields found in the document.",
     "invalidFile": "Unsupported file type.",
-    "fileTooLarge": "File is too large (maximum size is 10MB).",
+    "fileTooLarge": "File is too large (maximum size is 500MB).",
     "notADocument": "No readable document content detected.",
     "fieldsFilled": "{count} fields filled",
     "fieldsNotFilled": "{count} fields remaining",

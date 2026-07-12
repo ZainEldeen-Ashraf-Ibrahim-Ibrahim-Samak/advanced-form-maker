@@ -32,12 +32,14 @@ type FacingMode = "user" | "environment";
 type FlashMode = "off" | "on";
 type CamState = "closed" | "opening" | "previewing" | "captured";
 
+const maxAiUploadFiles = 5;
+
 interface AiPhotoUploadProps {
   stage: ExtractionStage;
   isExtracting: boolean;
   elapsedSeconds: number;
   disabled?: boolean;
-  onFileSelected: (file: File) => void;
+  onFilesSelected: (files: File[]) => void;
   locale: "en" | "ar";
 }
 
@@ -46,7 +48,7 @@ export function AiPhotoUpload({
   isExtracting,
   elapsedSeconds,
   disabled = false,
-  onFileSelected,
+  onFilesSelected,
   locale,
 }: AiPhotoUploadProps) {
   const t = useTranslations("aiExtraction");
@@ -67,15 +69,7 @@ export function AiPhotoUpload({
   const [capturedPreviewUrl, setCapturedPreviewUrl] = useState<string | null>(null);
   const [capturedBlob, setCapturedBlob] = useState<Blob | null>(null);
   const [camError, setCamError] = useState<string | null>(null);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-      stopStream();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [capturedShots, setCapturedShots] = useState<{ file: File; previewUrl: string }[]>([]);
 
   const stopStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -83,6 +77,14 @@ export function AiPhotoUpload({
     setTorchSupported(false);
     setFlashMode("off");
   }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      stopStream();
+    };
+  }, [stopStream]);
 
   const revokeCapture = useCallback(() => {
     setCapturedPreviewUrl((prev) => {
@@ -172,17 +174,47 @@ export function AiPhotoUpload({
     openCamera(facingMode);
   };
 
-  const usePhoto = () => {
-    if (!capturedBlob) return;
+  const blobToShot = () => {
+    if (!capturedBlob) return null;
     const file = new File([capturedBlob], `ai_capture_${Date.now()}.jpg`, { type: "image/jpeg" });
+    return { file, previewUrl: URL.createObjectURL(capturedBlob) };
+  };
+
+  const addAnotherPhoto = () => {
+    const shot = blobToShot();
+    if (!shot || capturedShots.length + 1 >= maxAiUploadFiles) return;
+    setCapturedShots((prev) => [...prev, shot]);
+    revokeCapture();
+    openCamera(facingMode);
+  };
+
+  const finishPhotos = () => {
+    const shot = blobToShot();
+    const allShots = shot ? [...capturedShots, shot] : capturedShots;
+    if (allShots.length === 0) return;
+    const files = allShots.map((s) => s.file);
+    setCapturedShots([]);
     revokeCapture();
     setCamState("closed");
-    onFileSelected(file);
+    onFilesSelected(files);
+  };
+
+  const removeShot = (index: number) => {
+    setCapturedShots((prev) => {
+      const next = [...prev];
+      const [removed] = next.splice(index, 1);
+      if (removed) URL.revokeObjectURL(removed.previewUrl);
+      return next;
+    });
   };
 
   const closeCamera = () => {
     stopStream();
     revokeCapture();
+    setCapturedShots((prev) => {
+      prev.forEach((s) => URL.revokeObjectURL(s.previewUrl));
+      return [];
+    });
     setCamState("closed");
     setCamError(null);
   };
@@ -200,12 +232,17 @@ export function AiPhotoUpload({
     e.stopPropagation();
     setDragActive(false);
     if (disabled || isExtracting) return;
-    if (e.dataTransfer.files?.[0]) onFileSelected(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files?.length) {
+      onFilesSelected(Array.from(e.dataTransfer.files).slice(0, maxAiUploadFiles));
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (disabled || isExtracting) return;
-    if (e.target.files?.[0]) onFileSelected(e.target.files[0]);
+    if (e.target.files?.length) {
+      onFilesSelected(Array.from(e.target.files).slice(0, maxAiUploadFiles));
+    }
+    e.target.value = "";
   };
 
   const getStageLabel = () => {
@@ -308,27 +345,62 @@ export function AiPhotoUpload({
 
           {/* Bottom controls — captured */}
           {camState === "captured" && (
-            <div className="absolute bottom-4 inset-x-0 flex items-center justify-center gap-4 z-10">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={retakePhoto}
-                className="h-11 rounded-full bg-black/60 text-white hover:bg-black/80 gap-2 px-5"
-              >
-                <FlipHorizontal className="h-4 w-4" />
-                {locale === "ar" ? "إعادة التقاط" : "Retake"}
-              </Button>
-              <Button
-                type="button"
-                onClick={usePhoto}
-                className="h-11 rounded-full bg-white text-black hover:bg-white/90 gap-2 px-5 shadow-lg"
-              >
-                <Sparkles className="h-4 w-4" />
-                {locale === "ar" ? "استخدم هذه الصورة" : "Use This Photo"}
-              </Button>
+            <div className="absolute bottom-4 inset-x-0 flex flex-col items-center gap-3 z-10">
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={retakePhoto}
+                  className="h-11 rounded-full bg-black/60 text-white hover:bg-black/80 gap-2 px-5"
+                >
+                  <FlipHorizontal className="h-4 w-4" />
+                  {locale === "ar" ? "إعادة التقاط" : "Retake"}
+                </Button>
+                {capturedShots.length + 1 < maxAiUploadFiles && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={addAnotherPhoto}
+                    className="h-11 rounded-full bg-black/60 text-white hover:bg-black/80 gap-2 px-5"
+                  >
+                    <Camera className="h-4 w-4" />
+                    {locale === "ar" ? "إضافة صورة أخرى" : "Add Another"}
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  onClick={finishPhotos}
+                  className="h-11 rounded-full bg-white text-black hover:bg-white/90 gap-2 px-5 shadow-lg"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {capturedShots.length > 0
+                    ? (locale === "ar" ? `إنهاء (${capturedShots.length + 1})` : `Done (${capturedShots.length + 1})`)
+                    : (locale === "ar" ? "استخدم هذه الصورة" : "Use This Photo")}
+                </Button>
+              </div>
             </div>
           )}
         </div>
+
+        {/* Captured shots thumbnail strip */}
+        {capturedShots.length > 0 && (
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            {capturedShots.map((shot, index) => (
+              <div key={shot.previewUrl} className="relative shrink-0 h-14 w-14 rounded-md overflow-hidden border border-border">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={shot.previewUrl} alt={`Photo ${index + 1}`} className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removeShot(index)}
+                  className="absolute top-0.5 right-0.5 h-4 w-4 rounded-full bg-black/70 text-white flex items-center justify-center"
+                  aria-label={locale === "ar" ? "إزالة" : "Remove"}
+                >
+                  <X className="h-2.5 w-2.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -339,6 +411,7 @@ export function AiPhotoUpload({
       <input
         ref={fileInputRef}
         type="file"
+        multiple
         className="hidden"
         accept={acceptedAiUploadTypes}
         onChange={handleFileChange}
