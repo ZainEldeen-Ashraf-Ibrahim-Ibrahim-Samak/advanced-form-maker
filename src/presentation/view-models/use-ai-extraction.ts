@@ -110,26 +110,14 @@ export function useAiExtraction({
     });
   };
 
-  // Image resolution pre-validation
-  const validateImageResolution = (file: File): Promise<{ width: number; height: number }> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        resolve({ width: img.width, height: img.height });
-      };
-      img.onerror = () => {
-        reject(new Error("invalidFile"));
-      };
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
-  // Re-encode an oversized image as JPEG, downscaling only as much as needed to
-  // fit the size cap. Full-resolution phone photos (common for handwritten
-  // documents) can exceed the 10MB limit even though the content itself is
-  // perfectly extractable — reject only if it still doesn't fit after this.
-  const compressImageIfNeeded = (file: File, maxSizeBytes: number): Promise<File> => {
-    if (file.size <= maxSizeBytes) return Promise.resolve(file);
+  // Re-encode any image to a normalized JPEG so the MIME type sent to the API
+  // always matches the server's strict allow-list. Phone cameras/gallery pickers
+  // frequently report nonstandard or empty `file.type` values (e.g. "image/jpg",
+  // "", HEIC variants), which otherwise get rejected by the server as invalid.
+  const normalizeImageMimeType = (file: File): Promise<File> => {
+    if (supportedImageMimeTypes.has(file.type.toLowerCase())) {
+      return Promise.resolve(file);
+    }
 
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -137,27 +125,15 @@ export function useAiExtraction({
       img.onload = () => {
         URL.revokeObjectURL(objectUrl);
         const canvas = document.createElement("canvas");
-        const { width, height } = img;
-        let scale = 1;
-
-        const tryEncode = (): void => {
-          canvas.width = Math.round(width * scale);
-          canvas.height = Math.round(height * scale);
-          const ctx = canvas.getContext("2d");
-          if (!ctx) { reject(new Error("invalidFile")); return; }
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob((blob) => {
-            if (!blob) { reject(new Error("invalidFile")); return; }
-            if (blob.size <= maxSizeBytes || scale <= 0.2) {
-              resolve(new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }));
-            } else {
-              scale -= 0.15;
-              tryEncode();
-            }
-          }, "image/jpeg", 0.85);
-        };
-
-        tryEncode();
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) { reject(new Error("invalidFile")); return; }
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          if (!blob) { reject(new Error("invalidFile")); return; }
+          resolve(new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }));
+        }, "image/jpeg", 0.92);
       };
       img.onerror = () => {
         URL.revokeObjectURL(objectUrl);
@@ -238,9 +214,6 @@ export function useAiExtraction({
     pendingDataRef.current = null;
 
     try {
-      const maxSizeBytes = 500 * 1024 * 1024;
-      let lowResolutionWarning = false;
-
       const processedFiles: File[] = [];
       for (let file of files) {
         const fileKind = getAiExtractionFileKind(file);
@@ -248,44 +221,18 @@ export function useAiExtraction({
           throw new Error("invalidFile");
         }
 
-        // 1. Images: downscale/re-compress oversized photos instead of rejecting them outright
-        if (fileKind === "image" && file.size > maxSizeBytes) {
-          try {
-            file = await compressImageIfNeeded(file, maxSizeBytes);
-          } catch {
-            throw new Error("fileTooLarge");
-          }
-        }
-
-        // Non-image documents (PDF/Word/etc.) can't be re-compressed client-side
-        if (file.size > maxSizeBytes) {
-          throw new Error("fileTooLarge");
-        }
-
+        // Normalize camera/gallery photos to a clean JPEG MIME type. Phone
+        // cameras frequently report nonstandard or empty `file.type` values,
+        // which the server's strict MIME allow-list otherwise rejects outright.
         if (fileKind === "image") {
-          // 2. Pre-validate image resolution
           try {
-            const { width, height } = await validateImageResolution(file);
-            if (width < 640 || height < 480) {
-              setError(locale === "ar" ? "دقة الصورة منخفضة جداً. يجب أن تكون الصورة على الأقل 640×480 بكسل." : "Resolution too low. Image must be at least 640x480 pixels.");
-              setStage("error");
-              setIsExtracting(false);
-              return;
-            }
-
-            if (width < 1024 || height < 768) {
-              lowResolutionWarning = true;
-            }
-          } catch (err) {
+            file = await normalizeImageMimeType(file);
+          } catch {
             throw new Error("invalidFile");
           }
         }
 
         processedFiles.push(file);
-      }
-
-      if (lowResolutionWarning) {
-        setWarning(locale === "ar" ? "دقة الصورة أقل من الموصى بها (1024×768). قد تكون دقة الاستخراج أقل." : "Image resolution is below recommended 1024x768. Text extraction might be less accurate.");
       }
 
       // 3. Stage update

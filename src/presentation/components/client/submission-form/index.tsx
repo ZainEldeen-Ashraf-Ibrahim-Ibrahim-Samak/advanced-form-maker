@@ -958,16 +958,23 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
 
             {!isViewOnly && (
               <CardFooter className="bg-muted/10 pt-6 mt-4 border-t">
-                <Button type="submit" className="w-full sm:w-auto" size="lg" disabled={isSubmitting || submittingAll}>
+                <Button
+                  type="submit"
+                  className="w-full sm:w-auto sm:min-w-[180px] justify-center"
+                  size="lg"
+                  disabled={isSubmitting || submittingAll}
+                >
                   {(isSubmitting || submittingAll) ? (
-                    <Loader2 className="me-2 h-5 w-5 animate-spin" />
+                    <Loader2 className="me-2 h-5 w-5 shrink-0 animate-spin" />
                   ) : (
-                    <Send className="me-2 h-5 w-5" />
+                    <Send className="me-2 h-5 w-5 shrink-0" />
                   )}
-                  {multiInstanceEnabled 
-                    ? (t("submitAll") || "Submit All")
-                    : (isNew || isDraft ? t("submitButton") : t("resubmitButton"))
-                  }
+                  <span>
+                    {multiInstanceEnabled
+                      ? (t("submitAll") || "Submit All")
+                      : (isNew || isDraft ? t("submitButton") : t("resubmitButton"))
+                    }
+                  </span>
                 </Button>
               </CardFooter>
             )}
