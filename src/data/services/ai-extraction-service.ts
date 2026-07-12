@@ -274,6 +274,11 @@ Reading Quality Instructions:
       contactData,
       fieldValues,
       records: records.length > 0 ? records : undefined,
+      // The model returned a response, but couldn't read any field from it —
+      // give the user something more actionable than a bare "failure" status.
+      errorMessage: status === "failure"
+        ? "Could not read any fields from the document. Make sure the photo is clear, well-lit, and shows the full document."
+        : undefined,
     };
 
   } catch (error: any) {

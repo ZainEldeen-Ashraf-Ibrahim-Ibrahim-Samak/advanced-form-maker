@@ -55,7 +55,10 @@ export function AiExtractionSummary({
     return null;
   }
 
-  // Helper to get translated error message
+  // Helper to get translated error message. Known error codes map to a
+  // localized message; anything else is a specific reason forwarded from the
+  // server (e.g. a Gemini/quota error, or why the document couldn't be read)
+  // and should be shown as-is rather than collapsed into a generic message.
   const getErrorMessage = () => {
     if (!error) return "";
     switch (error) {
@@ -68,8 +71,10 @@ export function AiExtractionSummary({
         return t("notADocument");
       case "timeout":
         return t("timeout");
-      default:
+      case "extractionFailed":
         return t("extractionFailed");
+      default:
+        return error;
     }
   };
 
