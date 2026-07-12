@@ -7,6 +7,11 @@ import { devlogger } from "@/lib/devlogger";
 import { extractionRequestSchema } from "@/lib/validations/ai-extraction";
 
 export const dynamic = "force-dynamic";
+// Gemini can take up to ~25s before its own internal timeout fires, and the
+// Tesseract OCR fallback (used when Gemini fails for any reason) needs
+// additional time on top of that — give the function enough room for both
+// instead of getting cut off by the platform's shorter default.
+export const maxDuration = 60;
 
 const useCase = new ExtractDocumentDataUseCase();
 
