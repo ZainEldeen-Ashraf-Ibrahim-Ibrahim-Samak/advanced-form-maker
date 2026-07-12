@@ -25,10 +25,17 @@ export async function extractDocumentData(
     }
 
     const type = field.inputType === "number" ? "NUMBER" : "STRING";
+    const dropdownOptions = field.inputType === "dropdown"
+      ? [...(field.dropdownOptionsEn || []), ...(field.dropdownOptionsAr || [])]
+      : [];
     const description = `Value for field (English: "${field.nameEn}", Arabic: "${field.nameAr}") with input type ${field.inputType}. ` +
-      (field.inputType === "dropdown" ? `For dropdown matching, check options: (English: ${[...(field.dropdownOptionsEn || [])].join(", ")}; Arabic: ${[...(field.dropdownOptionsAr || [])].join(", ")}). Match the document value to one of these options.` : "") +
+      (field.inputType === "dropdown" ? `You MUST output the value exactly as one of the allowed options below (character-for-character, do not paraphrase or translate it) — or null if none of them match the document.` : "") +
       (field.inputType === "date" ? " Format must be YYYY-MM-DD. Normalize the date value to this standard format." : "");
 
+    // For dropdowns, constrain Gemini's structured output to the exact configured
+    // option strings via `enum` — free-text matching previously let the model
+    // return a close-but-not-identical value (different casing/wording/language),
+    // which then failed the strict exact-string validation at submission time.
     fieldProperties[field.id] = {
       type: "OBJECT",
       properties: {
@@ -36,6 +43,7 @@ export async function extractDocumentData(
           type,
           description,
           nullable: true,
+          ...(dropdownOptions.length > 0 ? { enum: dropdownOptions } : {}),
         },
         confidence: {
           type: "NUMBER",
