@@ -323,7 +323,7 @@ export function AdminDashboard() {
                   key={card.formTemplateId}
                   className={cn(
                     "flex flex-col justify-between pt-0 hover:shadow-md transition-shadow",
-                    card.isLocked && "ring-1 ring-amber-300 dark:ring-amber-700",
+                    card.isLocked && "ring-1 ring-amber-300 dark:ring-amber-700 opacity-60 bg-muted/40",
                   )}
                 >
                   <div>
@@ -369,16 +369,26 @@ export function AdminDashboard() {
                   </div>
 
                   <div className="px-4 pb-4 pt-0">
-                    <Link href={`/f/${card.formTemplateId}`} target="_blank" className="w-full">
+                    {card.isLocked ? (
                       <Button
                         variant="outline"
                         className="w-full text-xs gap-1.5 h-9"
-                        disabled={card.isLocked}
+                        disabled
                       >
                         <Plus className="h-3.5 w-3.5" />
                         {buttonLabel ?? t("addNewForm", { name: title })}
                       </Button>
-                    </Link>
+                    ) : (
+                      <Link href={`/f/${card.formTemplateId}`} target="_blank" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full text-xs gap-1.5 h-9"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                          {buttonLabel ?? t("addNewForm", { name: title })}
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </Card>
               );
