@@ -3,6 +3,7 @@ import { devlogger } from "@/lib/devlogger";
 import { parseGeminiError } from "@/lib/gemini-error";
 import { getAiEnvs } from "@/lib/gemini-keys";
 import { ExtractionResult } from "@/domain/entities/ai-extraction";
+import { extractDocumentDataViaOcr } from "@/data/services/tesseract-extraction-service";
 
 export async function extractDocumentData(
   images: { data: string; mimeType: string }[],
@@ -102,13 +103,16 @@ Bilingual & Multi-Language Instructions:
 - Extract custom form fields into "fieldValues" mapped by their corresponding field IDs using the English and Arabic label descriptions provided.
 - For each custom field value in "fieldValues", provide a confidence score between 0.0 and 1.0 reflecting how clear the reading is.
 - If a field is not found or is completely unreadable on the document, set its value to null and confidence to 0.0.
-- For date fields, normalize the value to YYYY-MM-DD format.
+- For date fields, normalize the value to YYYY-MM-DD format. Source dates may use Arabic-Indic digits (e.g. ٢٠٠٤/١/٥) or other orderings (Y/M/D, D/M/Y) — convert the digits and reorder as needed, but always output plain Western digits in YYYY-MM-DD order.
 - For phone numbers, extract all digits, remove unnecessary formatting (e.g., spaces, dashes, parentheses), and normalize the phone format (e.g., preserving leading + or zeros as appropriate).
 
 Reading Quality Instructions:
 - Read printed/typed (computer-generated) text with the same care and attention as handwritten text. Do not skip, skim, or assume printed text is "already clear" — zoom into the actual pixels of every field, printed or handwritten, before extracting its value.
 - Pay special attention to visually similar digits, which are easy to misread in both printed and handwritten numerals: 6 vs 7 (and their Arabic-Indic equivalents ٦ vs ٧), 0 vs 8, 1 vs 7, 5 vs 6. When a digit is ambiguous, look at its full shape (e.g. a 6 has a closed loop at the bottom, a 7 does not) rather than guessing from context.
-- Never guess or hallucinate a value for a field that is not clearly legible; if genuinely unreadable, set value to null and confidence to 0.0 rather than outputting a low-confidence guess.`;
+- Never guess or hallucinate a value for a field that is not clearly legible; if genuinely unreadable, set value to null and confidence to 0.0 rather than outputting a low-confidence guess.
+- The photo may be taken at an angle, with other documents, papers, notebooks, or objects visible in the background or partially overlapping the edges of the page. Identify the single primary document/table that fills most of the frame and extract only from it; ignore any other paper, text, or object that is out of focus, cropped at the edge, or clearly a separate document behind/under it.
+- If a cell's original printed or handwritten value has been crossed out, struck through, or overwritten with a handwritten correction next to or above it, use the corrected (most recent, not struck-through) value, not the crossed-out original.
+- Table cells are sometimes photographed skewed or in perspective (not perfectly top-down). Follow each row/column carefully along its actual (possibly diagonal) line in the image rather than assuming strict horizontal/vertical alignment, so values don't get attributed to the wrong row.`;
 
   if (images.length > 1) {
     prompt += `\n- You have been given ${images.length} images/pages. They may represent different sides or pages of the same document (e.g. the front and back of an ID card) or a multi-page document. Treat them as one combined document and merge information found across all of them when filling in a single field.`;
@@ -159,21 +163,36 @@ Reading Quality Instructions:
   try {
     let responseText: string | null = null;
     let lastError: any = null;
+    let allKeysQuotaExhausted = apiKeys.length > 0;
 
     for (let i = 0; i < apiKeys.length; i++) {
       try {
         responseText = await callGemini(apiKeys[i]);
+        allKeysQuotaExhausted = false;
         break;
       } catch (err: any) {
         lastError = err;
         const isLastKey = i === apiKeys.length - 1;
         const geminiErr = parseGeminiError(err);
+        if (!geminiErr.isQuotaError) {
+          allKeysQuotaExhausted = false;
+        }
         if (geminiErr.isQuotaError && !isLastKey) {
           devlogger.error(`Gemini API key #${i + 1} quota exceeded, falling back to next key`, { retryAfterSeconds: geminiErr.retryAfterSeconds });
           continue;
         }
-        throw err;
+        if (!(geminiErr.isQuotaError && isLastKey)) {
+          throw err;
+        }
       }
+    }
+
+    // Every Gemini key is unavailable (missing keys entirely, or all
+    // configured keys hit quota/high-demand limits) — fall back to a free,
+    // local OCR pass instead of failing the whole extraction outright.
+    if (responseText === null && (allKeysQuotaExhausted || apiKeys.length === 0)) {
+      devlogger.error("All Gemini API keys exhausted, falling back to Tesseract OCR", { keyCount: apiKeys.length });
+      return await extractDocumentDataViaOcr(images, fieldDefinitions, contactFields);
     }
 
     if (responseText === null) {
