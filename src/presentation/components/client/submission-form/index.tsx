@@ -68,10 +68,40 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
     formTemplateId,
   } = useSubmission(tokenOrId);
 
+  interface FormInstance {
+    id: string;
+    formData: Record<string, { value?: any; mediaUrl?: string | null; mediaPublicId?: string | null; mediaItems?: { url: string; publicId: string }[] }>;
+    contactRecords: any[];
+    validationErrors: Record<string, boolean>;
+  }
+
+  const [instances, setInstances] = useState<FormInstance[]>([]);
+
+  const hasInitializedInstances = useRef(false);
+  if (!isLoading && !hasInitializedInstances.current) {
+    if (multiInstanceEnabled) {
+      setInstances([
+        {
+          id: "instance_default",
+          formData: { ...formData },
+          contactRecords: [...contactRecords],
+          validationErrors: {},
+        }
+      ]);
+      hasInitializedInstances.current = true;
+    }
+  }
+
+  // In multi-instance mode, AI extraction (single-record results) should target
+  // the active (first) instance, since that's what the form UI actually renders —
+  // the top-level formData/contactRecords are only a one-time seed for instances.
+  const activeInstance = multiInstanceEnabled ? instances[0] : undefined;
+
   const currentFieldValues = useMemo(() => {
     const res: Record<string, string | number | null> = {};
+    const source = activeInstance ? activeInstance.formData : formData;
     fields.forEach((f) => {
-      const fd = formData[f.id];
+      const fd = source[f.id];
       if (fd) {
         if (Array.isArray(fd.value)) {
           res[f.id] = fd.value as any;
@@ -83,17 +113,18 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
       }
     });
     return res;
-  }, [fields, formData]);
+  }, [fields, formData, activeInstance]);
 
   const currentContactValues = useMemo(() => {
-    const primary = contactRecords[0] || {};
+    const records = activeInstance ? activeInstance.contactRecords : contactRecords;
+    const primary = records[0] || {};
     return {
       name: primary.name || "",
       email: primary.email || "",
       phone: primary.phone || "",
       address: primary.address || "",
     };
-  }, [contactRecords]);
+  }, [contactRecords, activeInstance]);
 
   const handleApplyMultipleRecords = (extractedRecords: ExtractionResult[]) => {
     let recordsToUse = extractedRecords;
@@ -163,11 +194,20 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
     currentFieldValues,
     currentContactValues,
     onApplyField: (fieldId, val) => {
-      setFieldValue(fieldId, val);
+      if (activeInstance) {
+        updateInstanceFieldValue(activeInstance.id, fieldId, val);
+      } else {
+        setFieldValue(fieldId, val);
+      }
     },
     onApplyContact: (key, val) => {
-      const primary = contactRecords[0] || { id: "fallback_contact_record" };
-      updateContactRecord(primary.id, { [key]: val });
+      if (activeInstance) {
+        const contactId = activeInstance.contactRecords[0]?.id || "fallback_contact_record";
+        updateInstanceContactRecord(activeInstance.id, contactId, { [key]: val });
+      } else {
+        const primary = contactRecords[0] || { id: "fallback_contact_record" };
+        updateContactRecord(primary.id, { [key]: val });
+      }
     },
     locale,
     multiInstanceEnabled,
@@ -177,32 +217,8 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
 
   const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
   const [submittingAll, setSubmittingAll] = useState(false);
-
-  interface FormInstance {
-    id: string;
-    formData: Record<string, { value?: any; mediaUrl?: string | null; mediaPublicId?: string | null; mediaItems?: { url: string; publicId: string }[] }>;
-    contactRecords: any[];
-    validationErrors: Record<string, boolean>;
-  }
-
-  const [instances, setInstances] = useState<FormInstance[]>([]);
   const [isSubmitAllSuccess, setIsSubmitAllSuccess] = useState(false);
   const [submitAllError, setSubmitAllError] = useState<string | null>(null);
-
-  const hasInitializedInstances = useRef(false);
-  if (!isLoading && !hasInitializedInstances.current) {
-    if (multiInstanceEnabled) {
-      setInstances([
-        {
-          id: "instance_default",
-          formData: { ...formData },
-          contactRecords: [...contactRecords],
-          validationErrors: {},
-        }
-      ]);
-      hasInitializedInstances.current = true;
-    }
-  }
 
   const updateInstanceContactRecord = (instanceId: string, contactId: string, patch: any) => {
     setInstances(prev => prev.map(inst => {
