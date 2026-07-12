@@ -137,7 +137,7 @@ Reading Quality Instructions:
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
-    }, 25000); // 25 second hard timeout, leaving headroom for the OCR fallback within the route's 60s budget
+    }, 35000); // 35 second hard timeout — the Tesseract OCR fallback can take up to ~20s for a full 5-image batch, so this leaves enough of the route's 60s budget for it to still run and respond in time
 
     try {
       const response = await ai.models.generateContent({
@@ -180,8 +180,11 @@ Reading Quality Instructions:
         lastError = err;
         const isLastKey = i === apiKeys.length - 1;
         const geminiErr = parseGeminiError(err);
-        if (geminiErr.isQuotaError && !isLastKey) {
-          devlogger.error(`Gemini API key #${i + 1} quota exceeded, falling back to next key`, { retryAfterSeconds: geminiErr.retryAfterSeconds });
+        // Retry with the next key on quota errors AND transient server errors
+        // (503 "high demand", 500) — model overload isn't tied to which key
+        // made the request, so it's worth trying again before giving up.
+        if (geminiErr.isRetryable && !isLastKey) {
+          devlogger.error(`Gemini API key #${i + 1} failed (${geminiErr.isQuotaError ? "quota" : "transient error"}), trying next key`, { retryAfterSeconds: geminiErr.retryAfterSeconds });
           continue;
         }
         throw err;
@@ -192,7 +195,16 @@ Reading Quality Instructions:
       throw lastError || new Error("Failed to extract document data");
     }
 
-    const data = JSON.parse(responseText);
+    // Gemini occasionally ignores the JSON schema and replies with plain text
+    // instead (e.g. a safety/policy refusal on sensitive document content) —
+    // parse defensively so a raw SyntaxError never leaks to the end user as
+    // the final error message.
+    let data: any;
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      throw new Error("The AI declined to process this document. Please try a different photo.");
+    }
 
     // Map fields back into standard types
     const contactData = {
@@ -304,7 +316,7 @@ Reading Quality Instructions:
   } catch (error: any) {
     let reason = error.message || "Failed to extract document data";
     if (error.name === "AbortError" || error.message?.includes("aborted")) {
-      devlogger.error("Gemini AI extraction request timed out after 30s, falling back to Tesseract OCR");
+      devlogger.error("Gemini AI extraction request timed out after 35s, falling back to Tesseract OCR");
       reason = "timeout";
     } else {
       const geminiErr = parseGeminiError(error);

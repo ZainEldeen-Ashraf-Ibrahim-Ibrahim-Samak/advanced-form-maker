@@ -1,5 +1,10 @@
 export interface GeminiErrorInfo {
   isQuotaError: boolean;
+  /** True for quota errors AND transient server-side errors (503/UNAVAILABLE
+   * "high demand", 500/INTERNAL) — worth retrying with the next API key
+   * rather than failing immediately, since these are rarely tied to which
+   * key was used. */
+  isRetryable: boolean;
   retryAfterSeconds: number | null;
   /** Clean error code to store/return: "AI_QUOTA_EXCEEDED:59" or "AI_QUOTA_EXCEEDED" */
   cleanMessage: string;
@@ -44,16 +49,33 @@ function extractRetrySeconds(error: any): number | null {
 
 export function parseGeminiError(error: any): GeminiErrorInfo {
   const msg: string = error?.message ?? "";
+  const lowerMsg = msg.toLowerCase();
   const status: number = error?.status ?? error?.response?.status ?? 0;
 
   const isQuota =
     status === 429 ||
     msg.includes("429") ||
     msg.includes("RESOURCE_EXHAUSTED") ||
-    msg.toLowerCase().includes("quota");
+    lowerMsg.includes("quota");
+
+  // "High demand"/UNAVAILABLE and transient 5xx errors aren't quota-specific,
+  // but are just as worth retrying against the next configured API key —
+  // model-level overload isn't tied to which key made the request.
+  const isTransientServerError =
+    status === 503 ||
+    status === 500 ||
+    msg.includes("503") ||
+    msg.includes("UNAVAILABLE") ||
+    lowerMsg.includes("high demand") ||
+    lowerMsg.includes("overloaded");
 
   if (!isQuota) {
-    return { isQuotaError: false, retryAfterSeconds: null, cleanMessage: msg };
+    return {
+      isQuotaError: false,
+      isRetryable: isTransientServerError,
+      retryAfterSeconds: null,
+      cleanMessage: msg,
+    };
   }
 
   const retryAfterSeconds = extractRetrySeconds(error);
@@ -61,5 +83,5 @@ export function parseGeminiError(error: any): GeminiErrorInfo {
     ? `AI_QUOTA_EXCEEDED:${retryAfterSeconds}`
     : "AI_QUOTA_EXCEEDED";
 
-  return { isQuotaError: true, retryAfterSeconds, cleanMessage };
+  return { isQuotaError: true, isRetryable: true, retryAfterSeconds, cleanMessage };
 }
