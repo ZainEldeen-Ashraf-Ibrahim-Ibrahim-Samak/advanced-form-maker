@@ -1,25 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
-import { env } from "@/env.mjs";
 import { devlogger } from "@/lib/devlogger";
 import { parseGeminiError } from "@/lib/gemini-error";
+import { getAiEnvs } from "@/lib/gemini-keys";
 import { ExtractionResult } from "@/domain/entities/ai-extraction";
-
-// Collect all configured Gemini API keys, in priority order. When the first
-// key hits its quota limit, extraction falls back to the next configured key
-// instead of failing outright.
-const getApiKeys = (): string[] => {
-  const keys = [
-    env.GEMINI_API_KEY,
-    env.GEMINI_API_KEY_2,
-    env.GEMINI_API_KEY_3,
-    env.GEMINI_API_KEY_4,
-  ].filter((key): key is string => !!key);
-
-  if (keys.length === 0) {
-    throw new Error("GEMINI_API_KEY is not configured on the server");
-  }
-  return keys;
-};
 
 export async function extractDocumentData(
   images: { data: string; mimeType: string }[],
@@ -28,7 +11,7 @@ export async function extractDocumentData(
   locale: "en" | "ar",
   options?: { multiInstanceEnabled?: boolean; maxInstances?: number | null }
 ): Promise<ExtractionResult> {
-  const apiKeys = getApiKeys();
+  const apiKeys = getAiEnvs();
 
   // 1. Filter and build dynamic field schema
   const fieldProperties: Record<string, any> = {};

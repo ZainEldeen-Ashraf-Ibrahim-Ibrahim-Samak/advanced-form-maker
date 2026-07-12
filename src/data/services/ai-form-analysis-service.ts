@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
-import { env } from "@/env.mjs";
 import { logger } from "@/lib/dev-logger";
 import { parseGeminiError } from "@/lib/gemini-error";
+import { getAiEnvs } from "@/lib/gemini-keys";
 
 export interface AIFormAnalysisResult {
   summary: string;
@@ -9,23 +9,6 @@ export interface AIFormAnalysisResult {
   findings: string[];
   sentimentOverview: string;
 }
-
-// Collect all configured Gemini API keys, in priority order. When the current
-// key hits its quota limit, analysis falls back to the next configured key
-// instead of failing outright.
-const getApiKeys = (): string[] => {
-  const keys = [
-    env.GEMINI_API_KEY,
-    env.GEMINI_API_KEY_2,
-    env.GEMINI_API_KEY_3,
-    env.GEMINI_API_KEY_4,
-  ].filter((key): key is string => !!key);
-
-  if (keys.length === 0) {
-    throw new Error("GEMINI_API_KEY is not configured on the server");
-  }
-  return keys;
-};
 
 const responseSchema = {
   type: "OBJECT",
@@ -53,7 +36,7 @@ const responseSchema = {
 };
 
 export async function analyzeFormSubmissions(submissions: any[], locale: string = "ar"): Promise<AIFormAnalysisResult> {
-  const apiKeys = getApiKeys();
+  const apiKeys = getAiEnvs();
 
   // Sample to first 500 submissions to fit context and keep response times fast
   const sampledSubmissions = submissions.slice(0, 500).map((sub, idx) => {

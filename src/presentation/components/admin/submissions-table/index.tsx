@@ -525,7 +525,7 @@ export function SubmissionsTable({ submissions, isLoading, onDelete, onRefresh, 
                   <TableCell className="w-12 text-center text-muted-foreground font-medium">
                     {idx + 1}
                   </TableCell>
-                  <TableCell className="font-medium group-hover:text-primary transition-colors wrap-break-word">
+                  <TableCell className="font-medium [@media(hover:hover)]:group-hover:text-primary transition-colors wrap-break-word">
                     <div>
                       {(() => {
                         const contactName = sub.contactRecords

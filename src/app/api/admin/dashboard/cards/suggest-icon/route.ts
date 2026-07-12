@@ -2,10 +2,10 @@ import { auth } from "@/lib/auth";
 import { errorResponse, successResponse, unauthorizedResponse } from "@/lib/api-response";
 import { parseSecureJson } from "@/lib/api-security";
 import { GoogleGenAI } from "@google/genai";
-import { env } from "@/env.mjs";
 import { z } from "zod";
 import { CARD_ICON_KEYS } from "@/lib/card-icons";
 import { parseGeminiError } from "@/lib/gemini-error";
+import { getAiEnvs } from "@/lib/gemini-keys";
 
 const bodySchema = z.object({
   titleAr: z.string().optional().default(""),
@@ -33,13 +33,14 @@ export async function POST(request: Request) {
     return errorResponse("At least one title (AR or EN) is required", 400, "NO_TITLE");
   }
 
+  let apiKeys: string[];
   try {
-    const apiKey = env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return errorResponse("AI service not configured", 503, "AI_NOT_CONFIGURED");
-    }
+    apiKeys = getAiEnvs();
+  } catch {
+    return errorResponse("AI service not configured", 503, "AI_NOT_CONFIGURED");
+  }
 
-    const ai = new GoogleGenAI({ apiKey });
+  try {
     const iconList = CARD_ICON_KEYS.join(", ");
 
     const prompt = `You are a UI icon selector assistant. Given a card title, choose the single most appropriate icon from the available list.
@@ -55,10 +56,31 @@ Rules:
 - If both Arabic and English titles are provided, consider both
 - Do not add quotes, punctuation, or explanation`;
 
-    const result = await ai.models.generateContent({
-      model: "gemini-flash-latest",
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-    });
+    let result: Awaited<ReturnType<InstanceType<typeof GoogleGenAI>["models"]["generateContent"]>> | null = null;
+    let lastError: any = null;
+
+    for (let i = 0; i < apiKeys.length; i++) {
+      try {
+        const ai = new GoogleGenAI({ apiKey: apiKeys[i] });
+        result = await ai.models.generateContent({
+          model: "gemini-flash-latest",
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+        });
+        break;
+      } catch (err: any) {
+        lastError = err;
+        const isLastKey = i === apiKeys.length - 1;
+        const geminiErr = parseGeminiError(err);
+        if (geminiErr.isQuotaError && !isLastKey) {
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    if (!result) {
+      throw lastError || new Error("Failed to generate icon suggestion");
+    }
 
     const suggested = result.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
     
