@@ -164,57 +164,41 @@ export async function GET(req: Request) {
           groupedData[formName] = [];
         }
 
-        // Build clean readable row
-        const row: Record<string, any> = {
-          "#": groupedData[formName].length + 1,
-          "Form": formName,
-          "Client Name": doc.clientName || primaryRecord?.name || "—",
-          "Contact Name": primaryRecord?.name || "—",
-          "Contact Email": primaryRecord?.email || "—",
-          "Contact Phone": primaryRecord?.phone || doc.clientContact || "—",
-          "Contact Address": primaryRecord?.contact || "—",
-          "Contact Role": primaryRecord?.role || "—",
-          "Contact Notes": primaryRecord?.notes || "—",
-          "Status": doc.status || "—",
-          "Submitted At": doc.submittedAt ? new Date(doc.submittedAt).toISOString() : "—",
-          "Last Updated": doc.updatedAt ? new Date(doc.updatedAt).toISOString() : "—",
+        // Collect all raw values: contact fields + custom fields
+        const rawValues: Record<string, any> = {
+          "Client Name": doc.clientName || primaryRecord?.name || "",
+          "Contact Name": primaryRecord?.name || "",
         };
 
-        // Append custom field values as named columns
         const customFields = fieldValuesBySubmission.get(docIdStr) || [];
         for (const fv of customFields) {
           const columnName = fv.fieldNameSnapshot || `Field_${fv.fieldDefinitionId}`;
+          let strVal = "";
           if (fv.mediaUrl) {
-            row[columnName] = fv.mediaUrl;
+            strVal = fv.mediaUrl;
           } else if (fv.mediaItems && fv.mediaItems.length > 0) {
-            row[columnName] = fv.mediaItems.map((item: any) => item.url).join(", ");
+            strVal = fv.mediaItems.map((item: any) => item.url).join(", ");
           } else {
-            let strVal = fv.value !== undefined && fv.value !== null ? String(fv.value) : "";
-            if (strVal.length > 1000) {
-              strVal = strVal.substring(0, 1000) + "... [Truncated]";
-            }
-            row[columnName] = strVal;
+            strVal = fv.value !== undefined && fv.value !== null ? String(fv.value) : "";
           }
+          rawValues[columnName] = strVal;
         }
 
-        let finalRow = row;
-        // Intercept export for 'total passengers of the ship'
-        if (formName.toLowerCase().includes("passenger")) {
-          const passengerRow: Record<string, any> = {};
-          passengerRow["#"] = row["#"];
-          
-          const findVal = (keywords: string[]) => {
-             const key = Object.keys(row).find(k => keywords.some(kw => k.toLowerCase().includes(kw)));
-             return key ? row[key] : "—";
-          };
+        // Helper: find first non-empty value whose key contains any of the keywords
+        const findVal = (keywords: string[]) => {
+          const key = Object.keys(rawValues).find(
+            k => keywords.some(kw => k.toLowerCase().includes(kw)) && rawValues[k]?.toString().trim()
+          );
+          return key ? rawValues[key] : "—";
+        };
 
-          passengerRow["Full Name"] = findVal(["full name", "client name", "contact name", "name"]);
-          passengerRow["Date of Birth"] = findVal(["date of birth", "dob", "birth"]);
-          passengerRow["Nationality"] = findVal(["nationality"]);
-          passengerRow["Passport / National ID"] = findVal(["passport", "national id", "nationality id", "id number", "id"]);
-
-          finalRow = passengerRow;
-        }
+        const finalRow: Record<string, any> = {
+          "#": groupedData[formName].length + 1,
+          "Full Name": findVal(["full name", "name"]),
+          "Date of Birth": findVal(["date of birth", "dob", "birth date", "birthdate", "birth"]),
+          "Nationality": findVal(["nationality", "nation", "country"]),
+          "Passport / National ID": findVal(["passport", "national id", "nationality id", "id number", "national no", "id no"]),
+        };
 
         groupedData[formName].push(finalRow);
       });
