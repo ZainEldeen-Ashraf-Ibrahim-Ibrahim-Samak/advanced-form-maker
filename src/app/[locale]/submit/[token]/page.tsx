@@ -25,7 +25,10 @@ interface SubmitPageProps {
 export default async function SubmitPage({ params }: SubmitPageProps) {
   const { token } = await params;
   return (
-    <div className="min-h-screen bg-background px-3 pt-3 pb-10 sm:px-4 sm:pt-4 sm:pb-12">
+    <div
+      className="min-h-screen bg-background px-3 pt-3 pb-10 sm:px-4 sm:pt-4 sm:pb-12"
+      suppressHydrationWarning
+    >
       <ClientNotifications token={token} />
       <SubmissionForm tokenOrId={token} />
     </div>

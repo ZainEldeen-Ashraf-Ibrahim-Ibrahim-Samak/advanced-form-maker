@@ -34,6 +34,11 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
+  // tesseract.js resolves its worker script relative to its own package
+  // directory at runtime (fs paths, not static imports) — letting webpack
+  // bundle it breaks that resolution in the serverless output and crashes
+  // with MODULE_NOT_FOUND. Keep it as a native, unbundled require instead.
+  serverExternalPackages: ["tesseract.js"],
   async rewrites() {
     return [
       {
