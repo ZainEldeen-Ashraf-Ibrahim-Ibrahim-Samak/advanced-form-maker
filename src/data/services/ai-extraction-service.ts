@@ -138,8 +138,8 @@ Reading Quality Instructions:
     // (large multi-page/multi-record documents can legitimately take a while)
     // instead of aborting a request that would otherwise have succeeded.
       const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: [
+        model: "gemini-1.5-flash-latest",
+        contents: [
         ...images.map((image) => ({
           inlineData: {
             mimeType: image.mimeType,
