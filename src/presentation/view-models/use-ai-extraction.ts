@@ -281,12 +281,20 @@ export function useAiExtraction({
 
       // 3. Stage update
       setStage("analyzing");
+      let totalPayloadSize = 0;
       const images = await Promise.all(
-        processedFiles.map(async (file) => ({
-          data: await toBase64(file),
-          mimeType: file.type,
-        }))
+        processedFiles.map(async (file) => {
+          const data = await toBase64(file);
+          totalPayloadSize += data.length;
+          return { data, mimeType: file.type };
+        })
       );
+
+      // Vercel serverless functions have a strict 4.5MB payload limit. 
+      // We cap at ~4MB to be safe.
+      if (totalPayloadSize > 4 * 1024 * 1024) {
+        throw new Error("fileTooLarge");
+      }
 
       // 4. Collect field/contact metadata
       const cleanFieldDefs = fieldDefinitions
@@ -325,10 +333,20 @@ export function useAiExtraction({
         }),
       });
 
-      const json = await response.json();
+      let json;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        json = await response.json();
+      } else {
+        const text = await response.text();
+        if (response.status === 413) {
+          throw new Error("fileTooLarge");
+        }
+        throw new Error("extractionFailed");
+      }
 
-      if (!response.ok || !json.success) {
-        const errorMsg = json.error || "extractionFailed";
+      if (!response.ok || !json?.success) {
+        const errorMsg = json?.error || "extractionFailed";
         throw new Error(errorMsg);
       }
 
