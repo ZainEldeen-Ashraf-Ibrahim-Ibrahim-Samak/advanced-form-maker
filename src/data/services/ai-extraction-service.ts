@@ -137,8 +137,8 @@ Reading Quality Instructions:
     // No artificial timeout — let Gemini take as long as it actually needs
     // (large multi-page/multi-record documents can legitimately take a while)
     // instead of aborting a request that would otherwise have succeeded.
-    const response = await ai.models.generateContent({
-      model: "ggemini-pro-latest",
+      const response = await ai.models.generateContent({
+      model: "gemini-1.5-flash",
       contents: [
         ...images.map((image) => ({
           inlineData: {
