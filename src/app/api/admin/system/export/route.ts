@@ -197,7 +197,26 @@ export async function GET(req: Request) {
           }
         }
 
-        groupedData[formName].push(row);
+        let finalRow = row;
+        // Intercept export for 'total passengers of the ship'
+        if (formName.toLowerCase().includes("passenger")) {
+          const passengerRow: Record<string, any> = {};
+          passengerRow["#"] = row["#"];
+          
+          const findVal = (keywords: string[]) => {
+             const key = Object.keys(row).find(k => keywords.some(kw => k.toLowerCase().includes(kw)));
+             return key ? row[key] : "—";
+          };
+
+          passengerRow["Full Name"] = findVal(["full name", "client name", "contact name", "name"]);
+          passengerRow["Date of Birth"] = findVal(["date of birth", "dob", "birth"]);
+          passengerRow["Nationality"] = findVal(["nationality"]);
+          passengerRow["Passport / National ID"] = findVal(["passport", "national id", "nationality id", "id number", "id"]);
+
+          finalRow = passengerRow;
+        }
+
+        groupedData[formName].push(finalRow);
       });
     } else {
       // General flattening for other collections
