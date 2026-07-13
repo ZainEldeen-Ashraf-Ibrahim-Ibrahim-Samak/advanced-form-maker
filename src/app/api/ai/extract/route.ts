@@ -7,11 +7,11 @@ import { devlogger } from "@/lib/devlogger";
 import { extractionRequestSchema } from "@/lib/validations/ai-extraction";
 
 export const dynamic = "force-dynamic";
-// Gemini can take up to ~25s before its own internal timeout fires, and the
-// Tesseract OCR fallback (used when Gemini fails for any reason) needs
-// additional time on top of that — give the function enough room for both
-// instead of getting cut off by the platform's shorter default.
-export const maxDuration = 60;
+// Gemini has no internal timeout now — large/multi-record documents can take
+// a while to process. Give the function as much room as the platform allows
+// so a slow-but-successful analysis isn't cut off (Vercel automatically caps
+// this to the actual plan limit, e.g. 60s on Hobby, up to 300s on Pro).
+export const maxDuration = 600;
 
 const useCase = new ExtractDocumentDataUseCase();
 

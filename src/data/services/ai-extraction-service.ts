@@ -3,7 +3,6 @@ import { devlogger } from "@/lib/devlogger";
 import { parseGeminiError } from "@/lib/gemini-error";
 import { getAiEnvs } from "@/lib/gemini-keys";
 import { ExtractionResult } from "@/domain/entities/ai-extraction";
-import { extractDocumentDataViaOcr } from "@/data/services/tesseract-extraction-service";
 
 export async function extractDocumentData(
   images: { data: string; mimeType: string }[],
@@ -134,38 +133,32 @@ Reading Quality Instructions:
 
   const callGemini = async (apiKey: string): Promise<string> => {
     const ai = new GoogleGenAI({ apiKey });
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-    }, 35000); // 35 second hard timeout — the Tesseract OCR fallback can take up to ~20s for a full 5-image batch, so this leaves enough of the route's 60s budget for it to still run and respond in time
 
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-flash-latest",
-        contents: [
-          ...images.map((image) => ({
-            inlineData: {
-              mimeType: image.mimeType,
-              data: image.data,
-            },
-          })),
-          prompt,
-        ],
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: responseSchema as any,
-          abortSignal: controller.signal,
-        },
-      });
+    // No artificial timeout — let Gemini take as long as it actually needs
+    // (large multi-page/multi-record documents can legitimately take a while)
+    // instead of aborting a request that would otherwise have succeeded.
+    const response = await ai.models.generateContent({
+      model: "gemini-flash-latest",
+      contents: [
+        ...images.map((image) => ({
+          inlineData: {
+            mimeType: image.mimeType,
+            data: image.data,
+          },
+        })),
+        prompt,
+      ],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: responseSchema as any,
+      },
+    });
 
-      const responseText = response.text;
-      if (!responseText) {
-        throw new Error("Empty response from Gemini API");
-      }
-      return responseText;
-    } finally {
-      clearTimeout(timeoutId);
+    const responseText = response.text;
+    if (!responseText) {
+      throw new Error("Empty response from Gemini API");
     }
+    return responseText;
   };
 
   const attemptGeminiExtraction = async (): Promise<ExtractionResult> => {
@@ -306,34 +299,34 @@ Reading Quality Instructions:
     };
   };
 
-  // Gemini is always tried first (rotating through every configured API key).
-  // ANY failure of that path — quota exhaustion, timeout, network error, a
-  // malformed response, missing keys — falls back to the free local OCR pass
-  // rather than failing the whole extraction outright. The OCR fallback never
-  // throws (it catches its own errors internally), so this always resolves.
   try {
     return await attemptGeminiExtraction();
   } catch (error: any) {
-    let reason = error.message || "Failed to extract document data";
     if (error.name === "AbortError" || error.message?.includes("aborted")) {
-      devlogger.error("Gemini AI extraction request timed out after 35s, falling back to Tesseract OCR");
-      reason = "timeout";
-    } else {
-      const geminiErr = parseGeminiError(error);
-      if (geminiErr.isQuotaError) {
-        devlogger.error("Gemini API quota exceeded during extraction, falling back to Tesseract OCR", { retryAfterSeconds: geminiErr.retryAfterSeconds });
-        reason = geminiErr.cleanMessage;
-      } else {
-        devlogger.error("Error during Gemini AI extraction, falling back to Tesseract OCR", error);
-      }
+      devlogger.error("Gemini AI extraction request timed out after 35s");
+      return {
+        status: "failure",
+        contactData: { name: null, email: null, phone: null, address: null },
+        fieldValues: {},
+        errorMessage: "timeout",
+      };
     }
-
-    const ocrResult = await extractDocumentDataViaOcr(images, fieldDefinitions, contactFields);
-    if (ocrResult.status === "failure") {
-      // Both attempts failed — surface the original Gemini failure reason,
-      // since it's usually more specific than the generic OCR failure message.
-      return { ...ocrResult, errorMessage: reason };
+    const geminiErr = parseGeminiError(error);
+    if (geminiErr.isQuotaError) {
+      devlogger.error("Gemini API quota exceeded during extraction", { retryAfterSeconds: geminiErr.retryAfterSeconds });
+      return {
+        status: "failure",
+        contactData: { name: null, email: null, phone: null, address: null },
+        fieldValues: {},
+        errorMessage: geminiErr.cleanMessage,
+      };
     }
-    return ocrResult;
+    devlogger.error("Error during Gemini AI extraction", error);
+    return {
+      status: "failure",
+      contactData: { name: null, email: null, phone: null, address: null },
+      fieldValues: {},
+      errorMessage: error.message || "Failed to extract document data",
+    };
   }
 }
