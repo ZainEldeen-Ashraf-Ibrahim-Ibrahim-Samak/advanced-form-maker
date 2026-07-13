@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 // a while to process. Give the function as much room as the platform allows
 // so a slow-but-successful analysis isn't cut off (Vercel automatically caps
 // this to the actual plan limit, e.g. 60s on Hobby, up to 300s on Pro).
-export const maxDuration = 600;
+export const maxDuration = 300;
 
 const useCase = new ExtractDocumentDataUseCase();
 
