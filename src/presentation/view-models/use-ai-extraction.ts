@@ -27,8 +27,8 @@ const getAiExtractionFileKind = (file: File): "image" | "document" | null => {
   const fileName = file.name.toLowerCase();
 
   if (
-    supportedImageMimeTypes.has(mimeType) ||
-    hasSupportedExtension(fileName, [".jpg", ".jpeg", ".png", ".webp", ".heic"])
+    mimeType.startsWith("image/") ||
+    hasSupportedExtension(fileName, [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"])
   ) {
     return "image";
   }
@@ -120,25 +120,39 @@ export function useAiExtraction({
   };
 
   // Re-encode oversized/native canvas images to a normalized JPEG so the MIME
-  // type sent to the API always matches the server's strict allow-list. Phone
-  // cameras/gallery pickers frequently report nonstandard or empty `file.type`
-  // values (e.g. "image/jpg", ""), which otherwise get rejected by the server.
-  const reencodeImageAsJpeg = (file: File): Promise<File> => {
+  // type sent to the API always matches the server's strict allow-list, and compress
+  // to avoid Vercel's 4.5MB payload limits for serverless functions.
+  const processAndCompressImage = (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
       img.onload = () => {
         URL.revokeObjectURL(objectUrl);
+        
+        let { width, height } = img;
+        const MAX_DIMENSION = 2000;
+
+        if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+          const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
         const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = width;
+        canvas.height = height;
         const ctx = canvas.getContext("2d");
         if (!ctx) { reject(new Error("invalidFile")); return; }
-        ctx.drawImage(img, 0, 0);
+        
+        // Draw with white background in case of transparency
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        
         canvas.toBlob((blob) => {
           if (!blob) { reject(new Error("invalidFile")); return; }
           resolve(new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }));
-        }, "image/jpeg", 0.92);
+        }, "image/jpeg", 0.8);
       };
       img.onerror = () => {
         URL.revokeObjectURL(objectUrl);
@@ -154,18 +168,16 @@ export function useAiExtraction({
   // failing on iOS) and which the Gemini vision API doesn't accept either — so
   // HEIC always goes through a dedicated decoder instead of the native canvas path.
   const normalizeImageMimeType = async (file: File): Promise<File> => {
+    let processedFile = file;
+
     if (isHeicFile(file)) {
       const heic2any = (await import("heic2any")).default;
       const converted = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.92 });
       const blob = Array.isArray(converted) ? converted[0] : converted;
-      return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
+      processedFile = new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
     }
 
-    if (supportedImageMimeTypes.has(file.type.toLowerCase())) {
-      return file;
-    }
-
-    return reencodeImageAsJpeg(file);
+    return processAndCompressImage(processedFile);
   };
 
   const applyExtraction = useCallback((result: ExtractionResult, overwrite: boolean) => {
