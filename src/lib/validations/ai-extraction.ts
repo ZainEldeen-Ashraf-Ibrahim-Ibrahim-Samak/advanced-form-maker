@@ -42,7 +42,7 @@ export const extractionRequestSchema = z.object({
   ),
   locale: z.enum(["en", "ar"]),
   multiInstanceEnabled: z.boolean().optional(),
-  maxInstances: z.number().int().min(1).max(50).nullable().optional(),
+  maxInstances: z.number().int().min(1).nullable().optional(),
 });
 
 export type ExtractionRequest = z.infer<typeof extractionRequestSchema>;

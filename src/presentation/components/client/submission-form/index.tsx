@@ -128,7 +128,7 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
 
   const handleApplyMultipleRecords = (extractedRecords: ExtractionResult[]) => {
     let recordsToUse = extractedRecords;
-    const limit = maxInstances || 50;
+    const limit = maxInstances || Infinity;
     
     if (recordsToUse.length > limit) {
       recordsToUse = recordsToUse.slice(0, limit);
@@ -288,7 +288,6 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
 
   const handleAddInstance = () => {
     if (maxInstances && instances.length >= maxInstances) return;
-    if (instances.length >= 50) return;
 
     const initialForm: Record<string, any> = {};
     fields.forEach((f) => {
@@ -864,7 +863,7 @@ export function SubmissionForm({ tokenOrId }: SubmissionFormProps) {
                       type="button"
                       variant="outline"
                       onClick={handleAddInstance}
-                      disabled={submittingAll || !!(maxInstances && instances.length >= maxInstances) || instances.length >= 50}
+                      disabled={submittingAll || !!(maxInstances && instances.length >= maxInstances)}
                       className="w-full sm:w-auto"
                     >
                       <Plus className="me-2 h-4 w-4" />

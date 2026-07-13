@@ -165,7 +165,7 @@ export const updateFormTemplateSchema = z.object({
   contactFormLocked: z.boolean().optional(),
   canAddMoreReplies: z.boolean().optional(),
   multiInstanceEnabled: z.boolean().optional(),
-  maxInstances: z.number().int().min(1).max(50).nullable().optional(),
+  maxInstances: z.number().int().min(1).nullable().optional(),
 });
 
 // ── Submission Schemas ─────────────────────────────────────────────

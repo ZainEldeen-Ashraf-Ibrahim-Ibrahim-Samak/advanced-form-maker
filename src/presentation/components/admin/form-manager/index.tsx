@@ -425,7 +425,6 @@ export function FormManager() {
                   id="edit-form-max-instances"
                   type="number"
                   min={1}
-                  max={50}
                   placeholder={t("maxInstancesLabel")}
                   value={editFormMaxInstances ?? ""}
                   onChange={(e) => {

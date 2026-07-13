@@ -126,7 +126,7 @@ Reading Quality Instructions:
   }
 
   if (options?.multiInstanceEnabled) {
-    prompt += `\n- Since multiple records are allowed, if the document contains a list/table/sheet with multiple records, extract ALL rows into the 'records' array in the response schema. Capped at ${options.maxInstances || 50} records. The top-level 'contactData' and 'fieldValues' should represent the FIRST record.`;
+    prompt += `\n- Since multiple records are allowed, if the document contains a list/table/sheet with multiple records, extract ALL rows into the 'records' array in the response schema.${options.maxInstances ? ` Capped at ${options.maxInstances} records.` : ""} The top-level 'contactData' and 'fieldValues' should represent the FIRST record.`;
   }
 
   prompt += "\n\nExtract exactly as instructed. Do not include any explanation.";
