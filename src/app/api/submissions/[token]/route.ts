@@ -112,7 +112,7 @@ function conflictResponse(code: "STALE_FORM_VERSION" | "STALE_SUBMISSION_VERSION
 function summarizeFieldValues(
   fieldValues: Array<{
     fieldDefinitionId: string;
-    value?: string | number | string[] | null;
+    value?: any;
     mediaUrl?: string | null;
     mediaItems?: Array<{ url: string; publicId: string }>;
   }>,

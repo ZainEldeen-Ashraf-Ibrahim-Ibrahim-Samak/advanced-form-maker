@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Plus, X } from "lucide-react";
-import type { FieldDefinition, InputType } from "@/domain/entities/field-definition";
+import type { FieldDefinition, InputType, TableColumn, TableRowHeader } from "@/domain/entities/field-definition";
+import { v4 as uuidv4 } from "uuid";
 
 interface FieldFormDialogProps {
   open: boolean;
@@ -18,7 +19,7 @@ interface FieldFormDialogProps {
   onSave: (data: Record<string, unknown>) => Promise<void>;
 }
 
-const INPUT_TYPES: InputType[] = ["text", "number", "image", "file", "date", "dropdown", "camera"];
+const INPUT_TYPES: InputType[] = ["text", "number", "image", "file", "date", "dropdown", "camera", "table"];
 
 export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldFormDialogProps) {
   const t = useTranslations("fields");
@@ -35,6 +36,9 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
   const [dropdownOptionsEn, setDropdownOptionsEn] = useState<string[]>([""]);
   const [dropdownOptionsAr, setDropdownOptionsAr] = useState<string[]>([""]);
   const [defaultValue, setDefaultValue] = useState("");
+  const [tableColumns, setTableColumns] = useState<TableColumn[]>([]);
+  const [tableRowHeaders, setTableRowHeaders] = useState<TableRowHeader[]>([]);
+  const [tableAllowUserAddRows, setTableAllowUserAddRows] = useState(true);
 
   useEffect(() => {
     if (field) {
@@ -53,6 +57,9 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
         field.dropdownOptionsAr.length > 0 ? field.dropdownOptionsAr : [""]
       );
       setDefaultValue(field.defaultValue ?? "");
+      setTableColumns(field.tableColumns ?? []);
+      setTableRowHeaders(field.tableRowHeaders ?? []);
+      setTableAllowUserAddRows(field.tableAllowUserAddRows ?? true);
     } else {
       setNameEn("");
       setNameAr("");
@@ -64,6 +71,9 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
       setDropdownOptionsEn([""]);
       setDropdownOptionsAr([""]);
       setDefaultValue("");
+      setTableColumns([]);
+      setTableRowHeaders([]);
+      setTableAllowUserAddRows(true);
     }
   }, [field, open]);
 
@@ -86,6 +96,12 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
         data.dropdownOptionsEn = dropdownOptionsEn.filter((o) => o.trim() !== "");
         data.dropdownOptionsAr = dropdownOptionsAr.filter((o) => o.trim() !== "");
       }
+      
+      if (inputType === "table") {
+        data.tableColumns = tableColumns.filter(c => c.labelEn.trim() !== "" || c.labelAr.trim() !== "");
+        data.tableRowHeaders = tableRowHeaders.filter(r => r.labelEn.trim() !== "" || r.labelAr.trim() !== "");
+        data.tableAllowUserAddRows = tableAllowUserAddRows;
+      }
 
       const supportsDefault =
         inputType === "text" || inputType === "number" || inputType === "date" || inputType === "dropdown";
@@ -105,6 +121,22 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
   function removeOption(index: number) {
     setDropdownOptionsEn(dropdownOptionsEn.filter((_, i) => i !== index));
     setDropdownOptionsAr(dropdownOptionsAr.filter((_, i) => i !== index));
+  }
+
+  function addTableColumn() {
+    setTableColumns([...tableColumns, { id: uuidv4(), labelEn: "", labelAr: "", type: "text" }]);
+  }
+
+  function removeTableColumn(id: string) {
+    setTableColumns(tableColumns.filter((c) => c.id !== id));
+  }
+
+  function addTableRow() {
+    setTableRowHeaders([...tableRowHeaders, { id: uuidv4(), labelEn: "", labelAr: "" }]);
+  }
+
+  function removeTableRow(id: string) {
+    setTableRowHeaders(tableRowHeaders.filter((r) => r.id !== id));
   }
 
   return (
@@ -270,6 +302,127 @@ export function FieldFormDialog({ open, onOpenChange, field, onSave }: FieldForm
                   <Plus className="mr-1 h-3 w-3" />
                   {t("addOption")}
                 </Button>
+              </div>
+            </>
+          )}
+
+          {inputType === "table" && (
+            <>
+              <Separator />
+              <div className="space-y-4">
+                <Label className="text-lg font-semibold">{t("tableConfig")}</Label>
+                
+                <div className="space-y-3">
+                  <Label>{t("tableColumns")}</Label>
+                  {tableColumns.map((col, index) => (
+                    <div key={col.id} className="flex items-center gap-2">
+                      <Input
+                        value={col.labelEn}
+                        onChange={(e) => {
+                          const updated = [...tableColumns];
+                          updated[index].labelEn = e.target.value;
+                          setTableColumns(updated);
+                        }}
+                        placeholder={`Column (EN) ${index + 1}`}
+                        className="flex-1"
+                      />
+                      <Input
+                        value={col.labelAr}
+                        onChange={(e) => {
+                          const updated = [...tableColumns];
+                          updated[index].labelAr = e.target.value;
+                          setTableColumns(updated);
+                        }}
+                        placeholder={`عمود (عربي) ${index + 1}`}
+                        className="flex-1"
+                        dir="rtl"
+                      />
+                      <Select
+                        value={col.type}
+                        onValueChange={(v) => {
+                          const updated = [...tableColumns];
+                          updated[index].type = v as "text" | "number";
+                          setTableColumns(updated);
+                        }}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="text">{t("types.text")}</SelectItem>
+                          <SelectItem value="number">{t("types.number")}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeTableColumn(col.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button type="button" variant="outline" size="sm" onClick={addTableColumn}>
+                    <Plus className="mr-1 h-3 w-3" />
+                    {t("addColumn")}
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  <Label>{t("tableRowHeaders")}</Label>
+                  {tableRowHeaders.map((row, index) => (
+                    <div key={row.id} className="flex items-center gap-2">
+                      <Input
+                        value={row.labelEn}
+                        onChange={(e) => {
+                          const updated = [...tableRowHeaders];
+                          updated[index].labelEn = e.target.value;
+                          setTableRowHeaders(updated);
+                        }}
+                        placeholder={`Row (EN) ${index + 1}`}
+                        className="flex-1"
+                      />
+                      <Input
+                        value={row.labelAr}
+                        onChange={(e) => {
+                          const updated = [...tableRowHeaders];
+                          updated[index].labelAr = e.target.value;
+                          setTableRowHeaders(updated);
+                        }}
+                        placeholder={`صف (عربي) ${index + 1}`}
+                        className="flex-1"
+                        dir="rtl"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeTableRow(row.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button type="button" variant="outline" size="sm" onClick={addTableRow}>
+                    <Plus className="mr-1 h-3 w-3" />
+                    {t("addRow")}
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-2 mt-4">
+                  <input
+                    title="Allow users to add rows dynamically"
+                    type="checkbox"
+                    id="tableAllowUserAddRows"
+                    checked={tableAllowUserAddRows}
+                    onChange={(e) => setTableAllowUserAddRows(e.target.checked)}
+                    className="rounded"
+                  />
+                  <Label htmlFor="tableAllowUserAddRows" className="cursor-pointer">
+                    {t("tableAllowUserAddRows")}
+                  </Label>
+                </div>
               </div>
             </>
           )}

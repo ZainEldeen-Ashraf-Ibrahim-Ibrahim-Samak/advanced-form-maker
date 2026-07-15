@@ -9,6 +9,8 @@ export const InputTypeEnum = z.enum([
   "file",
   "date",
   "dropdown",
+  "camera",
+  "table",
 ]);
 export type InputType = z.infer<typeof InputTypeEnum>;
 
@@ -42,6 +44,19 @@ export const validationRulesSchema = z
   })
   .partial();
 
+export const tableColumnSchema = z.object({
+  id: z.string().min(1),
+  labelEn: z.string().min(1).max(200).regex(SAFE_TEXT_REGEX, "Contains invalid characters"),
+  labelAr: z.string().min(1).max(200).regex(SAFE_TEXT_REGEX, "Contains invalid characters"),
+  type: z.enum(["text", "number"]),
+});
+
+export const tableRowHeaderSchema = z.object({
+  id: z.string().min(1),
+  labelEn: z.string().min(1).max(200).regex(SAFE_TEXT_REGEX, "Contains invalid characters"),
+  labelAr: z.string().min(1).max(200).regex(SAFE_TEXT_REGEX, "Contains invalid characters"),
+});
+
 // ── Field Definition Schemas ───────────────────────────────────────
 
 export const createFieldDefinitionSchema = z
@@ -58,6 +73,9 @@ export const createFieldDefinitionSchema = z
     validationRules: validationRulesSchema.optional().default({}),
     dropdownOptionsEn: z.array(z.string()).optional().default([]),
     dropdownOptionsAr: z.array(z.string()).optional().default([]),
+    tableColumns: z.array(tableColumnSchema).nullable().optional(),
+    tableRowHeaders: z.array(tableRowHeaderSchema).nullable().optional(),
+    tableAllowUserAddRows: z.boolean().nullable().optional(),
     defaultValue: z.string().max(500).optional().default(""),
     sortOrder: z.number().int().min(0).optional(),
   })
@@ -99,6 +117,9 @@ export const updateFieldDefinitionSchema = z.object({
   validationRules: validationRulesSchema.optional(),
   dropdownOptionsEn: z.array(z.string()).optional(),
   dropdownOptionsAr: z.array(z.string()).optional(),
+  tableColumns: z.array(tableColumnSchema).nullable().optional(),
+  tableRowHeaders: z.array(tableRowHeaderSchema).nullable().optional(),
+  tableAllowUserAddRows: z.boolean().nullable().optional(),
   defaultValue: z.string().max(500).optional(),
   sortOrder: z.number().int().min(0).optional(),
 });
@@ -173,7 +194,13 @@ export const updateFormTemplateSchema = z.object({
 export const fieldValueInputSchema = z.object({
   fieldDefinitionId: z.string().min(1),
   value: z
-    .union([z.string(), z.number(), z.array(z.string()), z.null()])
+    .union([
+      z.string(),
+      z.number(),
+      z.array(z.string()),
+      z.array(z.record(z.string(), z.union([z.string(), z.number(), z.null()]))),
+      z.null(),
+    ])
     .optional(),
   mediaUrl: z.string().optional().nullable(),
   mediaPublicId: z.string().optional().nullable(),

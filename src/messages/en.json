@@ -314,8 +314,15 @@
       "file": "File Upload",
       "date": "Date",
       "dropdown": "Dropdown Select",
-      "camera": "Camera Capture"
+      "camera": "Camera Capture",
+      "table": "Table"
     },
+    "tableConfig": "Table Configuration",
+    "tableColumns": "Columns",
+    "tableRowHeaders": "Pre-defined Rows",
+    "tableAllowUserAddRows": "Allow user to add rows",
+    "addColumn": "Add Column",
+    "addRow": "Add Row",
     "validation": {
       "minLength": "Min Length",
       "maxLength": "Max Length",

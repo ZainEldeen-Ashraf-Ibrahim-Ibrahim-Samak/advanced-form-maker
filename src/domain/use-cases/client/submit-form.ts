@@ -29,7 +29,7 @@ interface SubmitFormData {
   }>;
   fieldValues: Array<{
     fieldDefinitionId: string;
-    value?: string | number | string[] | null;
+    value?: any;
     mediaUrl?: string | null;
     mediaPublicId?: string | null;
     mediaItems?: Array<{ url: string; publicId: string }>;
@@ -142,7 +142,7 @@ function normalizeIso(value: Date | string | null | undefined): string | null {
   return date.toISOString();
 }
 
-function hasValueContent(value: string | number | string[] | null | undefined): boolean {
+function hasValueContent(value: any): boolean {
   if (Array.isArray(value)) return value.length > 0;
   if (value === undefined || value === null) return false;
   return value.toString().trim().length > 0;

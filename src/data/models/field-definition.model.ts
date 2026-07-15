@@ -4,7 +4,7 @@ export interface IFieldDefinition extends Document {
   formTemplateId: mongoose.Types.ObjectId;
   nameEn: string;
   nameAr: string;
-  inputType: "text" | "number" | "image" | "file" | "date" | "dropdown";
+  inputType: "text" | "number" | "image" | "file" | "date" | "dropdown" | "camera" | "table";
   validationRules: {
     required?: boolean;
     minLength?: number;
@@ -17,6 +17,9 @@ export interface IFieldDefinition extends Document {
   isMultiple: boolean;
   dropdownOptionsEn: string[];
   dropdownOptionsAr: string[];
+  tableColumns?: { id: string; labelEn: string; labelAr: string; type: "text" | "number" }[] | null;
+  tableRowHeaders?: { id: string; labelEn: string; labelAr: string }[] | null;
+  tableAllowUserAddRows?: boolean | null;
   defaultValue?: string;
   sortOrder: number;
   isActive: boolean;
@@ -46,7 +49,7 @@ const fieldDefinitionSchema = new Schema<IFieldDefinition>(
     inputType: {
       type: String,
       required: true,
-      enum: ["text", "number", "image", "file", "date", "dropdown"],
+      enum: ["text", "number", "image", "file", "date", "dropdown", "camera", "table"],
     },
     validationRules: {
       type: Schema.Types.Mixed,
@@ -63,6 +66,18 @@ const fieldDefinitionSchema = new Schema<IFieldDefinition>(
     dropdownOptionsAr: {
       type: [String],
       default: [],
+    },
+    tableColumns: {
+      type: [Schema.Types.Mixed],
+      default: null,
+    },
+    tableRowHeaders: {
+      type: [Schema.Types.Mixed],
+      default: null,
+    },
+    tableAllowUserAddRows: {
+      type: Boolean,
+      default: null,
     },
     defaultValue: {
       type: String,

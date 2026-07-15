@@ -10,18 +10,19 @@ import { MediaUpload } from "./media-upload";
 import { CameraCapture } from "./camera-capture";
 import type { FieldDefinition } from "@/domain/entities/field-definition";
 import { Button } from "@/components/ui/button";
-import { X, Sparkles } from "lucide-react";
+import { X, Sparkles, Plus } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import EmailRegix from "@/components/validation/EmailRegix";
 import PhoneRegix from "@/components/validation/PhoneRegix";
 import NameRegix from "@/components/validation/NameRegix";
 
 interface FieldRendererProps {
   field: FieldDefinition;
-  value?: string | number | string[] | null;
+  value?: any;
   mediaUrl?: string | null;
   mediaPublicId?: string | null;
   mediaItems?: { url: string; publicId: string }[];
-  onChangeValue: (val: string | number | string[] | null) => void;
+  onChangeValue: (val: any) => void;
   onChangeMedia: (url: string, publicId: string) => void;
   onChangeMediaItems?: (items: { url: string; publicId: string }[]) => void;
   hasError?: boolean;
@@ -448,6 +449,135 @@ export function FieldRenderer({
             hasError={hasError}
           />
           {hasError && <p className="text-xs text-destructive">{tc("required")}</p>}
+        </div>
+      );
+    }
+
+    case "table": {
+      const columns = field.tableColumns || [];
+      const rowHeaders = field.tableRowHeaders || [];
+      const allowAdd = field.tableAllowUserAddRows ?? false;
+      
+      const tableData: any[] = Array.isArray(value) ? value : [];
+      
+      const displayRows = [...tableData];
+      rowHeaders.forEach(rh => {
+        if (!displayRows.find(r => r.rowId === rh.id)) {
+          displayRows.push({ rowId: rh.id });
+        }
+      });
+
+      const sortedRows = displayRows.sort((a, b) => {
+        const idxA = rowHeaders.findIndex(rh => rh.id === a.rowId);
+        const idxB = rowHeaders.findIndex(rh => rh.id === b.rowId);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return 0;
+      });
+
+      const handleTableChange = (rowIndex: number, colId: string, val: string | number) => {
+        const newData = [...sortedRows];
+        newData[rowIndex] = { ...newData[rowIndex], [`col_${colId}`]: val };
+        onChangeValue(newData);
+      };
+
+      const handleAddRow = () => {
+        const newData = [...sortedRows];
+        newData.push({ rowId: `custom_${crypto.randomUUID()}` });
+        onChangeValue(newData);
+      };
+
+      const handleRemoveRow = (index: number) => {
+        const newData = [...sortedRows];
+        newData.splice(index, 1);
+        onChangeValue(newData);
+      };
+
+      if (disabled && sortedRows.length === 0) {
+         return (
+          <div className="space-y-1">
+            {renderLabel()}
+            {renderReadonlyEmpty()}
+          </div>
+         );
+      }
+
+      return (
+        <div className="space-y-2">
+          {renderLabel(field.id)}
+          <div className="border rounded-md overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[150px]"></TableHead>
+                  {columns.map(col => (
+                    <TableHead key={col.id}>{locale === "ar" ? col.labelAr : col.labelEn}</TableHead>
+                  ))}
+                  {allowAdd && !disabled && <TableHead className="w-[50px]"></TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedRows.map((row, index) => {
+                  const isPredefined = rowHeaders.some(rh => rh.id === row.rowId);
+                  const preDefHeader = rowHeaders.find(rh => rh.id === row.rowId);
+                  const rowLabel = preDefHeader ? (locale === "ar" ? preDefHeader.labelAr : preDefHeader.labelEn) : "";
+                  
+                  return (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium whitespace-nowrap bg-muted/20">
+                        {isPredefined ? (
+                          rowLabel
+                        ) : (
+                          <Input 
+                            placeholder={tc("name")}
+                            value={row.customLabel || ""}
+                            onChange={(e) => {
+                              const newData = [...sortedRows];
+                              newData[index] = { ...newData[index], customLabel: e.target.value };
+                              onChangeValue(newData);
+                            }}
+                            disabled={disabled}
+                            className="h-8 text-sm bg-transparent border-dashed min-w-[100px]"
+                          />
+                        )}
+                      </TableCell>
+                      {columns.map(col => (
+                        <TableCell key={col.id} className="p-2 min-w-[120px]">
+                          {disabled ? (
+                            <span className="text-sm">{row[`col_${col.id}`] || "-"}</span>
+                          ) : controlWrapper(
+                            <Input
+                              type={col.type === "number" ? "number" : "text"}
+                              value={row[`col_${col.id}`] || ""}
+                              onChange={(e) => handleTableChange(index, col.id, e.target.value)}
+                              disabled={disabled}
+                              className="h-8 shadow-none"
+                            />
+                          )}
+                        </TableCell>
+                      ))}
+                      {allowAdd && !disabled && (
+                        <TableCell>
+                          {!isPredefined && (
+                            <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleRemoveRow(index)}>
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+          {allowAdd && !disabled && (
+            <Button type="button" variant="outline" size="sm" onClick={handleAddRow} className="mt-2">
+              <Plus className="mr-1 h-3 w-3" />
+              {locale === "ar" ? "إضافة صف" : "Add Row"}
+            </Button>
+          )}
         </div>
       );
     }

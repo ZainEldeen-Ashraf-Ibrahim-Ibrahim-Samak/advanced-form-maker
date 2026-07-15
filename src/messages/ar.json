@@ -313,8 +313,15 @@
       "file": "رفع ملف",
       "date": "تاريخ",
       "dropdown": "قائمة منسدلة",
-      "camera": "التقاط بالكاميرا"
+      "camera": "التقاط بالكاميرا",
+      "table": "جدول"
     },
+    "tableConfig": "إعدادات الجدول",
+    "tableColumns": "الأعمدة",
+    "tableRowHeaders": "الصفوف المحددة مسبقاً",
+    "tableAllowUserAddRows": "السماح للمستخدم بإضافة صفوف",
+    "addColumn": "إضافة عمود",
+    "addRow": "إضافة صف",
     "validation": {
       "minLength": "الحد الأدنى للطول",
       "maxLength": "الحد الأقصى للطول",

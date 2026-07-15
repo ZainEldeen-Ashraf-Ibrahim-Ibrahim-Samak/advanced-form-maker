@@ -3,7 +3,7 @@
  * Domain layer — zero framework imports.
  */
 
-export type InputType = "text" | "number" | "image" | "file" | "date" | "dropdown" | "camera";
+export type InputType = "text" | "number" | "image" | "file" | "date" | "dropdown" | "camera" | "table";
 
 export interface ValidationRules {
   required?: boolean;
@@ -16,6 +16,19 @@ export interface ValidationRules {
   regexType?: "email" | "phone" | "name";
 }
 
+export interface TableColumn {
+  id: string;
+  labelEn: string;
+  labelAr: string;
+  type: "text" | "number";
+}
+
+export interface TableRowHeader {
+  id: string;
+  labelEn: string;
+  labelAr: string;
+}
+
 export interface FieldDefinition {
   id: string;
   formTemplateId: string;
@@ -26,6 +39,9 @@ export interface FieldDefinition {
   isMultiple: boolean;
   dropdownOptionsEn: string[];
   dropdownOptionsAr: string[];
+  tableColumns?: TableColumn[] | null;
+  tableRowHeaders?: TableRowHeader[] | null;
+  tableAllowUserAddRows?: boolean | null;
   defaultValue?: string;
   sortOrder: number;
   isActive: boolean;
@@ -50,6 +66,9 @@ export type UpdateFieldDefinitionInput = Partial<
     | "validationRules"
     | "dropdownOptionsEn"
     | "dropdownOptionsAr"
+    | "tableColumns"
+    | "tableRowHeaders"
+    | "tableAllowUserAddRows"
     | "defaultValue"
     | "sortOrder"
   >
