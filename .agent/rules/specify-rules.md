@@ -1,6 +1,6 @@
 ﻿# SCCT Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-06-28
+Auto-generated from all feature plans. Last updated: 2026-07-15
 
 ## Active Technologies
 - [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION] (002-cms-enhancements)
@@ -19,6 +19,7 @@ Auto-generated from all feature plans. Last updated: 2026-06-28
 - Upstash Redis (caching), MongoDB (users/submissions) (main)
 - Node.js (v20+ LTS), TypeScript (strict mode) + Next.js 16 (App Router), Zod, React Hook Form, isomorphic-dompurify (main)
 - MongoDB (Mongoose) - existing models (main)
+- TypeScript / Next.js + Next.js App Router, React, Tailwind CSS, shadcn/ui, Mongoose, Zod, i18next (ar/en) (main)
 
 - TypeScript 5.x on Node.js 20+ (LTS) + Next.js 14+ (App Router), ShadCN UI, Mongoose 8+, Auth.js v5, next-cloudinary, @upstash/redis, @upstash/ratelimit, next-intl, next-themes, @dnd-kit/core, Zod (001-client-data-review)
 - TypeScript 5.x on Node.js LTS + Next.js 16.2.3, @google/genai (Gemini Vision API), Zod 4.x, next-intl 4.x (014-ai-photo-autofill)
@@ -40,9 +41,9 @@ npm test; npm run lint
 TypeScript 5.x on Node.js 20+ (LTS): Follow standard conventions
 
 ## Recent Changes
+- main: Added TypeScript / Next.js + Next.js App Router, React, Tailwind CSS, shadcn/ui, Mongoose, Zod, i18next (ar/en)
 - main: Added [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
 - 014-ai-photo-autofill: Added @google/genai (Gemini Vision API) for document photo data extraction
-- main: Added Node.js (v20+ LTS), TypeScript (strict mode) + Next.js 16 (App Router), Zod, React Hook Form, isomorphic-dompurify
 
 
 <!-- MANUAL ADDITIONS START -->
