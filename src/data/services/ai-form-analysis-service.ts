@@ -77,7 +77,7 @@ export async function analyzeFormSubmissions(submissions: any[], locale: string 
   Please generate the structured analysis according to the schema.`;
 
   // Try models in order; fall back on 503 overload
-  const MODEL_FALLBACKS = ["gemini-flash-latest", "gemini-1.5-flash", "gemini-1.5-flash-8b"];
+  const MODEL_FALLBACKS = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash" , "gemini-pro-latest"];
   const MAX_RETRIES = 2;
 
   let lastError: any;
